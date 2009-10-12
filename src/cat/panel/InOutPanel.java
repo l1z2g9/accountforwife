@@ -6,14 +6,14 @@ import cat.DBManager;
 import cat.DateField2;
 import cat.TableUtility;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -21,13 +21,17 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
-import java.util.EventObject;
+import java.util.EventListener;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -36,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -46,7 +51,7 @@ import javax.swing.table.DefaultTableModel;
 
 public abstract class InOutPanel
     extends JPanel
-    implements ActionListener, TableModelListener//, FocusListener
+    implements TableModelListener//, FocusListener
 {
   static Logger log = Logger.getLogger("InOutPanel");
 
@@ -86,18 +91,14 @@ public abstract class InOutPanel
       itemList = new JComboBox(DBManager.getIncomeItems());
     }
 
-    JPanel itemPanel = new JPanel(new GridBagLayout());
-    GridBagConstraints c = new GridBagConstraints();
-    c.insets = new Insets(2, 0, 2, 3);
-    c.anchor = GridBagConstraints.WEST;
-    c.weightx = 1;
-    firstLine(c, itemPanel);
-    secondLine(c, itemPanel);
-    thirdLine(c, itemPanel);
-    fourLine(c, itemPanel);
-    fiveLine(c, itemPanel);
+    JPanel itemPanel = new JPanel(new BorderLayout());
+    itemPanel.setPreferredSize(new Dimension(460, 170));
+
+    firstColumn(itemPanel);
+    secondColumn(itemPanel);
+    thirdColumn(itemPanel);
+
     itemPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-    //    itemPanel.setBorder(BorderFactory.createLineBorder(Color.red));
     this.add(itemPanel, BorderLayout.PAGE_START);
     createDataTable(this);
     this.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
@@ -112,143 +113,120 @@ public abstract class InOutPanel
         }
       }
     });
+
+    addComponentListener(new ComponentAdapter() //窗体显示时，获得焦点
+    {
+      @Override
+      public void componentShown(ComponentEvent ce)
+      {
+        money.requestFocusInWindow();
+      }
+    });
   }
 
 
-  private void firstLine(GridBagConstraints c, Container container)
+  private void firstColumn(Container container)
   {
-    c.gridwidth = 4;
-    container.add(new JLabel(lines[0]), c);
+    JPanel pane = new JPanel(new GridLayout(0, 1));
+    pane.setPreferredSize(new Dimension(280, 200));
+    pane.add(new JLabel(lines[0]));
+    pane.add(new JLabel(lines[1]));
+    pane.add(new JLabel(lines[2]));
+    pane.add(new JLabel(lines[3]));
+    pane.add(new JLabel(lines[4]));
+    container.add(pane, BorderLayout.WEST);
+  }
 
-    c.gridwidth = 1;
-    container.add(new JLabel("日期:"), c);
 
-    c.gridwidth = GridBagConstraints.REMAINDER;
+  private void secondColumn(Container container)
+  {
+    JPanel pane = new JPanel();
+    pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
+    //    pane.setPreferredSize(new Dimension(0, 200));
+    //第一列
+    JPanel datePane = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    datePane.add(createBorder(new JLabel("日期:")));
     incomeDate.addChangeListener(new ChangeListener()
     {
       public void stateChanged(ChangeEvent e)
       {
-        DateField2 date = (DateField2) e.getSource();
-        dataChange(date);
+        //        DateField2 date = (DateField2) e.getSource();
+        fireDataChange();
       }
     });
 
-    incomeDate.setPreferredSize(new Dimension(162, 25));
+    incomeDate.setPreferredSize(new Dimension(130, 30));
 
-    //    incomeDate.addFocusListener(this);
-    container.add(incomeDate, c);
+    datePane.add(incomeDate);
+    pane.add(datePane);
+    //第二列
+    JPanel itemPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    itemPane.add(createBorder(new JLabel("项目:")));
+    itemList.setPreferredSize(new Dimension(130, 30));
+    itemPane.add(itemList);
+    pane.add(itemPane);
+    //第三列
+    JPanel moneyPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    moneyPane.add(createBorder(new JLabel("金额:")));
+    money = new JFormattedTextField(new DecimalFormat("##.##"));
+    money.setColumns(11);
+    money.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "submit");
+    money.getActionMap().put("submit", new SubmitAction(this));
+    moneyPane.add(money);
+    pane.add(moneyPane);
+    //第四列
+    JPanel remarkPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    remarkPane.add(createBorder(new JLabel("备注:")));
+    remark = new JTextArea(2, 11);
+    remark.setLineWrap(true);
+    remark.setWrapStyleWord(true);
+
+    //    remark.setBorder(BorderFactory.createLineBorder(Color.gray));
+    remarkPane.add(remark);
+    pane.add(remarkPane);
+    container.add(pane, BorderLayout.CENTER);
   }
 
 
-  private void dataChange(DateField2 date)
+  private JLabel createBorder(JLabel label)
+  {
+    label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
+    return label;
+  }
+
+
+  private void thirdColumn(Container container)
+  {
+    JPanel pane = new JPanel();
+    pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
+    pane.setPreferredSize(new Dimension(100, 0));
+    pane.add(Box.createVerticalGlue());
+    JButton add = new JButton(new SubmitAction(this));
+    //    add.setActionCommand("add");
+    add.setText("添加");
+    pane.add(add);
+    container.add(pane, BorderLayout.EAST);
+  }
+
+
+  public void fireDataChange()
   {
     changedDate = true;
 
-    Vector<Vector> obj = DBManager.getItemsByType(sf.format(date.getValue()), type);
+    Vector<Vector> obj = DBManager.getItemsByType(sf.format(incomeDate.getValue()), type);
     defaultModel.setDataVector(obj, Constance.getDateColumns());
 
     new TableUtility().makeTableCell(table);
 
     changedDate = false;
-
-  }
-
-
-  private void secondLine(GridBagConstraints c, Container container)
-  {
-    c.gridwidth = 4;
-    container.add(new JLabel(lines[1]), c);
-
-    c.gridwidth = 1;
-    container.add(new JLabel("项目:"), c);
-
-//    c.gridwidth = 2;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.fill = GridBagConstraints.NONE;
-
-    itemList.setPreferredSize(new Dimension(162, 20));
-    container.add(itemList, c);
-
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    /*final JButton edit = new JButton("编辑");
-    edit.addActionListener(new ActionListener()
-    {
-
-      public void actionPerformed(ActionEvent e)
-      {
-        Source panel = new Source(SwingUtilities.getWindowAncestor((JButton) e.getSource()), type);
-        panel.setLocationRelativeTo(InOutPanel.this);
-        panel.setVisible(true);
-      }
-
-    });
-    container.add(edit, c);
-*/  }
-
-
-  private void thirdLine(GridBagConstraints c, Container container)
-  {
-    c.gridwidth = 4;
-    container.add(new JLabel(lines[2]), c);
-
-    c.gridwidth = 1;
-    container.add(new JLabel("金额:"), c);
-
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    money = new JFormattedTextField(new DecimalFormat("##.##"));
-    money.setPreferredSize(new Dimension(162, 20));
-    container.add(money, c);
-  }
-
-
-  private void fourLine(GridBagConstraints c, Container container)
-  {
-    c.gridwidth = 4;
-    JLabel label = new JLabel(lines[3]);
-    label.setPreferredSize(new Dimension(300, 40));
-    container.add(label, c);
-
-    c.gridwidth = 1;
-    container.add(new JLabel("备注:"), c);
-
-    c.gridwidth = 2;
-    c.gridheight = 2;
-    remark = new JTextArea(4, 23);
-    remark.setLineWrap(true);
-    remark.setWrapStyleWord(true);
-    remark.setBorder(BorderFactory.createLineBorder(Color.gray));
-    container.add(remark, c);
-
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridwidth = 2;
-    JButton add = new JButton("添加");
-    container.add(add, c);
-    add.setActionCommand("add");
-    add.addActionListener(this);
-  }
-
-
-  private void fiveLine(GridBagConstraints c, Container container)
-  {
-    c.anchor = GridBagConstraints.WEST;
-    c.gridx = 0;
-    c.gridy = 4;
-    c.gridwidth = 4;
-    c.gridheight = 1;
-    container.add(new JLabel(lines[4]), c);
-
-    /*c.gridx = 0;
-    c.gridy = 5;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.gridheight = GridBagConstraints.REMAINDER;
-    container.add(new JLabel("提示：可以选择单元格进行编辑。"), c);*/
   }
 
 
   private void createDataTable(Container container)
   {
     Vector obj = DBManager.getItemsByType(sf.format(new Date()), type);
-    defaultModel = new DefaultTableModel(obj, Constance.getDateColumns()) {
+    defaultModel = new DefaultTableModel(obj, Constance.getDateColumns())
+    {
       @Override
       public boolean isCellEditable(int row, int column)
       {
@@ -261,7 +239,7 @@ public abstract class InOutPanel
     };
     table = new JTable(defaultModel);
     //    table.getTableHeader().setFont(UIManager.getFont("Button.font").deriveFont(Font.BOLD, 14f));
-    table.getTableHeader().setPreferredSize(new Dimension(30, 22));
+    //    table.getTableHeader().setPreferredSize(new Dimension(30, 22));Nimbus下不需要;
     new TableUtility().makeTableCell(table);
 
     table.setPreferredScrollableViewportSize(new Dimension(400, 150));
@@ -282,39 +260,42 @@ public abstract class InOutPanel
     container.add(s, BorderLayout.CENTER);
   }
 
-
   /**
    * 添加项目
    */
-  @SuppressWarnings("unchecked")
-  public void actionPerformed(ActionEvent e)
-  {
-    String date = sf.format(incomeDate.getValue());
-    String item = itemList.getSelectedItem().toString();
-    if (money.getText().trim().isEmpty())
-    {
-      JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(this), "金额不能为空！", "错误", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    float volumn = Float.valueOf(money.getText());
-    String desc = remark.getText();
 
-    if ("add".equalsIgnoreCase(e.getActionCommand()))
+  class SubmitAction
+      extends AbstractAction
+  {
+    JComponent c;
+
+
+    public SubmitAction(JComponent c)
     {
-      //从数据库加载一次数据,而非defaultModel,因为Color值会动态变化的.
+      this.c = c;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public void actionPerformed(ActionEvent e)
+    {
+      String date = sf.format(incomeDate.getValue());
+      String item = itemList.getSelectedItem().toString();
+      if (money.getText().trim().isEmpty())
+      {
+        JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(this.c), "金额不能为空！", "错误",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      float volumn = Float.valueOf(money.getText());
+      String desc = remark.getText();
+
+      //    if ("add".equalsIgnoreCase(e.getActionCommand()))
+      //    {
+      //从数据库加载一次数据,而非defaultModel,因为Color值会动态变化的，所以取消使用defaultModel.addRow(data);
       DBManager.insert(type, date, item, volumn, desc);
-      /*int rlt[] = 
-      Vector data = new Vector();
-      data.add(rlt[0]);
-      data.add(type);
-      data.add(date);
-      data.add(item);
-      data.add(volumn);
-      data.add(desc);
-      data.add(rlt[1]);
-      defaultModel.addRow(data);
-      SwingUtilities.updateComponentTreeUI(table);*/
-      dataChange(incomeDate);
+      fireDataChange();
+      //    }
     }
   }
 
