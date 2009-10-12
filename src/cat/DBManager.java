@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
-import javax.swing.UIManager;
 import javax.swing.table.TableModel;
 
 
@@ -188,17 +188,18 @@ public class DBManager
 
       int id = (Integer) item.get(0);
       String _item = (String) item.get(3);
-      float budget = getBudget(year, month, _item);
+      int budget = getBudget(year, month, _item);
+      if (budget == 0)
+      {
+        continue;
+      }
 
       float sum = Float.valueOf(item.get(4).toString());
       if (itemSum.containsKey(_item))
       {
-        sum += itemSum.get(_item);
+        sum = itemSum.get(_item) + sum;
       }
-      else
-      {
-        itemSum.put(_item, sum);
-      }
+      itemSum.put(_item, sum);
 
       if (budget * 0.75 > sum)
       {
@@ -262,10 +263,7 @@ public class DBManager
 
   public static void insert(String type, String date, String item, float money, String remark)
   {
-    /*
-    int lastId = 0;
-    int[] rlt = new int[2];
-    */try
+    try
     {
       int color = -1;
       String sql = "insert into Account(Type, Date, Item, Money, Remark, User, Color) values(?, ?, ?, ?, ?, ?, ?)";
@@ -281,13 +279,6 @@ public class DBManager
       ps.executeUpdate();
       ps.close();
 
-      /*Statement stmt = conn.createStatement();
-      ResultSet rs = stmt.executeQuery("select max(id) from Account");
-      rs.next();
-      lastId = rs.getInt(1);
-      rs.close();
-      stmt.close();
-      */
     }
     catch (Exception e)
     {
@@ -297,11 +288,6 @@ public class DBManager
     {
       refreshBudgetColor(date);
     }
-
-    /*    rlt[0] = lastId;
-        rlt[1] = color;
-        return rlt;
-    */
   }
 
 
@@ -532,6 +518,7 @@ public class DBManager
       ps.setString(1, type);
       ps.setString(2, item);
       ps.executeUpdate();
+      ps.close();
     }
     catch (SQLException e)
     {
@@ -549,6 +536,7 @@ public class DBManager
       ps.setString(1, type);
       ps.setString(2, item);
       ps.executeUpdate();
+      ps.close();
     }
     catch (SQLException e)
     {
@@ -648,71 +636,22 @@ public class DBManager
 
   public static int[] getBudgetColor()
   {
-    int[] color = null;
-    String sql = "SELECT Percent75, Percent90 FROM BudgetColor WHERE USER = ?";
-    try
-    {
-      PreparedStatement ps = conn.prepareStatement(sql);
-      ps.setString(1, Constance.LOGIN_USER);
-      ResultSet rs = ps.executeQuery();
-      if (rs.next())
-      {
-        color = new int[2];
-        color[0] = rs.getInt(1);
-        color[1] = rs.getInt(2);
-      }
-      rs.close();
-      ps.close();
-    }
-    catch (SQLException e)
-    {
-      e.printStackTrace();
-    }
+    int[] color = new int[2];
+    Preferences pref = Preferences.userNodeForPackage(DBManager.class);
+    color[0] = pref.getInt("Percent75", Color.GRAY.getRGB());
+    color[1] = pref.getInt("Percent90", Color.MAGENTA.getRGB());
     return color;
   }
 
 
   public static void saveBudgetColor(int percent75, int percent90)
   {
-    String userSql = "SELECT ID FROM BudgetColor WHERE USER = ?";
-    String updateSql = "UPDATE BudgetColor set Percent75 = ?, Percent90 = ? WHERE ID = ?";
-    String insertSql = "INSERT INTO BudgetColor(User, Percent75, Percent90) VALUES(?, ?, ?)";
+    Preferences pref = Preferences.userNodeForPackage(DBManager.class);
+    pref.putInt("Percent75", percent75);
+    pref.putInt("Percent90", percent90);
 
-    int id = -1;
-    try
-    {
-      PreparedStatement ps = conn.prepareStatement(userSql);
-      ps.setString(1, Constance.LOGIN_USER);
-      ResultSet rs = ps.executeQuery();
-      if (rs.next())
-      {
-        id = rs.getInt(1);
-      }
-      rs.close();
-
-      if (id != -1)
-      {
-        ps = conn.prepareStatement(updateSql);
-        ps.setInt(1, percent75);
-        ps.setInt(2, percent90);
-        ps.setInt(3, id);
-      }
-      else
-      {
-        ps = conn.prepareStatement(insertSql);
-        ps.setString(1, Constance.LOGIN_USER);
-        ps.setInt(2, percent75);
-        ps.setInt(3, percent90);
-      }
-      ps.executeUpdate();
-      ps.close();
-    }
-    catch (SQLException e)
-    {
-      e.printStackTrace();
-    }
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    DBManager.refreshBudgetColor(df.format(new Date()));
+    refreshBudgetColor(df.format(new Date()));
   }
 
 
@@ -722,7 +661,7 @@ public class DBManager
   }
 
 
-  public static void saveBudget(int year, int month, String item, int budget)
+  private static void saveBudget(int year, int month, String item, int budget)
   {
     String userSql = "SELECT ID FROM Budget WHERE USER = ? AND Year = ? AND Month = ? AND Item = ?";
     String insertSql = "INSERT INTO Budget(User, Year, Month, Item, Budget) VALUES(?, ?, ?, ?, ?)";
@@ -747,8 +686,6 @@ public class DBManager
       {
         ps = conn.prepareStatement(updateSql);
         ps.setFloat(1, budget);
-        //        ps.setInt(2, percent75);
-        //        ps.setInt(3, percent90);
         ps.setInt(2, id);
       }
       else
@@ -757,10 +694,8 @@ public class DBManager
         ps.setString(1, Constance.LOGIN_USER);
         ps.setInt(2, year);
         ps.setInt(3, month);
-        ps.setString(4, "Total");
+        ps.setString(4, item);
         ps.setFloat(5, budget);
-        //        ps.setInt(6, percent75);
-        //        ps.setInt(7, percent90);
       }
       ps.executeUpdate();
       ps.close();
@@ -796,8 +731,14 @@ public class DBManager
   }
 
 
-  public static void saveItemBudget(Integer selectedItem, Integer selectedItem2, Vector dataVector)
+  public static void saveItemBudget(Integer year, Integer month, Vector<Vector> dataVector)
   {
-
+    for (Vector v : dataVector)
+    {
+      String item = (String) v.elementAt(1);
+      int money = Integer.valueOf(v.elementAt(2).toString());
+      saveBudget(year, month, item, money);
+    }
+    refreshBudgetColor(String.valueOf(year) + "-" + String.valueOf(month) + "-" + "01");
   }
 }
