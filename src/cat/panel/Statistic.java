@@ -1,6 +1,10 @@
 package cat.panel;
 
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import cat.Constance;
 import cat.DBManager;
 import cat.DateField2;
@@ -35,7 +39,9 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -50,6 +56,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -91,7 +98,7 @@ public class Statistic
 
   JLabel imcomeTotal = new JLabel("     ");
 
-  //  JLabel dateAveragePayout = new JLabel();
+  JLabel budget = new JLabel();
 
   //  JLabel dateAverageIncome = new JLabel();
 
@@ -199,10 +206,7 @@ public class Statistic
       }
     });
     final JButton listButton = new JButton("↓");
-    listButton.setMargin(new Insets(2, 0, 2, 0));
-
-    //    String fromDate = sf.format(d1.getValue());
-    //    final String toDate = sf.format(d2.getValue());
+    listButton.setMargin(new Insets(0, -8, 0, -8));
 
     listButton.addActionListener(new ActionListener()
     {
@@ -254,14 +258,47 @@ public class Statistic
         menu.add(incomeRatio);
 
         menu.addSeparator();
-        JMenuItem output = new JMenuItem("导出为文本文件");
-        output.addActionListener(new ActionListener()
+        JMenu output = new JMenu("导出为文本文件");
+        JMenuItem format1 = new JMenuItem("格式： 日期、项目、收入、支出、备注");
+        format1.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
           {
-            JOptionPane.showMessageDialog(null, "ok4");
+            JFileChooser fc = new JFileChooser();
+            fc.addChoosableFileFilter(new FileFilter()
+            {
+              @Override
+              public boolean accept(File f)
+              {
+                return true;
+              }
+
+
+              @Override
+              public String getDescription()
+              {
+                return "Text File (*.txt)";
+              }
+            });
+            int returnVal = fc.showSaveDialog(Statistic.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
+              File file = fc.getSelectedFile();
+              try
+              {
+                FileWriter fw = new FileWriter(file + ".txt");
+                saveTextFormat(fw);
+                fw.close();
+              }
+              catch (IOException e1)
+              {
+                e1.printStackTrace();
+              }
+            }
           }
         });
+        output.add(format1);
+
         menu.add(output);
 
         menu.show((JButton) e.getSource(), 0, 0);
@@ -289,8 +326,8 @@ public class Statistic
     statTable.getSelectionModel().addListSelectionListener(this);
 
     //    statTable.getTableHeader().setFont(new Font("Default", Font.BOLD, 12));
-    statTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
-    statTable.setPreferredScrollableViewportSize(new Dimension(400, 150));
+    //    statTable.getTableHeader().setPreferredSize(new Dimension(30, 22)) Nimbus下不需要;
+    statTable.setPreferredScrollableViewportSize(new Dimension(400, 130));
 
     JScrollPane scrollPane = new JScrollPane(statTable);
     scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0), scrollPane
@@ -299,6 +336,37 @@ public class Statistic
     searchPane.add(scrollPane, BorderLayout.PAGE_END);
 
     container.add(searchPane, BorderLayout.LINE_START);
+  }
+
+
+  private void saveTextFormat(FileWriter fw)
+  {
+    Vector<Vector> data = DBManager.getItemsBetweenDates(sf.format(fromDate.getValue()), sf.format(toDate.getValue()));
+    try
+    {
+      String format = "%-14s%-16s%10s%14s     %-10s\n";
+      fw.write(String.format(format, "  日期", "项目", "收入", "支出", "备注"));
+      fw.write("-------------------------------------------------------------------------------\n");
+      for (Vector v : data)
+      {
+        if (String.valueOf(v.get(1)).equalsIgnoreCase("支出"))
+        {
+          fw.write(String.format("%-14s%-16s%14s%14.2f     %-10s\n", v.get(2), v.get(3), " ", Float.valueOf(v.get(4)
+              .toString()), v.get(5)));
+        }
+        else
+        {
+          fw.write(String.format("%-14s%-16s%14.2f%14s     %-10s\n", v.get(2), v.get(3), Float.valueOf(v.get(4)
+              .toString()), " ", v.get(5)));
+        }
+
+      }
+    }
+    catch (IOException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
   }
 
@@ -325,6 +393,14 @@ public class Statistic
     c.anchor = GridBagConstraints.SOUTH;
     statNumPane.add(new JLabel("支出合计："), c);
     statNumPane.add(payoutTotal, c);
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    statNumPane.add(new JLabel(" 元"), c);
+
+    c.gridwidth = 1;
+    c.gridheight = 1;
+    c.anchor = GridBagConstraints.SOUTH;
+    statNumPane.add(new JLabel("支出预算："), c);
+    statNumPane.add(budget, c);
     c.gridwidth = GridBagConstraints.REMAINDER;
     statNumPane.add(new JLabel(" 元"), c);
 
@@ -398,7 +474,7 @@ public class Statistic
     colorCol.setMinWidth(0);
     colorCol.setPreferredWidth(0);
     //    dateTable.getTableHeader().setFont(new Font("Default", Font.BOLD, 12));
-    dateTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
+    //    dateTable.getTableHeader().setPreferredSize(new Dimension(30, 22));Nimbus下不需要;
     //    dateTable.setPreferredSize(new Dimension(450, 150));
     dateTable.setPreferredScrollableViewportSize(new Dimension(450, 150));
 
@@ -433,7 +509,6 @@ public class Statistic
     Vector obj = DBManager.getItemsByDate(date);
     dateModel.setDataVector(obj, Constance.getDateColumns());
     new TableUtility().makeTableCell(dateTable);
-
   }
 
 
@@ -478,6 +553,7 @@ public class Statistic
     payoutTotal.setText(df.format(payout));
     imcomeTotal.setText(df.format(income));
 
+    budget.setText(String.valueOf(DBManager.getTotalBudget(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1)));
     //    dateAveragePayout.setText(df.format(payout / diff));
     //    dateAverageIncome.setText(df.format(income / diff));
     balance.setText(df.format(income - payout));
@@ -517,7 +593,7 @@ public class Statistic
       }
       JFreeChart jfreechart = ChartFactory.createPieChart(date + " 的" + type + "统计", piedataset, true, true, false);
       TextTitle texttitle = jfreechart.getTitle();
-      Font font = UIManager.getFont("Button.font");
+      Font font = UIManager.getFont("Button.font");//使用系统提供的字体
       texttitle.setFont(font.deriveFont(Font.BOLD, 20f));
       texttitle.setToolTipText(type + "统计");
 
