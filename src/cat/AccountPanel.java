@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 
 public class AccountPanel
@@ -27,15 +28,16 @@ public class AccountPanel
     super(new BorderLayout());
     JPanel tabpane = new JPanel();
     JTabbedPane tab = new JTabbedPane();
-    tab.addTab("预算", new Budget());
+    Payout payout = new Payout();
+    tab.addTab("预算", new Budget(payout));
     tab.setMnemonicAt(0, KeyEvent.VK_1);
-    tab.addTab("支出", new Payout());
+    tab.addTab("支出", payout);
     tab.setMnemonicAt(1, KeyEvent.VK_2);
     tab.addTab("收入", new Income());
     tab.setMnemonicAt(2, KeyEvent.VK_3);
     tab.addTab("统计", new Statistic());
     tab.setMnemonicAt(3, KeyEvent.VK_4);
-//    tab.setSelectedIndex(1);
+    tab.setSelectedIndex(1);
     tab.setPreferredSize(new Dimension(620, 460));
     tabpane.setLayout(new GridLayout(1, 1));
     tabpane.add(tab);
@@ -51,7 +53,18 @@ public class AccountPanel
   {
     try
     {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      for (LookAndFeelInfo lookAndFeel : UIManager.getInstalledLookAndFeels())
+      {
+        if (lookAndFeel.getName().equalsIgnoreCase("Nimbus"))
+        {
+          UIManager.setLookAndFeel(lookAndFeel.getClassName());
+          break;
+        }
+      }
+      if (UIManager.getLookAndFeel().getName().equalsIgnoreCase("Metal"))
+      {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      }
     }
     catch (Exception e)
     {
