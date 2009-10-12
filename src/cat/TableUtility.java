@@ -50,7 +50,6 @@ public class TableUtility
       {
         message = message + table.getValueAt(row, i) + " , ";
       }
-
     }
 
     int choose = JOptionPane.showConfirmDialog(null, message, "删除数据", JOptionPane.YES_NO_OPTION);
@@ -74,9 +73,8 @@ public class TableUtility
       {
         deleteData(table);
       }
-
     });
-    table.setRowHeight(20);
+    table.setRowHeight(22);
     //    table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JFormattedTextField(sf)));    
     //    table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(itemList));
     table.getColumnModel().getColumn(2).setCellEditor(new DateCellEditor());
@@ -125,10 +123,14 @@ public class TableUtility
     colorCol.setMinWidth(0);
     colorCol.setPreferredWidth(0);
 
-    if (table.getModel().getRowCount() > 0)
+    /*if (table.getModel().getRowCount() > 0)
     {
-      table.setRowSelectionInterval(0, 0);
+      table.setRowSelectionInterval(0, 0); 设置了ListSelectionModel.SINGLE_SELECTION，可以省略次操作
     }
+    */
+    
+    table.setAutoCreateRowSorter(true);
+    table.getRowSorter().toggleSortOrder(2);//按日期排序
   }
 
 
