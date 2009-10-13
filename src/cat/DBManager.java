@@ -4,11 +4,19 @@ package cat;
 import cat.vo.StatItem;
 import java.awt.Color;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -38,6 +46,45 @@ public class DBManager
     {
       Class.forName("org.sqlite.JDBC");
       conn = DriverManager.getConnection("jdbc:sqlite:Account.db");
+      File file = new File("Account.db");
+
+      if (file.length() == 0)
+      {
+        PreparedStatement ps = conn
+            .prepareStatement("CREATE TABLE Source(ID INTEGER PRIMARY KEY AUTOINCREMENT,Type VARCHAR(20) NOT NULL,Item VARCHAR(20) NOT NULL)");
+        ps.executeUpdate();
+
+        ps = conn
+            .prepareStatement("CREATE TABLE Account(ID INTEGER PRIMARY KEY AUTOINCREMENT,Type VARCHAR(20) NOT NULL,Date DATETIME NOT NULL,Item VARCHAR(20) NOT NULL,Money INT NOT NULL,Remark VARCHAR(100) NOT NULL,User VARCHAR(20) NOT NULL,Color INT NULL)");
+        ps.executeUpdate();
+
+        ps = conn
+            .prepareStatement("CREATE TABLE Budget(ID INTEGER PRIMARY KEY AUTOINCREMENT,User VARCHAR(20) NOT NULL,Year INT NOT NULL,Month INT NOT NULL,Item VARCHAR(20) NOT NULL,Budget INT NULL)");
+        ps.executeUpdate();
+
+        conn.setAutoCommit(false);
+        String[] incomes = {"工资", "奖金", "提成", "补助津贴", "分红", "礼物收入", "亲属赠与金", "租赁所得", "公务报销", "其他收入"};
+        ps = conn.prepareStatement("insert into Source(Type, Item) values(?, ?)");
+        for (String income : incomes)
+        {
+          ps.setString(1, "收入");
+          ps.setString(2, income);
+          ps.executeUpdate();
+        }
+
+        String[] payouts = {"早饭", "午饭", "晚饭", "公共交通费", "买菜", "购物", "食品", "水费", "电费", "煤气费", "日常用品", "房租", "医疗药品费",
+            "保健费", "电话费", "手机费", "上网费", "邮寄费", "学杂费", "培训费", "书籍及音像", "订阅报章杂志", "外出就餐", "旅游度假", "娱乐费", "汽车年检费", "养路费等",
+            "汽油费", "汽车维护费", "停车过路等", "父母奉养费", "礼品礼金", "其他支出"};
+        for (String payout : payouts)
+        {
+          ps.setString(1, "支出");
+          ps.setString(2, payout);
+          ps.executeUpdate();
+        }
+        conn.commit();
+        ps.close();
+
+      }
     }
     catch (Exception e)
     {
@@ -63,6 +110,7 @@ public class DBManager
       ResultSet rs = ps.executeQuery();
       assemble(result, rs);
       rs.close();
+      ps.close();
     }
     catch (Exception e)
     {
@@ -310,6 +358,7 @@ public class DBManager
       rs.next();
       date = rs.getString(1);
       rs.close();
+      ps.close();
     }
     catch (Exception e)
     {

@@ -121,7 +121,6 @@ public class Source
   class AddListener
       implements ActionListener
   {
-
     public void actionPerformed(ActionEvent e)
     {
       int index = listModel.getSize();
