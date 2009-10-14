@@ -148,7 +148,7 @@ public class Budget
             dialog.dispose();
           }
         });
-        
+
         dialog.getContentPane().add(pane);
         dialog.pack();
         dialog.setLocationRelativeTo(Budget.this);
@@ -164,7 +164,7 @@ public class Budget
     choose.add(configPane);
 
     JLabel title = new JLabel("项目预算表");
-    title.setFont(new Font("宋体", Font.BOLD, 14));
+    title.setFont(title.getFont().deriveFont(Font.BOLD, 14));
     title.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
     JPanel tmp = new JPanel();
     tmp.add(title);
