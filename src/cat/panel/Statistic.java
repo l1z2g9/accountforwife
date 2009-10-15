@@ -341,26 +341,39 @@ public class Statistic
 
   private void saveTextFormat(FileWriter fw)
   {
-    Vector<Vector> data = DBManager.getItemsBetweenDates(sf.format(fromDate.getValue()), sf.format(toDate.getValue()));
+    String from = sf.format(fromDate.getValue());
+    String to = sf.format(toDate.getValue());
+    Vector<Vector> data = DBManager.getItemsBetweenDates(from, to);
     try
     {
       String format = "%-14s%-16s%10s%14s     %-10s\n";
       fw.write(String.format(format, "  日期", "项目", "收入", "支出", "备注"));
       fw.write("-------------------------------------------------------------------------------\n");
+      float payout = 0;
+      float income = 0;
       for (Vector v : data)
       {
+        String item = v.get(3).toString();
+        float money = Float.valueOf(v.get(4).toString());
+
         if (String.valueOf(v.get(1)).equalsIgnoreCase("支出"))
         {
-          fw.write(String.format("%-14s%-16s%14s%14.2f     %-10s\n", v.get(2), v.get(3), " ", Float.valueOf(v.get(4)
-              .toString()), v.get(5)));
+          payout += money;
+          fw.write(String.format("%-16s%-" + (16 - item.length()) + "s%-16s%14.2f     %-10s\n", v.get(2), item, " ",
+              money, v.get(5)));
         }
         else
         {
-          fw.write(String.format("%-14s%-16s%14.2f%14s     %-10s\n", v.get(2), v.get(3), Float.valueOf(v.get(4)
-              .toString()), " ", v.get(5)));
+          income += money;
+          fw.write(String.format("%-16s%-" + (16 - item.length()) + "s%14.2f%-14s       %-10s\n", v.get(2), item,
+              money, " ", v.get(5)));
         }
-
       }
+      fw.write("\n");
+      fw.write(String.format("%-16s%-14s%14.2f%16.2f     %-10s\n", " ", "合计", income, payout, from + " 至 " + to + " " +
+          dateDiff.getText() + "天"));
+      fw.write(String.format("%-16s%-14s%14.2f%16s     %-10s\n", " ", "结余", income - payout, " ", from + " 至 " + to +
+          " " + dateDiff.getText() + "天"));
     }
     catch (IOException e)
     {
