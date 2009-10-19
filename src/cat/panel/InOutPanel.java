@@ -5,6 +5,7 @@ import cat.Constance;
 import cat.DBManager;
 import cat.DateField2;
 import cat.TableUtility;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -21,7 +22,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
-import java.util.EventListener;
 import java.util.Vector;
 import java.util.logging.Logger;
 

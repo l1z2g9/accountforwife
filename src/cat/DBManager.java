@@ -2,21 +2,16 @@ package cat;
 
 
 import cat.vo.StatItem;
+
 import java.awt.Color;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -28,6 +23,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import javax.swing.table.TableModel;
@@ -698,7 +694,16 @@ public class DBManager
     Preferences pref = Preferences.userNodeForPackage(DBManager.class);
     pref.putInt("Percent75", percent75);
     pref.putInt("Percent90", percent90);
-
+    try
+    {
+      pref.flush();
+    }
+    catch (BackingStoreException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     refreshBudgetColor(df.format(new Date()));
   }

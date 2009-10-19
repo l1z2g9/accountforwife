@@ -177,19 +177,19 @@ public class Budget
     JPanel savePane = new JPanel();
     savePane.setLayout(new BoxLayout(savePane, BoxLayout.PAGE_AXIS));
 
-    final JTable sourceTable = new JTable(model);
+    final JTable budgetTable = new JTable(model);
     getTableData();
     //    sourceTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
     //    sourceTable.setPreferredSize(new Dimension(450, 150));
-    sourceTable.setPreferredScrollableViewportSize(new Dimension(450, 130));
-    sourceTable.setRowHeight(22);
-    sourceTable.getColumnModel().getColumn(2).setCellEditor(new MoneyCellEditor());
+    budgetTable.setPreferredScrollableViewportSize(new Dimension(450, 130));
+    budgetTable.setRowHeight(22);
+    budgetTable.getColumnModel().getColumn(2).setCellEditor(new MoneyCellEditor());
 
-    JScrollPane scrollPane = new JScrollPane(sourceTable);
+    JScrollPane scrollPane = new JScrollPane(budgetTable);
     scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5), scrollPane
         .getBorder()));
     //    scrollPane.setPreferredSize(new Dimension(450, 150));
-    sourceTable.setAutoCreateRowSorter(true);
+    budgetTable.setAutoCreateRowSorter(true);
     //    sourceTable.getRowSorter().toggleSortOrder(0);
     savePane.add(scrollPane);
 
@@ -202,6 +202,10 @@ public class Budget
         {
           JOptionPane.showMessageDialog(Budget.this, "预算数值不合法！");
           return;
+        }
+        if (budgetTable.isEditing())
+        {
+          budgetTable.getCellEditor().stopCellEditing();
         }
         DBManager.saveTotalBudget((Integer) year.getSelectedItem(), (Integer) month.getSelectedItem(), Integer
             .valueOf(totalPayout.getText()));
@@ -222,7 +226,7 @@ public class Budget
       @Override
       public void mouseClicked(MouseEvent e)
       {
-        TableCellEditor editor = sourceTable.getCellEditor();
+        TableCellEditor editor = budgetTable.getCellEditor();
         if (editor != null)
         {
           editor.stopCellEditing();
