@@ -519,8 +519,8 @@ public class Statistic extends JPanel implements ListSelectionListener,
 		payoutTotal.setText(df.format(payout));
 		imcomeTotal.setText(df.format(income));
 
-		budget.setText(String.valueOf(DBManager.getTotalBudget(c1
-				.get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1)));
+		// budget.setText(String.valueOf(DBManager.getTotalBudget(c1
+		// .get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1)));
 		// dateAveragePayout.setText(df.format(payout / diff));
 		// dateAverageIncome.setText(df.format(income / diff));
 		balance.setText(df.format(income - payout));
@@ -537,7 +537,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 			Map<String, Float> items = new HashMap();
 			String date = (String) statTable.getValueAt(statTable
 					.getSelectedRow(), 0);
-			Vector<Vector> data = DBManager.getItemsByType(date, type);
+			Vector<Vector> data = null; // DBManager.getItemsByType(date, type);
 			for (Vector v : data) {
 				String item = (String) v.get(3);
 				Float money = Float.valueOf((String) v.get(4));

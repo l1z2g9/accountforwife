@@ -94,9 +94,11 @@ public class Budget extends JPanel {
 		JPanel payoutBudget = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		payoutBudget.add(new JLabel("总支出预算："));
 
-		totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
-				(Integer) year.getSelectedItem(), (Integer) month
-						.getSelectedItem())));
+		/*
+		 * totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
+		 * (Integer) year.getSelectedItem(), (Integer) month
+		 * .getSelectedItem())));
+		 */
 		payoutBudget.add(totalPayout);
 		payoutBudget.add(new JLabel("元"));
 		choose.add(payoutBudget);
@@ -151,8 +153,8 @@ public class Budget extends JPanel {
 
 		});
 		configPane.add(color);
-		sourceConfig(configPane, "支出项目编辑", "支出");
-		sourceConfig(configPane, "收入项目编辑", "收入");
+		categoryConfig(configPane, "支出项目编辑", "支出");
+		categoryConfig(configPane, "收入项目编辑", "收入");
 
 		choose.add(configPane);
 
@@ -166,7 +168,6 @@ public class Budget extends JPanel {
 		add(choose, BorderLayout.PAGE_START);
 
 		// 预算表格
-
 		JPanel savePane = new JPanel();
 		savePane.setLayout(new BoxLayout(savePane, BoxLayout.PAGE_AXIS));
 
@@ -178,7 +179,7 @@ public class Budget extends JPanel {
 		budgetTable.setRowHeight(22);
 		budgetTable.getColumnModel().getColumn(2).setCellEditor(
 				new MoneyCellEditor());
-
+		
 		JScrollPane scrollPane = new JScrollPane(budgetTable);
 		scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory
 				.createEmptyBorder(5, 5, 0, 5), scrollPane.getBorder()));
@@ -187,7 +188,7 @@ public class Budget extends JPanel {
 		// sourceTable.getRowSorter().toggleSortOrder(0);
 		savePane.add(scrollPane);
 
-		JButton save = new JButton("保存");
+		JButton save = new JButton("添加预算项");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if ("".equalsIgnoreCase(totalPayout.getText().trim())) {
@@ -207,10 +208,11 @@ public class Budget extends JPanel {
 				JOptionPane.showMessageDialog(Budget.this, "预算设置保存成功。");
 			}
 		});
-		JPanel tmp2 = new JPanel();
-		tmp2.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
-		tmp2.add(save);
-		savePane.add(tmp2);
+		
+		JPanel saveButtonPane = new JPanel();
+		saveButtonPane.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+		saveButtonPane.add(save);
+		savePane.add(saveButtonPane);
 		add(savePane, BorderLayout.PAGE_END);
 
 		this.addMouseListener(new MouseAdapter() {
@@ -225,7 +227,7 @@ public class Budget extends JPanel {
 
 	}
 
-	private void sourceConfig(JPanel pane, String title, final String type) {
+	private void categoryConfig(JPanel pane, String title, final String type) {
 		final JButton payoutEdit = new JButton(title);
 		payoutEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -272,8 +274,9 @@ public class Budget extends JPanel {
 			Vector v = new Vector();
 			v.addElement(i++);
 			v.addElement(item);
-			v.addElement(DBManager.getBudget((Integer) year.getSelectedItem(),
-					(Integer) month.getSelectedItem(), item));
+			v.addElement(DBManager.getBudget(String.valueOf(year
+					.getSelectedItem()), String
+					.valueOf(month.getSelectedItem())));
 			data.addElement(v);
 		}
 		model.setDataVector(data, Constance.getSourceBudgetColumns());
@@ -282,9 +285,11 @@ public class Budget extends JPanel {
 	class SelectChangeListenter implements ItemListener {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
-					(Integer) year.getSelectedItem(), (Integer) month
-							.getSelectedItem())));
+			/*
+			 * totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
+			 * (Integer) year.getSelectedItem(), (Integer) month
+			 * .getSelectedItem())));
+			 */
 			getTableData();
 		}
 	}

@@ -130,7 +130,7 @@ public class Source extends JDialog {
 				return;
 
 			}
-			DBManager.insertSource(type, source);
+			// DBManager.insertSource(type, source);
 			listModel.addElement(source);
 			list.setSelectedIndex(index);
 			list.ensureIndexIsVisible(index);
@@ -149,7 +149,7 @@ public class Source extends JDialog {
 			}
 
 			String source = (String) list.getSelectedValue();
-			DBManager.deleteSource(type, source);
+			// DBManager.deleteSource(type, source);
 			listModel.removeElementAt(index);
 			if (index == 0) {
 				index = 0;

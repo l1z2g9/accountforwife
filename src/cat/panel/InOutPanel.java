@@ -4,6 +4,7 @@ import cat.Constance;
 import cat.DBManager;
 import cat.DateField2;
 import cat.TableUtility;
+import cat.model.Item;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -48,7 +49,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 public abstract class InOutPanel extends JPanel implements TableModelListener// ,
-																				// FocusListener
+// FocusListener
 {
 	static Logger log = Logger.getLogger("InOutPanel");
 
@@ -190,8 +191,8 @@ public abstract class InOutPanel extends JPanel implements TableModelListener// 
 	public void fireDataChange() {
 		changedDate = true;
 
-		Vector<Vector> obj = DBManager.getItemsByType(sf.format(incomeDate
-				.getValue()), type);
+		Vector<Vector> obj = null;// DBManager.getItemsByType(sf.format(incomeDate
+		// .getValue()), type);
 		defaultModel.setDataVector(obj, Constance.getDateColumns());
 
 		new TableUtility().makeTableCell(table);
@@ -200,7 +201,8 @@ public abstract class InOutPanel extends JPanel implements TableModelListener// 
 	}
 
 	private void createDataTable(Container container) {
-		Vector obj = DBManager.getItemsByType(sf.format(new Date()), type);
+		Vector obj = null;// DBManager.getItemsByType(sf.format(new Date()),
+		// type);
 		defaultModel = new DefaultTableModel(obj, Constance.getDateColumns()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -259,7 +261,9 @@ public abstract class InOutPanel extends JPanel implements TableModelListener// 
 			// if ("add".equalsIgnoreCase(e.getActionCommand()))
 			// {
 			// 从数据库加载一次数据,而非defaultModel,因为Color值会动态变化的，所以取消使用defaultModel.addRow(data);
-			DBManager.insert(type, date, item, volumn, desc);
+			Item data = new Item();
+
+			// DBManager.insertItem(type, date, item, volumn, desc);
 			fireDataChange();
 			// }
 		}

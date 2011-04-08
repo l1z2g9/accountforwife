@@ -1,21 +1,14 @@
 package cat;
 
-import cat.vo.StatItem;
-
 import java.awt.Color;
-
-import java.io.File;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +20,9 @@ import java.util.prefs.Preferences;
 
 import javax.swing.table.TableModel;
 
+import cat.model.Item;
+import cat.vo.StatItem;
+
 public class DBManager {
 	static Logger log = Logger.getLogger("Util");
 
@@ -37,46 +33,6 @@ public class DBManager {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection("jdbc:sqlite:Account.db");
-			File file = new File("Account.db");
-
-			if (file.length() == 0) {
-				PreparedStatement ps = conn
-						.prepareStatement("CREATE TABLE Source(ID INTEGER PRIMARY KEY AUTOINCREMENT,Type VARCHAR(20) NOT NULL,Item VARCHAR(20) NOT NULL)");
-				ps.executeUpdate();
-
-				ps = conn
-						.prepareStatement("CREATE TABLE Account(ID INTEGER PRIMARY KEY AUTOINCREMENT,Type VARCHAR(20) NOT NULL,Date DATETIME NOT NULL,Item VARCHAR(20) NOT NULL,Money INT NOT NULL,Remark VARCHAR(100) NOT NULL,User VARCHAR(20) NOT NULL,Color INT NULL)");
-				ps.executeUpdate();
-
-				ps = conn
-						.prepareStatement("CREATE TABLE Budget(ID INTEGER PRIMARY KEY AUTOINCREMENT,User VARCHAR(20) NOT NULL,Year INT NOT NULL,Month INT NOT NULL,Item VARCHAR(20) NOT NULL,Budget INT NULL)");
-				ps.executeUpdate();
-
-				conn.setAutoCommit(false);
-				String[] incomes = { "工资", "奖金", "提成", "补助津贴", "分红", "礼物收入",
-						"亲属赠与金", "租赁所得", "公务报销", "其他收入" };
-				ps = conn
-						.prepareStatement("insert into Source(Type, Item) values(?, ?)");
-				for (String income : incomes) {
-					ps.setString(1, "收入");
-					ps.setString(2, income);
-					ps.executeUpdate();
-				}
-
-				String[] payouts = { "早饭", "午饭", "晚饭", "公共交通费", "买菜", "购物",
-						"食品", "水费", "电费", "煤气费", "日常用品", "房租", "医疗药品费", "保健费",
-						"电话费", "手机费", "上网费", "邮寄费", "学杂费", "培训费", "书籍及音像",
-						"订阅报章杂志", "外出就餐", "旅游度假", "娱乐费", "汽车年检费", "养路费等",
-						"汽油费", "汽车维护费", "停车过路等", "父母奉养费", "礼品礼金", "其他支出" };
-				for (String payout : payouts) {
-					ps.setString(1, "支出");
-					ps.setString(2, payout);
-					ps.executeUpdate();
-				}
-				conn.commit();
-				ps.close();
-
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,6 +80,7 @@ public class DBManager {
 		}
 	}
 
+	// ---------- start 统计 ------------
 	@SuppressWarnings("unchecked")
 	public static Vector<Vector> getItemsBetweenDates(String fromDate,
 			String toDate) {
@@ -143,16 +100,44 @@ public class DBManager {
 		return result;
 	}
 
+	// ---------- end 统计 ------------
+
 	@SuppressWarnings("unchecked")
-	public static Vector<Vector> getItemsByType(String date, String type) {
+	public static Vector<Vector> getCategory(String type) {
+		String sql = "SELECT ID, Name Item FROM Category WHERE Type = ?";
+
 		Vector<Vector> result = new Vector<Vector>();
 		try {
-			String sql = "SELECT ID, Type, Date, Item, Money, Remark, Color FROM Account WHERE Date = ? and Type = ?";
+
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, date);
-			ps.setString(2, type);
+			ps.setString(1, type);
 			ResultSet rs = ps.executeQuery();
-			assemble(result, rs);
+			while (rs.next()) {
+				Vector vo = new Vector();
+				vo.addElement(rs.getInt(1));
+				vo.addElement(rs.getString(2));
+				result.add(vo);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static Vector<String> getSubCategory(int id) {
+		String sql = "SELECT Name Item FROM Category WHERE ParentID = ?";
+
+		Vector<String> result = new Vector<String>();
+		try {
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, 1);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				result.addElement(rs.getString(1));
+			}
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
@@ -168,16 +153,10 @@ public class DBManager {
 	 */
 	private static void refreshBudgetColor(String date) {
 		String fromDate = date.substring(0, date.length() - 2) + "01";
-		int year = Integer.valueOf(date.substring(0, 4));
-		int month = Integer.valueOf(date.substring(5, 7));
+		String year = date.substring(0, 4);
+		String month = date.substring(5, 7);
 		// log.info("month: " + month);
-		int[] bigMon = new int[] { 1, 3, 5, 7, 8, 10, 12 };
 		String lastDay = "30";
-		for (int m : bigMon) {
-			if (m == month) {
-				lastDay = "31";
-			}
-		}
 
 		String toDate = date.substring(0, date.length() - 2) + lastDay;
 		// float payout = queryPayoutTotal(fromDate, toDate, "支出");
@@ -202,7 +181,7 @@ public class DBManager {
 
 			int id = (Integer) item.get(0);
 			String _item = (String) item.get(3);
-			int budget = getBudget(year, month, _item);
+			int budget = getBudget(year, month);
 			if (budget == 0) {
 				continue;
 			}
@@ -259,19 +238,17 @@ public class DBManager {
 		}
 	}
 
-	public static void insert(String type, String date, String item,
-			float money, String remark) {
+	public static void insertItem(Item item) {
 		try {
-			int color = -1;
-			String sql = "insert into Account(Type, Date, Item, Money, Remark, User, Color) values(?, ?, ?, ?, ?, ?, ?)";
+			String sql = "insert into Item(Title, Date, Money, CategoryID, Remark, User, Address) values(?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
-			ps.setString(2, date);
-			ps.setString(3, item);
-			ps.setFloat(4, money);
-			ps.setString(5, remark);
-			ps.setString(6, Constance.LOGIN_USER);
-			ps.setInt(7, color);
+			ps.setString(1, item.getTitle());
+			ps.setDate(2, item.getDate());
+			ps.setFloat(3, item.getMoney());
+			ps.setFloat(4, item.getCategoryID());
+			ps.setString(5, item.getRemark());
+			ps.setString(6, item.getUser());
+			ps.setString(7, item.getAddress());
 
 			ps.executeUpdate();
 			ps.close();
@@ -279,55 +256,40 @@ public class DBManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if ("支出".equalsIgnoreCase(type)) {
-			refreshBudgetColor(date);
-		}
 	}
 
-	public static void update(int id, String field, String value) {
-		String sql = "update Account SET " + field + " = ? WHERE ID = ?";
+	public static void updateItem(Item item) {
+		String sql = "update Item set Title =?, Date = ?, Money = ?, CategoryID = ?, Remark = ?, User = ?, Address = ? where ID = ?";
 		log.info(sql);
-		String date = "";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, value);
-			ps.setInt(2, id);
+			ps.setString(1, item.getTitle());
+			ps.setDate(2, item.getDate());
+			ps.setFloat(3, item.getMoney());
+			ps.setInt(4, item.getCategoryID());
+			ps.setString(5, item.getRemark());
+			ps.setString(6, item.getUser());
+			ps.setString(7, item.getAddress());
+			ps.setInt(7, item.getId());
+
 			ps.executeUpdate();
 			ps.close();
 
-			ps = conn.prepareStatement("SELECT Date FROM Account WHERE ID = ?");
-			ps.setInt(1, id);
-			ResultSet rs = ps.executeQuery();
-			rs.next();
-			date = rs.getString(1);
-			rs.close();
 			ps.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		refreshBudgetColor(date);
 	}
 
-	public static void delete(int id) {
-		String sql = "delete from Account where id = ?";
-		String date = "";
+	public static void deleteItem(int id) {
+		String sql = "delete from Item where id = ?";
 		try {
-			PreparedStatement ps = conn
-					.prepareStatement("SELECT Date FROM Account WHERE ID = ?");
+			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
-			ResultSet rs = ps.executeQuery();
-			rs.next();
-			date = rs.getString(1);
-			rs.close();
-
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		refreshBudgetColor(date);
 	}
 
 	public static Vector<String> getPayoutItems() {
@@ -341,7 +303,7 @@ public class DBManager {
 	private static Vector<String> getItems(String type) {
 		Vector<String> v = new Vector<String>();
 		try {
-			String sql = "select item from Source where type = ?";
+			String sql = "select Name from Category where type = ?";
 
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, type);
@@ -456,21 +418,8 @@ public class DBManager {
 		}
 	}
 
-	public static void insertSource(String type, String item) {
+	public static void saveSource(String type, String item) {
 		String sql = "insert into Source(Type, Item) values(?, ?) ";
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
-			ps.setString(2, item);
-			ps.executeUpdate();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void deleteSource(String type, String item) {
-		String sql = "delete from Source where Type = ? and Item = ? ";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, type);
@@ -532,19 +481,17 @@ public class DBManager {
 		return result;
 	}
 
-	public static int getTotalBudget(int year, int month) {
-		return getBudget(year, month, "Total");
+	public static int getTotalBudget(String year, String month) {
+		return 0;
 	}
 
-	public static int getBudget(int year, int month, String item) {
+	public static int getBudget(String year, String month) {
 		int budget = 0;
-		String userSql = "SELECT Budget FROM Budget WHERE USER = ? AND Year = ? AND Month = ? AND Item = ?";
+		String userSql = "SELECT Money FROM Budget b, Category c WHERE b.CategoryID = c.ID and ParentID is not null and Type = 'Expenditure' and year = ? and month = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(userSql);
-			ps.setString(1, Constance.LOGIN_USER);
-			ps.setInt(2, year);
-			ps.setInt(3, month);
-			ps.setString(4, item);
+			ps.setString(1, year);
+			ps.setString(2, month);
 
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
@@ -652,6 +599,6 @@ public class DBManager {
 		if (month != 10 || month != 11 || month != 12) {
 			strMonth = "0" + String.valueOf(month);
 		}
-		refreshBudgetColor(String.valueOf(year) + "-" + strMonth+"-" + "01");
+		refreshBudgetColor(String.valueOf(year) + "-" + strMonth + "-" + "01");
 	}
 }
