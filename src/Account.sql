@@ -28,4 +28,3 @@ Month INT NOT NULL,
 Item VARCHAR(20) NOT NULL,
 Budget INT NULL
 );
-foo
