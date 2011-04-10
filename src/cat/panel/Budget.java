@@ -1,5 +1,6 @@
 package cat.panel;
 
+import backup.InOutPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -43,12 +44,6 @@ import cat.editor.MoneyCellEditor;
 public class Budget extends JPanel {
 	static Logger log = Logger.getLogger("Budget");
 
-	final JTextField totalPayout = new JTextField(10);
-
-	final JLabel percent1 = new JLabel("超支 1");
-
-	final JLabel percent2 = new JLabel("超支 2");
-
 	JComboBox year;
 
 	JComboBox month;
@@ -63,7 +58,7 @@ public class Budget extends JPanel {
 		}
 	};
 
-	public Budget(final InOutPanel inOutPanel) {
+	public Budget() {
 		super(new BorderLayout());
 		JPanel choose = new JPanel(new GridLayout(0, 1));
 
@@ -91,74 +86,15 @@ public class Budget extends JPanel {
 		year.addItemListener(new SelectChangeListenter());
 		month.addItemListener(new SelectChangeListenter());
 
-		JPanel payoutBudget = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		payoutBudget.add(new JLabel("总支出预算："));
-
-		/*
-		 * totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
-		 * (Integer) year.getSelectedItem(), (Integer) month
-		 * .getSelectedItem())));
-		 */
-		payoutBudget.add(totalPayout);
-		payoutBudget.add(new JLabel("元"));
-		choose.add(payoutBudget);
-
 		// ---
 		JPanel configPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JButton color = new JButton("超支颜色设定");
 
-		color.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				final JDialog dialog = new JDialog(SwingUtilities
-						.getWindowAncestor(Budget.this),
-						ModalityType.DOCUMENT_MODAL);
-				// Container pane = dialog.getContentPane();
-				JPanel pane = new JPanel(new GridLayout(0, 1));
-				int[] color = DBManager.getBudgetColor();
-				percent1.setBackground(new Color(color[0]));
-				percent2.setBackground(new Color(color[1]));
-
-				pane.add(colorSet(percent1, "75%"));
-				pane.add(colorSet(percent2, "90%"));
-
-				JPanel buttonPane = new JPanel();
-				JButton saveColor = new JButton("保存");
-				saveColor.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						DBManager.saveBudgetColor(percent1.getBackground()
-								.getRGB(), percent2.getBackground().getRGB());
-
-						JOptionPane.showMessageDialog(Budget.this, "超支颜色设置成功！");
-
-						inOutPanel.fireDataChange();
-					}
-				});
-				buttonPane.add(saveColor);
-				pane.add(buttonPane);
-
-				pane.getInputMap().put(
-						KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "exit");
-				pane.getActionMap().put("exit", new AbstractAction() {
-					public void actionPerformed(ActionEvent e) {
-						dialog.dispose();
-					}
-				});
-
-				dialog.getContentPane().add(pane);
-				dialog.pack();
-				dialog.setLocationRelativeTo(Budget.this);
-				dialog.setVisible(true);
-
-			}
-
-		});
-		configPane.add(color);
-		categoryConfig(configPane, "支出项目编辑", "支出");
-		categoryConfig(configPane, "收入项目编辑", "收入");
+		categoryConfig(configPane, "支出类别编辑", "支出");
+		categoryConfig(configPane, "收入类别编辑", "收入");
 
 		choose.add(configPane);
 
-		JLabel title = new JLabel("项目预算表");
+		JLabel title = new JLabel("支出预算表");
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 14));
 		title.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 		JPanel tmp = new JPanel();
@@ -175,11 +111,11 @@ public class Budget extends JPanel {
 		getTableData();
 		// sourceTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
 		// sourceTable.setPreferredSize(new Dimension(450, 150));
-		budgetTable.setPreferredScrollableViewportSize(new Dimension(450, 130));
+		budgetTable.setPreferredScrollableViewportSize(new Dimension(450, 170));
 		budgetTable.setRowHeight(22);
 		budgetTable.getColumnModel().getColumn(2).setCellEditor(
 				new MoneyCellEditor());
-		
+
 		JScrollPane scrollPane = new JScrollPane(budgetTable);
 		scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory
 				.createEmptyBorder(5, 5, 0, 5), scrollPane.getBorder()));
@@ -191,24 +127,16 @@ public class Budget extends JPanel {
 		JButton save = new JButton("添加预算项");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ("".equalsIgnoreCase(totalPayout.getText().trim())) {
-					JOptionPane.showMessageDialog(Budget.this, "预算数值不合法！");
-					return;
-				}
 				if (budgetTable.isEditing()) {
 					budgetTable.getCellEditor().stopCellEditing();
 				}
-				DBManager.saveTotalBudget((Integer) year.getSelectedItem(),
-						(Integer) month.getSelectedItem(), Integer
-								.valueOf(totalPayout.getText()));
 				DBManager.saveItemBudget((Integer) year.getSelectedItem(),
 						(Integer) month.getSelectedItem(), model
 								.getDataVector());
-				inOutPanel.fireDataChange();
 				JOptionPane.showMessageDialog(Budget.this, "预算设置保存成功。");
 			}
 		});
-		
+
 		JPanel saveButtonPane = new JPanel();
 		saveButtonPane.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		saveButtonPane.add(save);
@@ -224,7 +152,6 @@ public class Budget extends JPanel {
 				}
 			}
 		});
-
 	}
 
 	private void categoryConfig(JPanel pane, String title, final String type) {
@@ -236,60 +163,20 @@ public class Budget extends JPanel {
 				panel.setLocationRelativeTo(Budget.this);
 				panel.setVisible(true);
 			}
-
 		});
 		pane.add(payoutEdit);
-
-	}
-
-	private JPanel colorSet(final JLabel label, String percent) {
-		JPanel overspend = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		overspend.add(new JLabel("超支 " + percent + " 时候的颜色设定："));
-
-		label.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		label.setOpaque(true);
-		overspend.add(label);
-
-		JButton colorChoose = new JButton("选择颜色");
-		colorChoose.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Color newColor = JColorChooser.showDialog(Budget.this,
-						"选择超支颜色", label.getBackground());
-				if (newColor != null) {
-					label.setBackground(newColor);
-				}
-			}
-		});
-
-		overspend.add(colorChoose);
-		return overspend;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void getTableData() {
-		Vector<Vector> data = new Vector<Vector>();
-		Vector<String> items = DBManager.getPayoutItems();
-		int i = 1;
-		for (String item : items) {
-			Vector v = new Vector();
-			v.addElement(i++);
-			v.addElement(item);
-			v.addElement(DBManager.getBudget(String.valueOf(year
-					.getSelectedItem()), String
-					.valueOf(month.getSelectedItem())));
-			data.addElement(v);
-		}
-		model.setDataVector(data, Constance.getSourceBudgetColumns());
+		Vector<Vector> items = DBManager.getBudgetItems((Integer) year
+				.getSelectedItem(), (Integer) month.getSelectedItem());
+		model.setDataVector(items, Constance.getSourceBudgetColumns());
 	}
 
 	class SelectChangeListenter implements ItemListener {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			/*
-			 * totalPayout.setText(String.valueOf(DBManager.getTotalBudget(
-			 * (Integer) year.getSelectedItem(), (Integer) month
-			 * .getSelectedItem())));
-			 */
 			getTableData();
 		}
 	}

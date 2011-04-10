@@ -5,12 +5,14 @@ import java.sql.Date;
 public class Item {
 	private Integer id;
 	private String title;
-	private Date date;
+	private Long time;
 	private Float money;
 	private Integer categoryID;
 	private String remark;
 	private String user;
 	private String address;
+	private String categoryName;
+	private String parentCategoryName;
 
 	public Integer getId() {
 		return id;
@@ -28,12 +30,12 @@ public class Item {
 		this.title = title;
 	}
 
-	public Date getDate() {
-		return date;
+	public Long getTime() {
+		return time;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setTime(Long time) {
+		this.time = time;
 	}
 
 	public Float getMoney() {
@@ -74,6 +76,22 @@ public class Item {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public String getParentCategoryName() {
+		return parentCategoryName;
+	}
+
+	public void setParentCategoryName(String parentCategoryName) {
+		this.parentCategoryName = parentCategoryName;
 	}
 
 }

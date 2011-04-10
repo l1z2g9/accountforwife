@@ -1,14 +1,20 @@
 package cat;
 
+import cat.model.Item;
+import cat.vo.StatItem;
 import java.awt.Color;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,11 +26,8 @@ import java.util.prefs.Preferences;
 
 import javax.swing.table.TableModel;
 
-import cat.model.Item;
-import cat.vo.StatItem;
-
 public class DBManager {
-	static Logger log = Logger.getLogger("Util");
+	static Logger log = Logger.getLogger("DBManager");
 
 	static DecimalFormat df = new DecimalFormat("##.##");
 
@@ -45,14 +48,44 @@ public class DBManager {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static Vector<Vector> getItemsByDate(String date) {
+	public static Vector<Vector> getItemsByDate(String type, Date date) {
+		Calendar startTime = Calendar.getInstance();
+		startTime.setTime(date);
+		startTime.set(Calendar.HOUR, 0);
+		startTime.set(Calendar.MINUTE, 0);
+		startTime.set(Calendar.SECOND, 0);
+
+		Calendar endtTime = Calendar.getInstance();
+		endtTime.setTime(date);
+		endtTime.set(Calendar.HOUR, 23);
+		endtTime.set(Calendar.MINUTE, 59);
+		endtTime.set(Calendar.SECOND, 59);
+
 		Vector<Vector> result = new Vector<Vector>();
 		try {
-			String sql = "SELECT ID, Type, Date, Item, Money, Remark, Color FROM Account WHERE Date = ?";
+			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark FROM Item i, Category c, Category cp "
+					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
+					+ "c.type = ? and time between ? and ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, date);
+			ps.setString(1, type);
+			ps.setLong(2, startTime.getTimeInMillis());
+			ps.setLong(3, endtTime.getTimeInMillis());
 			ResultSet rs = ps.executeQuery();
-			assemble(result, rs);
+
+			int seq = 0;
+			while (rs.next()) {
+				Vector vo = new Vector();
+				vo.addElement(rs.getInt(1));
+				vo.addElement(++seq);
+				vo.addElement(rs.getDate(2));
+				vo.addElement(rs.getString(3));
+				vo.addElement(rs.getString(4));
+				vo.addElement(rs.getFloat(5));
+				vo.addElement(rs.getString(6));
+				vo.addElement(rs.getString(7));
+				vo.addElement(rs.getString(8));
+				result.add(vo);
+			}
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
@@ -102,21 +135,16 @@ public class DBManager {
 
 	// ---------- end 统计 ------------
 
-	@SuppressWarnings("unchecked")
-	public static Vector<Vector> getCategory(String type) {
-		String sql = "SELECT ID, Name Item FROM Category WHERE Type = ?";
+	public static Map<String, Integer> getCategory(String type) {
+		String sql = "SELECT ID, Name Item FROM Category WHERE Type = ? and ParentID is null order by displayOrder";
 
-		Vector<Vector> result = new Vector<Vector>();
+		Map<String, Integer> result = new HashMap<String, Integer>();
 		try {
-
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, type);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				Vector vo = new Vector();
-				vo.addElement(rs.getInt(1));
-				vo.addElement(rs.getString(2));
-				result.add(vo);
+				result.put(rs.getString(2), rs.getInt(1));
 			}
 			rs.close();
 			ps.close();
@@ -126,17 +154,17 @@ public class DBManager {
 		return result;
 	}
 
-	public static Vector<String> getSubCategory(int id) {
-		String sql = "SELECT Name Item FROM Category WHERE ParentID = ?";
+	public static Map<String, Integer> getSubCategory(Integer id) {
+		String sql = "SELECT ID, Name Item FROM Category WHERE ParentID = ? ORDER BY displayOrder";
 
-		Vector<String> result = new Vector<String>();
+		Map<String, Integer> result = new HashMap<String, Integer>();
 		try {
 
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, 1);
+			ps.setInt(1, id);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				result.addElement(rs.getString(1));
+				result.put(rs.getString(2), rs.getInt(1));
 			}
 			rs.close();
 			ps.close();
@@ -238,12 +266,13 @@ public class DBManager {
 		}
 	}
 
-	public static void insertItem(Item item) {
+	public static int saveItem(Item item) {
+		int rowID = 0;
 		try {
-			String sql = "insert into Item(Title, Date, Money, CategoryID, Remark, User, Address) values(?, ?, ?, ?, ?, ?, ?)";
+			String sql = "insert into Item(title, time, money, categoryID, remark, user, address) values(?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, item.getTitle());
-			ps.setDate(2, item.getDate());
+			ps.setLong(2, item.getTime());
 			ps.setFloat(3, item.getMoney());
 			ps.setFloat(4, item.getCategoryID());
 			ps.setString(5, item.getRemark());
@@ -253,23 +282,31 @@ public class DBManager {
 			ps.executeUpdate();
 			ps.close();
 
+			ps = conn
+					.prepareStatement("select ID from Item order by ID desc limit 1");
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				rowID = rs.getInt(1);
+			}
+			rs.close();
+			ps.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return rowID;
 	}
 
 	public static void updateItem(Item item) {
-		String sql = "update Item set Title =?, Date = ?, Money = ?, CategoryID = ?, Remark = ?, User = ?, Address = ? where ID = ?";
-		log.info(sql);
+		String sql = "update Item set title =?, money = ?, categoryID = ?, remark = ?, user = ?, address = ? where id= ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, item.getTitle());
-			ps.setDate(2, item.getDate());
-			ps.setFloat(3, item.getMoney());
-			ps.setInt(4, item.getCategoryID());
-			ps.setString(5, item.getRemark());
-			ps.setString(6, item.getUser());
-			ps.setString(7, item.getAddress());
+			ps.setFloat(2, item.getMoney());
+			ps.setInt(3, item.getCategoryID());
+			ps.setString(4, item.getRemark());
+			ps.setString(5, item.getUser());
+			ps.setString(6, item.getAddress());
 			ps.setInt(7, item.getId());
 
 			ps.executeUpdate();
@@ -286,38 +323,52 @@ public class DBManager {
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
+			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static Vector<String> getPayoutItems() {
-		return getItems("支出");
-	}
-
-	public static Vector<String> getIncomeItems() {
-		return getItems("收入");
-	}
-
-	private static Vector<String> getItems(String type) {
-		Vector<String> v = new Vector<String>();
+	public static Vector<Vector> getBudgetItems(int year, int month) {
+		Vector<Vector> result = new Vector<Vector>();
+		Map budget = new HashMap();
+		int seq = 0;
+		String sql = "select name, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
+				+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder";
 		try {
-			String sql = "select Name from Category where type = ?";
-
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
+			ps.setInt(1, year);
+			ps.setInt(2, month);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				v.addElement(rs.getString(1));
+				budget.put(rs.getString(1), rs.getString(2));
 			}
 			rs.close();
 			ps.close();
 
+			sql = "select name from Category where parentID is null and "
+					+ "type = 'Expenditure' order by displayOrder";
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				Vector v = new Vector();
+				v.addElement(++seq);
+				String categoryName = rs.getString(1);
+				v.addElement(categoryName);
+				if (budget.containsKey(categoryName)) {
+					v.addElement(budget.get(categoryName));
+				} else {
+					v.addElement(-1);
+				}
+				result.addElement(v);
+			}
+			rs.close();
+			ps.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return v;
+		return result;
 	}
 
 	private static void addList(String date, String type, float money,

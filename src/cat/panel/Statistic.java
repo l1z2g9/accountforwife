@@ -475,8 +475,8 @@ public class Statistic extends JPanel implements ListSelectionListener,
 			return;
 		}
 		String date = statTable.getValueAt(row, 0).toString();
-		Vector obj = DBManager.getItemsByDate(date);
-		dateModel.setDataVector(obj, Constance.getDateColumns());
+		// Vector obj = DBManager.getItemsByDate(date);
+		// dateModel.setDataVector(obj, Constance.getDateColumns());
 		new TableUtility().makeTableCell(dateTable);
 	}
 

@@ -1,81 +1,82 @@
-DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS Item;
 CREATE TABLE Item(
-ID INTEGER PRIMARY KEY AUTOINCREMENT,
-Title VARCHAR(200) NOT NULL,
-Date DATETIME NOT NULL,
-Money FLOAT NOT NULL,
-CategoryID INT NOT NULL REFERENCES Category(ID),
-Remark TEXT NULL,
-User VARCHAR(20) NULL,
-Address VARCHAR(200) NULL
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+title VARCHAR(200) NULL,
+time INTEGER NOT NULL,
+money FLOAT NOT NULL,
+categoryID INTEGER NOT NULL REFERENCES Category(id),
+remark TEXT NULL,
+user VARCHAR(20) NULL,
+address VARCHAR(200) NULL
 );
 
 DROP TABLE IF EXISTS Category;
 CREATE TABLE Category(
-ID INT PRIMARY KEY,
-ParentID INT NULL REFERENCES Category(ID),
-Type VARCHAR(20) NOT NULL Check ( Type = 'Expenditure' OR Type = 'Income'),
-Name VARCHAR(50) NOT NULL
+id INTEGER PRIMARY KEY,
+parentID INTEGER NULL REFERENCES Category(id),
+type VARCHAR(20) NOT NULL Check (type = 'Expenditure' OR Type = 'Income'),
+name VARCHAR(50) NOT NULL,
+displayOrder INTEGER NOT NULL DEFAULT 0
 );
 
 DROP TABLE IF EXISTS Budget;
 CREATE TABLE Budget(
-ID INTEGER PRIMARY KEY AUTOINCREMENT,
-CategoryID INT NOT NULL REFERENCES Category(ID),
-Year INT NOT NULL,
-Month INT NOT NULL,
-Color75 CHAR(7) NOT NULL default '#FFFF00',
-Color90 CHAR(7) NOT NULL default '#FF0033',
-Money FLOAT NOT NULL
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+categoryID INTEGER NOT NULL REFERENCES Category(ID),
+year INTEGER NOT NULL,
+month INTEGER NOT NULL,
+--color75 CHAR(7) NOT NULL DEFAULT '#FFFF00',
+--color90 CHAR(7) NOT NULL DEFAULT '#FF0033',
+money FLOAT NOT NULL
 );
 
 DROP INDEX IF EXISTS Item_idx;
-CREATE INDEX Item_idx ON Item (Date);
+CREATE INDEX Item_idx ON Item (time);
 
 DROP INDEX IF EXISTS Budget_idx;
 CREATE INDEX Budget_idx ON Budget (Year, Month);
 
--- ≤Â»Î ˝æ›
-INSERT INTO Category(ID, Type, Name)
-VALUES(100, 'Income', '÷∞“µ ’»Î');
+-- ÊèíÂÖ•Êï∞ÊçÆ
+INSERT INTO Category(id, type, name)
+VALUES(100, 'Income', 'ËÅå‰∏öÊî∂ÂÖ•');
 INSERT INTO Category
-VALUES(101, 100, 'Income', 'π§◊ ');
+VALUES(101, 100, 'Income', 'Â∑•ËµÑ', 0);
 INSERT INTO Category
-VALUES(102, 100, 'Income', 'Ω±Ω');
+VALUES(102, 100, 'Income', 'Â•ñÈáë', 0);
 
-INSERT INTO Category(ID, Type, Name)
-VALUES(200, 'Expenditure', '–›œ–');
+INSERT INTO Category(id, type, name)
+VALUES(200, 'Expenditure', '‰ºëÈó≤');
 INSERT INTO Category
-VALUES(201, 200, 'Expenditure', 'µÁ”∞');
+VALUES(201, 200, 'Expenditure', 'ÁîµÂΩ±', 0);
 
-INSERT INTO Category(ID, Type, Name)
-VALUES(300, ' ≥ŒÔ¿‡');
+INSERT INTO Category(id, type, name)
+VALUES(300, 'Expenditure', 'È£üÁâ©Á±ª');
 INSERT INTO Category
-VALUES(301, 300, 'Expenditure', ' ﬂ≤À');
+VALUES(301, 300, 'Expenditure', 'Ëî¨Ëèú', 0);
 INSERT INTO Category
-VALUES(302, 300, 'Expenditure', 'ªÁ≤À');
+VALUES(302, 300, 'Expenditure', 'Ëç§Ëèú', 0);
 INSERT INTO Category
-VALUES(302, 300, 'Expenditure', '√ø»’»˝≤Õ');
+VALUES(303, 300, 'Expenditure', 'ÊØèÊó•‰∏âÈ§ê', 0);
 
-INSERT INTO Category(ID, Type, Name)
-VALUES(400, 'Expenditure', '◊°∑ø¿‡');
+INSERT INTO Category(id, type, name)
+VALUES(400, 'Expenditure', '‰ΩèÊàøÁ±ª');
 INSERT INTO Category
-VALUES(401, 400, 'Expenditure', 'ŒÔ“µπ‹¿Ì∑—');
+VALUES(401, 400, 'Expenditure', 'Áâ©‰∏öÁÆ°ÁêÜË¥π', 0);
 INSERT INTO Category
-VALUES(402, 400, 'Expenditure', '∑ø◊‚ÀÆµÁ');
+VALUES(402, 400, 'Expenditure', 'ÊàøÁßüÊ∞¥Áîµ', 0);
 
-INSERT INTO Category(ID, Type, Name)
-VALUES(500, 'Expenditure', '∑˛ Œ¿‡');
+INSERT INTO Category(id, type, name)
+VALUES(500, 'Expenditure', 'ÊúçÈ•∞Á±ª');
 INSERT INTO Category
-VALUES(501, 500, 'Expenditure', '–¨◊”');
+VALUES(501, 500, 'Expenditure', 'ÈûãÂ≠ê', 0);
 INSERT INTO Category
-VALUES(502, 500, 'Expenditure', 'ø„◊”');
+VALUES(502, 500, 'Expenditure', 'Ë£§Â≠ê', 0);
 INSERT INTO Category
-VALUES(503, 500, 'Expenditure', '“¬∑˛');
+VALUES(503, 500, 'Expenditure', 'Ë°£Êúç', 0);
 
-INSERT INTO Category(ID, Type, Name)
-VALUES(600, 'Expenditure', 'ΩªÕ®¿‡');
+INSERT INTO Category(id, type, name)
+VALUES(600, 'Expenditure', '‰∫§ÈÄöÁ±ª');
 INSERT INTO Category
-VALUES(601, 600, 'Expenditure', '◊¯ª≥µ');
+VALUES(601, 600, 'Expenditure', 'ÂùêÁÅ´ËΩ¶', 0);
 INSERT INTO Category
-VALUES(602, 600, 'Expenditure', '◊¯π´Ωª');
+VALUES(602, 600, 'Expenditure', 'ÂùêÂÖ¨‰∫§', 0);

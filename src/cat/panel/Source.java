@@ -77,11 +77,11 @@ public class Source extends JDialog {
 		listModel = new DefaultListModel();
 
 		Vector<String> items = null;
-		if (type.equalsIgnoreCase("支出")) {
-			items = DBManager.getPayoutItems();
-		} else {
-			items = DBManager.getIncomeItems();
-		}
+		/*
+		 * if (type.equalsIgnoreCase("支出")) { items =
+		 * DBManager.getPayoutItems(); } else { items =
+		 * DBManager.getIncomeItems(); }
+		 */
 
 		for (String item : items) {
 			listModel.addElement(item);
