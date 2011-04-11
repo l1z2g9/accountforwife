@@ -2,6 +2,7 @@ package cat.panel;
 
 import cat.Configure;
 import cat.DBManager;
+import cat.model.Category;
 import cat.model.Item;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -33,7 +34,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class EditDialog extends JDialog {
 	private Item item;
-	Map<String, Integer> categories;
+	Map<String, Category> categories;
 	Map<String, Integer> subcategories;
 
 	public EditDialog(Window parent, final Item item, String type,
@@ -64,8 +65,8 @@ public class EditDialog extends JDialog {
 
 		pane = new JPanel();
 		arrange(pane, "Ð¡Àà±ð£º");
-		subcategories = DBManager.getSubCategory(categories
-				.get((String) categoryCombox.getSelectedItem()));
+		subcategories = DBManager.getSubCategory(categories.get(
+				(String) categoryCombox.getSelectedItem()).getId());
 
 		final JComboBox subCategoryCombox = new JComboBox(subcategories
 				.keySet().toArray());
@@ -80,8 +81,8 @@ public class EditDialog extends JDialog {
 				DefaultComboBoxModel model = (DefaultComboBoxModel) subCategoryCombox
 						.getModel();
 				model.removeAllElements();
-				subcategories = DBManager.getSubCategory(categories
-						.get((String) categoryCombox.getSelectedItem()));
+				subcategories = DBManager.getSubCategory(categories.get(
+						(String) categoryCombox.getSelectedItem()).getId());
 				for (String name : subcategories.keySet()) {
 					model.addElement(name);
 				}

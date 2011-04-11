@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -20,6 +19,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -37,6 +37,7 @@ import javax.swing.table.TableColumn;
 import cat.Configure;
 import cat.DBManager;
 import cat.editor.MoneyCellEditor;
+import cat.model.Category;
 
 public class Budget extends JPanel {
 	static Logger log = Logger.getLogger("Budget");
@@ -57,12 +58,57 @@ public class Budget extends JPanel {
 
 	public Budget() {
 		super(new BorderLayout());
-		JPanel choose = new JPanel(new GridLayout(0, 1));
+		setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
 
-		setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEmptyBorder(10, 30, 30, 30), BorderFactory
-				.createTitledBorder(
-						BorderFactory.createLineBorder(Color.black), "设置")));
+		// 类别部分
+		JPanel categorySetPane = new JPanel();
+		categorySetPane.setLayout(new BoxLayout(categorySetPane,
+				BoxLayout.LINE_AXIS));
+		categorySetPane.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createLineBorder(Color.black), "类别设置"));
+		final Map<String, String> typeMap = new HashMap<String, String>();
+		typeMap.put("收入", "Income");
+		typeMap.put("支出", "Expenditure");
+
+		final JComboBox typeCombox = new JComboBox(typeMap.keySet().toArray());
+		final JButton categoryButton = new JButton("类别设置");
+		categoryButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				CategoryPane panel = new CategoryPane(SwingUtilities
+						.getWindowAncestor((JButton) e.getSource()), typeMap
+						.get(typeCombox.getSelectedItem().toString()));
+				panel.setLocationRelativeTo(Budget.this);
+				panel.setVisible(true);
+			}
+		});
+
+		final JButton subCategoryButton = new JButton("小类别设置");
+		subCategoryButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				CategoryPane panel = new CategoryPane(SwingUtilities
+						.getWindowAncestor((JButton) e.getSource()), typeMap
+						.get(typeCombox.getSelectedItem().toString()));
+				panel.setLocationRelativeTo(Budget.this);
+				panel.setVisible(true);
+			}
+		});
+
+		typeCombox.setPreferredSize(new Dimension(80, 30));
+		typeCombox.setMaximumSize(new Dimension(80, 30));
+		categorySetPane.add(typeCombox);
+		categorySetPane.add(Box.createHorizontalStrut(10));
+		categorySetPane.add(categoryButton);
+		categorySetPane.add(Box.createHorizontalStrut(10));
+		categorySetPane.add(subCategoryButton);
+		categorySetPane.add(Box.createHorizontalGlue());
+
+		add(categorySetPane, BorderLayout.PAGE_START);
+
+		// 预算部分
+		JPanel choose = new JPanel();
+		choose.setLayout(new BoxLayout(choose, BoxLayout.PAGE_AXIS));
+		choose.setBorder(BorderFactory.createTitledBorder(BorderFactory
+				.createLineBorder(Color.black), "预算设置"));
 
 		Calendar c = Calendar.getInstance();
 
@@ -83,14 +129,6 @@ public class Budget extends JPanel {
 		year.addItemListener(new SelectChangeListenter());
 		month.addItemListener(new SelectChangeListenter());
 
-		// ---
-		JPanel configPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-		categoryConfig(configPane, "支出类别编辑", "支出");
-		categoryConfig(configPane, "收入类别编辑", "收入");
-
-		choose.add(configPane);
-
 		JLabel title = new JLabel("支出预算表");
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 14));
 		title.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
@@ -98,24 +136,17 @@ public class Budget extends JPanel {
 		tmp.add(title);
 		choose.add(tmp);
 
-		add(choose, BorderLayout.PAGE_START);
-
 		// 预算表格
-		JPanel savePane = new JPanel();
-		savePane.setLayout(new BoxLayout(savePane, BoxLayout.PAGE_AXIS));
-
 		budgetTable = new JTable(model);
 		refreshTableData();
-		// sourceTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
-		// sourceTable.setPreferredSize(new Dimension(450, 150));
 
 		JScrollPane scrollPane = new JScrollPane(budgetTable);
 		scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory
 				.createEmptyBorder(5, 5, 0, 5), scrollPane.getBorder()));
-		// scrollPane.setPreferredSize(new Dimension(450, 150));
+		scrollPane.setPreferredSize(new Dimension(350, 180));
 		budgetTable.setAutoCreateRowSorter(true);
 		// sourceTable.getRowSorter().toggleSortOrder(0);
-		savePane.add(scrollPane);
+		choose.add(scrollPane);
 
 		JButton save = new JButton("保存");
 		save.addActionListener(new ActionListener() {
@@ -126,7 +157,6 @@ public class Budget extends JPanel {
 
 				Map map = new HashMap<Integer, String>();
 				for (int row = 0; row < budgetTable.getRowCount(); row++) {
-
 					int categoryID = Integer.valueOf(model.getValueAt(row, 1)
 							.toString());
 					float money = Float.valueOf(model.getValueAt(row, 3)
@@ -146,8 +176,8 @@ public class Budget extends JPanel {
 		JPanel saveButtonPane = new JPanel();
 		saveButtonPane.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		saveButtonPane.add(save);
-		savePane.add(saveButtonPane);
-		add(savePane, BorderLayout.PAGE_END);
+		choose.add(saveButtonPane);
+		add(choose, BorderLayout.PAGE_END);
 
 		this.addMouseListener(new MouseAdapter() {
 			@Override
@@ -164,7 +194,7 @@ public class Budget extends JPanel {
 		final JButton payoutEdit = new JButton(title);
 		payoutEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Source panel = new Source(SwingUtilities
+				CategoryPane panel = new CategoryPane(SwingUtilities
 						.getWindowAncestor((JButton) e.getSource()), type);
 				panel.setLocationRelativeTo(Budget.this);
 				panel.setVisible(true);

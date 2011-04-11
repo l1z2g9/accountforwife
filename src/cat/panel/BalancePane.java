@@ -3,6 +3,7 @@ package cat.panel;
 import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
+import cat.model.Category;
 import cat.model.Item;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -55,7 +56,7 @@ public class BalancePane extends JPanel {
 	JTextField moneyField;
 	String type = "Expenditure";
 	final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-	Map<String, Integer> categories;
+	Map<String, Category> categories;
 
 	public BalancePane(String type) {
 		super(new BorderLayout());
@@ -94,9 +95,8 @@ public class BalancePane extends JPanel {
 		categoryCombox = new JComboBox(categories.keySet().toArray());
 		pane.add(categoryCombox);
 		pane.add(setBorder(new JLabel("Ð¡Àà±ð£º"), 20, 0));
-		subcategories = DBManager.getSubCategory(categories
-				.get((String) categoryCombox.getSelectedItem()));
-
+		subcategories = DBManager.getSubCategory(categories.get(
+				(String) categoryCombox.getSelectedItem()).getId());
 		subCategoryCombox = new JComboBox(subcategories.keySet().toArray());
 		subCategoryCombox.setPreferredSize(new Dimension(100, 30));
 		pane.add(subCategoryCombox);
@@ -106,8 +106,8 @@ public class BalancePane extends JPanel {
 				DefaultComboBoxModel model = (DefaultComboBoxModel) subCategoryCombox
 						.getModel();
 				model.removeAllElements();
-				subcategories = DBManager.getSubCategory(categories
-						.get((String) categoryCombox.getSelectedItem()));
+				subcategories = DBManager.getSubCategory(categories.get(
+						(String) categoryCombox.getSelectedItem()).getId());
 				for (String name : subcategories.keySet()) {
 					model.addElement(name);
 				}

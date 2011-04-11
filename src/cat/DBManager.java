@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -18,8 +19,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-import javax.swing.table.TableModel;
-
+import cat.model.Category;
 import cat.model.Item;
 import cat.vo.StatItem;
 
@@ -94,7 +94,7 @@ public class DBManager {
 			}
 
 			String sql = "select c.id, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
-					+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder";
+					+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder desc";
 			try {
 				PreparedStatement ps = conn.prepareStatement(sql);
 				ps.setInt(1, monthFirstDay.get(Calendar.YEAR));
@@ -210,16 +210,21 @@ public class DBManager {
 
 	// ---------- end Í³¼Æ ------------
 
-	public static Map<String, Integer> getCategory(String type) {
-		String sql = "SELECT ID, Name Item FROM Category WHERE Type = ? and ParentID is null order by displayOrder";
+	public static Map<String, Category> getCategory(String type) {
+		String sql = "SELECT name, id, displayOrder FROM Category WHERE Type = ? and ParentID is null order by displayOrder desc";
 
-		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Category> result = new LinkedHashMap<String, Category>();
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, type);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				result.put(rs.getString(2), rs.getInt(1));
+				Category category = new Category();
+				category.setId(rs.getInt(2));
+				category.setName(rs.getString(1));
+				category.setDisplayOrder(rs.getInt(3));
+
+				result.put(rs.getString(1), category);
 			}
 			rs.close();
 			ps.close();
@@ -230,7 +235,7 @@ public class DBManager {
 	}
 
 	public static Map<String, Integer> getSubCategory(Integer id) {
-		String sql = "SELECT ID, Name Item FROM Category WHERE ParentID = ? ORDER BY displayOrder";
+		String sql = "SELECT ID, Name Item FROM Category WHERE ParentID = ? ORDER BY displayOrder desc";
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
 		try {
@@ -318,7 +323,7 @@ public class DBManager {
 		Map budget = new HashMap();
 		int seq = 0;
 		String sql = "select name, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
-				+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder";
+				+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder desc";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, year);
@@ -331,7 +336,7 @@ public class DBManager {
 			ps.close();
 
 			sql = "select id, name from Category where parentID is null and "
-					+ "type = 'Expenditure' order by displayOrder";
+					+ "type = 'Expenditure' order by displayOrder desc";
 			ps = conn.prepareStatement(sql);
 			rs = ps.executeQuery();
 			while (rs.next()) {
@@ -453,12 +458,41 @@ public class DBManager {
 		}
 	}
 
-	public static void saveSource(String type, String item) {
-		String sql = "insert into Source(Type, Item) values(?, ?) ";
+	public static void deleteCategory(int id) {
+		String sql = "delete from Category where id = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
-			ps.setString(2, item);
+			ps.setInt(1, id);
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void saveCategory(String type, String name, int displayOrder) {
+		String findLastCategoryIDsql = "select max(id) from Category where parentID is null";
+		int lastID = -1;
+		try {
+			PreparedStatement ps = conn.prepareStatement(findLastCategoryIDsql);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				lastID = rs.getInt(1);
+				lastID += 100;
+			}
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		String sql = "insert into Category(id, type, name, displayOrder) values(?, ?, ?, ?)";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, lastID);
+			ps.setString(2, type);
+			ps.setString(3, name);
+			ps.setInt(4, displayOrder);
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
@@ -514,14 +548,6 @@ public class DBManager {
 			e.printStackTrace();
 		}
 		return result;
-	}
-
-	public static int[] getBudgetColor() {
-		int[] color = new int[2];
-		Preferences pref = Preferences.userNodeForPackage(DBManager.class);
-		color[0] = pref.getInt("Percent75", Color.GRAY.getRGB());
-		color[1] = pref.getInt("Percent90", Color.MAGENTA.getRGB());
-		return color;
 	}
 
 	public static void saveBudget(int year, int month,

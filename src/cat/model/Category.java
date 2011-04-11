@@ -4,7 +4,8 @@ public class Category {
 	private Integer id;
 	private Integer parentID;
 	private String type;
-	private String Name;
+	private String name;
+	private Integer displayOrder;
 
 	public Integer getId() {
 		return id;
@@ -31,11 +32,19 @@ public class Category {
 	}
 
 	public String getName() {
-		return Name;
+		return name;
 	}
 
 	public void setName(String name) {
-		Name = name;
+		this.name = name;
+	}
+
+	public Integer getDisplayOrder() {
+		return displayOrder;
+	}
+
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
 	}
 
 }
