@@ -1,43 +1,40 @@
 package cat.panel;
 
-import backup.InOutPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
 
-import cat.Constance;
+import cat.Configure;
 import cat.DBManager;
 import cat.editor.MoneyCellEditor;
 
@@ -47,7 +44,7 @@ public class Budget extends JPanel {
 	JComboBox year;
 
 	JComboBox month;
-
+	JTable budgetTable;
 	DefaultTableModel model = new DefaultTableModel() {
 		@Override
 		public boolean isCellEditable(int row, int column) {
@@ -69,7 +66,7 @@ public class Budget extends JPanel {
 
 		Calendar c = Calendar.getInstance();
 
-		year = new JComboBox(new Object[] { 2009, 2010, 2011, 2012 });
+		year = new JComboBox(new Object[] { 2011, 2012, 2013, 2014, 2015 });
 		month = new JComboBox(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 				12 });
 		JPanel yearMonth = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -107,14 +104,10 @@ public class Budget extends JPanel {
 		JPanel savePane = new JPanel();
 		savePane.setLayout(new BoxLayout(savePane, BoxLayout.PAGE_AXIS));
 
-		final JTable budgetTable = new JTable(model);
-		getTableData();
+		budgetTable = new JTable(model);
+		refreshTableData();
 		// sourceTable.getTableHeader().setPreferredSize(new Dimension(30, 22));
 		// sourceTable.setPreferredSize(new Dimension(450, 150));
-		budgetTable.setPreferredScrollableViewportSize(new Dimension(450, 170));
-		budgetTable.setRowHeight(22);
-		budgetTable.getColumnModel().getColumn(2).setCellEditor(
-				new MoneyCellEditor());
 
 		JScrollPane scrollPane = new JScrollPane(budgetTable);
 		scrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory
@@ -124,16 +117,29 @@ public class Budget extends JPanel {
 		// sourceTable.getRowSorter().toggleSortOrder(0);
 		savePane.add(scrollPane);
 
-		JButton save = new JButton("添加预算项");
+		JButton save = new JButton("保存");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (budgetTable.isEditing()) {
 					budgetTable.getCellEditor().stopCellEditing();
 				}
-				DBManager.saveItemBudget((Integer) year.getSelectedItem(),
-						(Integer) month.getSelectedItem(), model
-								.getDataVector());
-				JOptionPane.showMessageDialog(Budget.this, "预算设置保存成功。");
+
+				Map map = new HashMap<Integer, String>();
+				for (int row = 0; row < budgetTable.getRowCount(); row++) {
+
+					int categoryID = Integer.valueOf(model.getValueAt(row, 1)
+							.toString());
+					float money = Float.valueOf(model.getValueAt(row, 3)
+							.toString());
+					if (money != -1) {
+						map.put(categoryID, money);
+					}
+				}
+				DBManager.saveBudget((Integer) year.getSelectedItem(),
+						(Integer) month.getSelectedItem(), map);
+
+				JOptionPane.showMessageDialog(Budget.this, "保存成功。", "预算设置",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 
@@ -167,17 +173,41 @@ public class Budget extends JPanel {
 		pane.add(payoutEdit);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void getTableData() {
+	private void refreshTableData() {
 		Vector<Vector> items = DBManager.getBudgetItems((Integer) year
 				.getSelectedItem(), (Integer) month.getSelectedItem());
-		model.setDataVector(items, Constance.getSourceBudgetColumns());
+		model.setDataVector(items, Configure.getCategoryBudgetColumns());
+
+		budgetTable.getColumnModel().getColumn(3).setCellEditor(
+				new MoneyCellEditor());
+		budgetTable.getColumnModel().getColumn(3).setCellRenderer(
+				new DefaultTableCellRenderer() {
+					public Component getTableCellRendererComponent(
+							JTable table, Object value, boolean isSelected,
+							boolean hasFocus, int row, int column) {
+						if (value.toString().trim().equals("-1")) {
+							value = "--";
+						}
+						return super.getTableCellRendererComponent(table,
+								value, isSelected, hasFocus, row, column);
+					}
+				});
+
+		budgetTable.setPreferredScrollableViewportSize(new Dimension(450, 170));
+		budgetTable.setRowHeight(22);
+		TableColumn idCol = budgetTable.getColumnModel().getColumn(1);
+		idCol.setMaxWidth(0);
+		idCol.setMinWidth(0);
+		idCol.setPreferredWidth(0);
 	}
 
+	/**
+	 * 年月日变化时，更新预算内容。
+	 */
 	class SelectChangeListenter implements ItemListener {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			getTableData();
+			refreshTableData();
 		}
 	}
 }

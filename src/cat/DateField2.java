@@ -28,7 +28,7 @@ public class DateField2
       }
 
     });
-    this.setDateFormat(Constance.dateFormat);
+    this.setDateFormat(Configure.dateFormat);
 
   }
 }

@@ -1,6 +1,6 @@
 package backup;
 
-import cat.Constance;
+import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
 import cat.TableUtility;
@@ -190,7 +190,7 @@ public abstract class InOutPanel extends JPanel implements TableModelListener// 
 
 		Vector<Vector> obj = null;// DBManager.getItemsByType(sf.format(incomeDate
 		// .getValue()), type);
-		defaultModel.setDataVector(obj, Constance.getDateColumns());
+		defaultModel.setDataVector(obj, Configure.getDateColumns());
 
 		new TableUtility().makeTableCell(table);
 
@@ -200,7 +200,7 @@ public abstract class InOutPanel extends JPanel implements TableModelListener// 
 	private void createDataTable(Container container) {
 		Vector obj = null;// DBManager.getItemsByType(sf.format(new Date()),
 		// type);
-		defaultModel = new DefaultTableModel(obj, Constance.getDateColumns()) {
+		defaultModel = new DefaultTableModel(obj, Configure.getDateColumns()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				if (column == 0 || column == 1) {

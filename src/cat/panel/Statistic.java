@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import cat.Constance;
+import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
 import cat.TableUtility;
@@ -201,7 +201,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 								.format(fromDate.getValue()), sf.format(toDate
 								.getValue()));
 
-						new PopupDialog(data, Constance.getDateColumns(),
+						new PopupDialog(data, Configure.getDateColumns(),
 								Statistic.this, true);
 					}
 				});
@@ -216,7 +216,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 						Vector<Vector<String>> data = DBManager.getItemStat(
 								"支出", sf.format(fromDate.getValue()), sf
 										.format(toDate.getValue()));
-						new PopupDialog(data, Constance.getItemStatColumns(),
+						new PopupDialog(data, Configure.getItemStatColumns(),
 								Statistic.this, false);
 					}
 				});
@@ -230,7 +230,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 						Vector<Vector<String>> data = DBManager.getItemStat(
 								"收入", sf.format(fromDate.getValue()), sf
 										.format(toDate.getValue()));
-						new PopupDialog(data, Constance.getItemStatColumns(),
+						new PopupDialog(data, Configure.getItemStatColumns(),
 								Statistic.this, false);
 					}
 				});
@@ -282,7 +282,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 
 		searchPane.add(datePane, BorderLayout.PAGE_START);
 
-		statModel = new DefaultTableModel(new Vector(), Constance
+		statModel = new DefaultTableModel(new Vector(), Configure
 				.getStatColumns()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -420,7 +420,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 	}
 
 	private void createDataTable(Container container) {
-		dateModel = new DefaultTableModel(new Vector(), Constance
+		dateModel = new DefaultTableModel(new Vector(), Configure
 				.getDateColumns()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -500,7 +500,7 @@ public class Statistic extends JPanel implements ListSelectionListener,
 
 		Vector<Vector<String>> data = DBManager.query(sf.format(c1.getTime()),
 				sf.format(c2.getTime()));
-		statModel.setDataVector(data, Constance.getStatColumns());
+		statModel.setDataVector(data, Configure.getStatColumns());
 		int diff = 0;
 		if ((c1 != null) && (c2 != null)) {
 			long t = c2.getTimeInMillis() - c1.getTimeInMillis();

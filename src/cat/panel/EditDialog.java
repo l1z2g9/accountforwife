@@ -1,5 +1,6 @@
 package cat.panel;
 
+import cat.Configure;
 import cat.DBManager;
 import cat.model.Item;
 import java.awt.BorderLayout;
@@ -11,7 +12,9 @@ import java.awt.event.ActionListener;
 
 import java.text.SimpleDateFormat;
 
+import java.util.Date;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +37,7 @@ public class EditDialog extends JDialog {
 	Map<String, Integer> subcategories;
 
 	public EditDialog(Window parent, final Item item, String type,
-			final DefaultTableModel tableModel, final int selectedRow) {
+			final BalancePane balancePane, final int selectedRow) {
 		super(parent, "编辑项目", ModalityType.APPLICATION_MODAL);
 		this.item = item;
 		categories = DBManager.getCategory(type);
@@ -147,18 +150,26 @@ public class EditDialog extends JDialog {
 				toSaveItem.setAddress(address.getText());
 				DBManager.updateItem(toSaveItem);
 
-				JOptionPane.showMessageDialog(SwingUtilities
-						.getWindowAncestor(EditDialog.this), "成功更新内容", "更新内容",
-						JOptionPane.INFORMATION_MESSAGE);
+				/*
+				 * JOptionPane.showMessageDialog(SwingUtilities
+				 * .getWindowAncestor(EditDialog.this), "成功更新内容", "更新内容",
+				 * JOptionPane.INFORMATION_MESSAGE);
+				 */
 				EditDialog.this.dispose();
-				tableModel.setValueAt(categoryCombox.getSelectedItem(),
-						selectedRow, 3);
-				tableModel.setValueAt(subCategoryCombox.getSelectedItem(),
-						selectedRow, 4);
-				tableModel.setValueAt(toSaveItem.getMoney(), selectedRow, 5);
-				tableModel.setValueAt(toSaveItem.getUser(), selectedRow, 6);
-				tableModel.setValueAt(toSaveItem.getAddress(), selectedRow, 7);
-				tableModel.setValueAt(toSaveItem.getRemark(), selectedRow, 8);
+
+				balancePane.refreshData();
+
+				/*
+				 * tableModel.setValueAt(categoryCombox.getSelectedItem(),
+				 * selectedRow, 3);
+				 * tableModel.setValueAt(subCategoryCombox.getSelectedItem(),
+				 * selectedRow, 4); tableModel.setValueAt(toSaveItem.getMoney(),
+				 * selectedRow, 5); tableModel.setValueAt(toSaveItem.getUser(),
+				 * selectedRow, 6);
+				 * tableModel.setValueAt(toSaveItem.getAddress(), selectedRow,
+				 * 7); tableModel.setValueAt(toSaveItem.getRemark(),
+				 * selectedRow, 8);
+				 */
 			}
 		});
 		pane.add(update);

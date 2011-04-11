@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.Vector;
 
-public class Constance {
+public class Configure {
 	static final DateFormat dateFormat = new SimpleDateFormat(
 			" yyyy - MM - dd ");
 
@@ -17,7 +17,7 @@ public class Constance {
 
 	static final Vector<String> itemStatColumns = new Vector<String>();
 
-	static final Vector<String> sourceBudgetColumns = new Vector<String>();
+	static final Vector<String> categoryBudgetColumns = new Vector<String>();
 
 	static final String LOGIN_USER = "cat";
 	static {
@@ -30,6 +30,7 @@ public class Constance {
 		dateColumns.addElement("用户");
 		dateColumns.addElement("场所");
 		dateColumns.addElement("备注");
+		dateColumns.addElement("颜色");
 
 		fieldColumns.addElement("Type");
 		fieldColumns.addElement("Date");
@@ -46,9 +47,10 @@ public class Constance {
 		itemStatColumns.addElement("金额");
 		itemStatColumns.addElement("百分比(%)");
 
-		sourceBudgetColumns.addElement("序号");
-		sourceBudgetColumns.addElement("项目");
-		sourceBudgetColumns.addElement("预算金额");
+		categoryBudgetColumns.addElement("序号");
+		categoryBudgetColumns.addElement("类别ID");
+		categoryBudgetColumns.addElement("类别");
+		categoryBudgetColumns.addElement("预算金额");
 	}
 
 	public static Vector<String> getDateColumns() {
@@ -67,7 +69,7 @@ public class Constance {
 		return fieldColumns;
 	}
 
-	public static Vector<String> getSourceBudgetColumns() {
-		return sourceBudgetColumns;
+	public static Vector<String> getCategoryBudgetColumns() {
+		return categoryBudgetColumns;
 	}
 }

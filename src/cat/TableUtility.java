@@ -51,7 +51,7 @@ public class TableUtility {
 			DBManager.deleteItem(id);
 			DefaultTableModel model = (DefaultTableModel) table.getModel();
 			model.removeRow(row);
-			DBManager.updateColor(model);
+			// DBManager.updateColor(model);
 		}
 	}
 
@@ -139,8 +139,8 @@ public class TableUtility {
 
 		/*
 		 * DBManager.updateItem(id, Constance.getFieldColumns().get(column - 1),
-		 * data.toString());
-		 */DBManager.updateColor(model);
+		 * data.toString()); DBManager.updateColor(model);
+		 */
 	}
 
 }

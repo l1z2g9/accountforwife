@@ -1,10 +1,12 @@
 package cat.panel;
 
-import cat.Constance;
+import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
 import cat.model.Item;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,8 +40,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+
+import sun.swing.DefaultLookup;
 
 public class BalancePane extends JPanel {
 	static Logger log = Logger.getLogger("PreparePane");
@@ -61,6 +66,13 @@ public class BalancePane extends JPanel {
 		add(createDataTable(), BorderLayout.SOUTH);
 	}
 
+	public void refreshData() {
+		Vector<Vector> data = DBManager.getItemsByDate(type,
+				(Date) selectedDate.getValue());
+		tableModel.setDataVector(data, Configure.getDateColumns());
+		arrangeColumn();
+	}
+
 	private JPanel createItems() {
 		JPanel pane = new JPanel();
 		pane.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 5));
@@ -68,8 +80,7 @@ public class BalancePane extends JPanel {
 		pane.add(setBorder(new JLabel("日期："), 20, 0));
 		selectedDate.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				// DateField2 date = (DateField2) e.getSource();
-				// fireDataChange();
+				refreshData();
 			}
 		});
 
@@ -164,19 +175,23 @@ public class BalancePane extends JPanel {
 				int rowID = DBManager.saveItem(item);
 
 				// 显示
-				Vector data = new Vector();
-				data.add(rowID);
-				data.add(table.getRowCount() + 1);
-				data.add(sf.format(selectedDate.getValue()));
-				data.add(categoryCombox.getSelectedItem());
-
-				data.add(subCategoryCombox.getSelectedItem());
-				data.add(moneyField.getText());
-				data.add(user.getText());
-				data.add(address.getText());
-				data.add(remark.getText());
-
-				tableModel.addRow(data);
+				/*
+				 * Vector data = new Vector(); data.add(rowID);
+				 * data.add(table.getRowCount() + 1);
+				 * data.add(sf.format(selectedDate.getValue()));
+				 * data.add(categoryCombox.getSelectedItem());
+				 * 
+				 * data.add(subCategoryCombox.getSelectedItem());
+				 * data.add(moneyField.getText()); data.add(user.getText());
+				 * data.add(address.getText()); data.add(remark.getText());
+				 * 
+				 * tableModel.addRow(data);
+				 * 
+				 * Vector<Vector> data = DBManager.getItemsByDate(type, (Date)
+				 * selectedDate.getValue()); tableModel.setDataVector(data,
+				 * Configure.getDateColumns()); arrangeColumn();
+				 */
+				refreshData();
 			}
 		});
 		return pane;
@@ -190,26 +205,59 @@ public class BalancePane extends JPanel {
 	JTable table;
 	DefaultTableModel tableModel;
 
-	private JScrollPane createDataTable() {
-		Vector<Vector> obj = DBManager.getItemsByDate(type, (Date) selectedDate
-				.getValue());
-		// type);
-		tableModel = new DefaultTableModel(obj, Constance.getDateColumns()) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		table = new JTable(tableModel);
-
+	private void arrangeColumn() {
 		// 隐藏ID列
 		TableColumn idCol = table.getColumnModel().getColumn(0);
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
-		TableColumn colorCol = table.getColumnModel().getColumn(1);
-		colorCol.setMaxWidth(45);
+		// 隐藏颜色列
+
+		TableColumn colorCol = table.getColumnModel().getColumn(9);
+		colorCol.setMaxWidth(0);
+		colorCol.setMinWidth(0);
+		colorCol.setPreferredWidth(0);
+
+		TableColumn seqCol = table.getColumnModel().getColumn(1);
+		seqCol.setMaxWidth(45);
+
+		table.getColumnModel().getColumn(5).setCellRenderer(
+				new DefaultTableCellRenderer() {
+					public Component getTableCellRendererComponent(
+							JTable table, Object value, boolean isSelected,
+							boolean hasFocus, int row, int column) {
+
+						Color color = (Color) table.getModel().getValueAt(row,
+								9);
+						if (!Color.white.equals(color)) {
+							super.setBackground(color);
+						} else {
+							super.setBackground(null);
+						}
+
+						return super.getTableCellRendererComponent(table,
+								value, isSelected, hasFocus, row, column);
+					}
+				});
+
+	}
+
+	private JScrollPane createDataTable() {
+		Vector<Vector> data = DBManager.getItemsByDate(type,
+				(Date) selectedDate.getValue());
+		// type);
+		tableModel = new DefaultTableModel(data, Configure.getDateColumns()) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+
+		table = new JTable(tableModel);
+		table.setRowHeight(22);
+		arrangeColumn();
+
 		table.setAutoCreateRowSorter(true);
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -247,7 +295,7 @@ public class BalancePane extends JPanel {
 
 							EditDialog dialog = new EditDialog(SwingUtilities
 									.getWindowAncestor(BalancePane.this), item,
-									type, tableModel, selectedRow);
+									type, BalancePane.this, selectedRow);
 							dialog.setVisible(true);
 						}
 					});

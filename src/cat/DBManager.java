@@ -1,30 +1,27 @@
 package cat;
 
-import cat.model.Item;
-import cat.vo.StatItem;
 import java.awt.Color;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import javax.swing.table.TableModel;
+
+import cat.model.Item;
+import cat.vo.StatItem;
 
 public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
@@ -49,21 +46,72 @@ public class DBManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Vector<Vector> getItemsByDate(String type, Date date) {
-		Calendar startTime = Calendar.getInstance();
+		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
+				Locale.SIMPLIFIED_CHINESE);
 		startTime.setTime(date);
-		startTime.set(Calendar.HOUR, 0);
+		startTime.set(Calendar.HOUR_OF_DAY, 0);
 		startTime.set(Calendar.MINUTE, 0);
 		startTime.set(Calendar.SECOND, 0);
 
-		Calendar endtTime = Calendar.getInstance();
+		Calendar endtTime = Calendar.getInstance(Locale.SIMPLIFIED_CHINESE);
 		endtTime.setTime(date);
-		endtTime.set(Calendar.HOUR, 23);
+		endtTime.set(Calendar.HOUR_OF_DAY, 23);
 		endtTime.set(Calendar.MINUTE, 59);
 		endtTime.set(Calendar.SECOND, 59);
 
+		Calendar monthFirstDay = Calendar
+				.getInstance(Locale.SIMPLIFIED_CHINESE);
+		monthFirstDay.setTime(date);
+		monthFirstDay.set(Calendar.DAY_OF_MONTH, 1);
+		monthFirstDay.set(Calendar.HOUR, 0);
+		monthFirstDay.set(Calendar.MINUTE, 0);
+		monthFirstDay.set(Calendar.SECOND, 0);
+
 		Vector<Vector> result = new Vector<Vector>();
+		// 预算比较
+		Map<Integer, Float> sumMap = new HashMap<Integer, Float>();
+		Map<Integer, Float> budgetMap = new HashMap<Integer, Float>();
+		if ("Expenditure".equals(type)) {
+			try {
+				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
+						+ "c.type = ? and time between ? and ? group by cp.id";
+
+				PreparedStatement ps = conn.prepareStatement(sumSql);
+				ps.setString(1, type);
+				ps.setLong(2, monthFirstDay.getTimeInMillis());
+				ps.setLong(3, startTime.getTimeInMillis());
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					int categoryID = rs.getInt(1);
+					float sumMoney = rs.getFloat(2);
+					sumMap.put(categoryID, sumMoney);
+				}
+				rs.close();
+				ps.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			String sql = "select c.id, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
+					+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder";
+			try {
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ps.setInt(1, monthFirstDay.get(Calendar.YEAR));
+				ps.setInt(2, monthFirstDay.get(Calendar.MONTH) + 1);
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					budgetMap.put(rs.getInt(1), rs.getFloat(2));
+				}
+				rs.close();
+				ps.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		try {
-			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark FROM Item i, Category c, Category cp "
+			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id FROM Item i, Category c, Category cp "
 					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
 					+ "c.type = ? and time between ? and ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -84,6 +132,33 @@ public class DBManager {
 				vo.addElement(rs.getString(6));
 				vo.addElement(rs.getString(7));
 				vo.addElement(rs.getString(8));
+
+				if ("Expenditure".equals(type)) {
+					int categoryID = rs.getInt(9);
+					if (sumMap.containsKey(categoryID)) {
+						sumMap.put(categoryID, sumMap.get(categoryID)
+								+ rs.getFloat(5));
+					} else {
+						sumMap.put(categoryID, rs.getFloat(5));
+					}
+
+					float nowSum = sumMap.get(categoryID);
+
+					if (budgetMap.containsKey(categoryID)) {
+						float categtoryBudget = budgetMap.get(categoryID);
+						if (nowSum > categtoryBudget * 0.9) {
+							vo.addElement(Color.red);
+						} else if (nowSum > categtoryBudget * 0.7) {
+							vo.addElement(Color.yellow);
+						} else {
+							vo.addElement(Color.white);
+						}
+					} else {
+						vo.addElement(Color.white);
+					}
+				} else {
+					vo.addElement(Color.white);
+				}
 				result.add(vo);
 			}
 			rs.close();
@@ -174,98 +249,6 @@ public class DBManager {
 		return result;
 	}
 
-	/**
-	 * 某一天的金额发生变化，可能增加，可能减少，这样可能导致当月超支，或者超支的地方变成没有超支，所以需要同步更新当月的所有预算背景色。
-	 * 
-	 * @param date
-	 */
-	private static void refreshBudgetColor(String date) {
-		String fromDate = date.substring(0, date.length() - 2) + "01";
-		String year = date.substring(0, 4);
-		String month = date.substring(5, 7);
-		// log.info("month: " + month);
-		String lastDay = "30";
-
-		String toDate = date.substring(0, date.length() - 2) + lastDay;
-		// float payout = queryPayoutTotal(fromDate, toDate, "支出");
-		Vector<Vector> items = getItemsBetweenDates(fromDate, toDate);
-
-		int[] budgetColor = getBudgetColor();
-
-		int percent75color = budgetColor[0];
-		int percent90color = budgetColor[1];
-
-		//    
-		Map<String, Float> itemSum = new HashMap<String, Float>();
-		Map<Integer, Integer> normal = new HashMap<Integer, Integer>();
-		Map<Integer, Integer> percent75 = new HashMap<Integer, Integer>();
-		Map<Integer, Integer> percent90 = new HashMap<Integer, Integer>();
-		Map<Integer, Integer> over_budget = new HashMap<Integer, Integer>();
-		for (Vector item : items) {
-			String i = (String) item.get(1);
-			if (!"支出".equalsIgnoreCase(i)) {
-				continue;
-			}
-
-			int id = (Integer) item.get(0);
-			String _item = (String) item.get(3);
-			int budget = getBudget(year, month);
-			if (budget == 0) {
-				continue;
-			}
-
-			float sum = Float.valueOf(item.get(4).toString());
-			if (itemSum.containsKey(_item)) {
-				sum = itemSum.get(_item) + sum;
-			}
-			itemSum.put(_item, sum);
-
-			if (budget * 0.75 > sum) {
-				normal.put(id, Color.WHITE.getRGB());
-			} else if (budget * 0.75 < sum && budget * 0.9 >= sum) {
-				percent75.put(id, percent75color);
-			} else if (budget * 0.9 < sum && budget >= sum) {
-				percent90.put(id, percent90color);
-			} else {
-				over_budget.put(id, Color.RED.getRGB());
-			}
-		}
-		try {
-			conn.setAutoCommit(false);
-			PreparedStatement ps = conn
-					.prepareStatement("UPDATE Account SET Color = ? WHERE ID = ?");
-			for (int id : normal.keySet()) {
-				ps.setInt(1, normal.get(id));
-				ps.setInt(2, id);
-				ps.executeUpdate();
-			}
-
-			for (int id : percent75.keySet()) {
-				ps.setInt(1, percent75.get(id));
-				ps.setInt(2, id);
-				ps.executeUpdate();
-			}
-
-			for (int id : percent90.keySet()) {
-				ps.setInt(1, percent90.get(id));
-				ps.setInt(2, id);
-				ps.executeUpdate();
-			}
-
-			for (int id : over_budget.keySet()) {
-				ps.setInt(1, over_budget.get(id));
-				ps.setInt(2, id);
-				ps.executeUpdate();
-			}
-
-			conn.commit();
-			ps.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static int saveItem(Item item) {
 		int rowID = 0;
 		try {
@@ -347,14 +330,15 @@ public class DBManager {
 			rs.close();
 			ps.close();
 
-			sql = "select name from Category where parentID is null and "
+			sql = "select id, name from Category where parentID is null and "
 					+ "type = 'Expenditure' order by displayOrder";
 			ps = conn.prepareStatement(sql);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				Vector v = new Vector();
 				v.addElement(++seq);
-				String categoryName = rs.getString(1);
+				v.addElement(rs.getString(1));
+				String categoryName = rs.getString(2);
 				v.addElement(categoryName);
 				if (budget.containsKey(categoryName)) {
 					v.addElement(budget.get(categoryName));
@@ -532,30 +516,6 @@ public class DBManager {
 		return result;
 	}
 
-	public static int getTotalBudget(String year, String month) {
-		return 0;
-	}
-
-	public static int getBudget(String year, String month) {
-		int budget = 0;
-		String userSql = "SELECT Money FROM Budget b, Category c WHERE b.CategoryID = c.ID and ParentID is not null and Type = 'Expenditure' and year = ? and month = ?";
-		try {
-			PreparedStatement ps = conn.prepareStatement(userSql);
-			ps.setString(1, year);
-			ps.setString(2, month);
-
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				budget = rs.getInt(1);
-			}
-			rs.close();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return budget;
-	}
-
 	public static int[] getBudgetColor() {
 		int[] color = new int[2];
 		Preferences pref = Preferences.userNodeForPackage(DBManager.class);
@@ -564,92 +524,53 @@ public class DBManager {
 		return color;
 	}
 
-	public static void saveBudgetColor(int percent75, int percent90) {
-		Preferences pref = Preferences.userNodeForPackage(DBManager.class);
-		pref.putInt("Percent75", percent75);
-		pref.putInt("Percent90", percent90);
+	public static void saveBudget(int year, int month,
+			Map<Integer, Float> budget) {
 		try {
-			pref.flush();
-		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		refreshBudgetColor(df.format(new Date()));
-	}
-
-	public static void saveTotalBudget(int year, int month, int budget) {
-		saveBudget(year, month, "Total", budget);
-	}
-
-	private static void saveBudget(int year, int month, String item, int budget) {
-		String userSql = "SELECT ID FROM Budget WHERE USER = ? AND Year = ? AND Month = ? AND Item = ?";
-		String insertSql = "INSERT INTO Budget(User, Year, Month, Item, Budget) VALUES(?, ?, ?, ?, ?)";
-		String updateSql = "UPDATE Budget set Budget = ? WHERE ID = ?";
-
-		int id = -1;
-		try {
-			PreparedStatement ps = conn.prepareStatement(userSql);
-			ps.setString(1, Constance.LOGIN_USER);
-			ps.setInt(2, year);
-			ps.setInt(3, month);
-			ps.setString(4, item);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				id = rs.getInt(1);
-			}
-			rs.close();
-
-			if (id != -1) {
-				ps = conn.prepareStatement(updateSql);
-				ps.setFloat(1, budget);
-				ps.setInt(2, id);
-			} else {
-				ps = conn.prepareStatement(insertSql);
-				ps.setString(1, Constance.LOGIN_USER);
-				ps.setInt(2, year);
-				ps.setInt(3, month);
-				ps.setString(4, item);
-				ps.setFloat(5, budget);
-			}
-			ps.executeUpdate();
-			ps.close();
+			conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
 
-	public static void updateColor(TableModel model) {
-		String sql = "SELECT ID, Color FROM Account WHERE ID = ?";
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			for (int i = 0; i < model.getRowCount(); i++) {
-				ps.setInt(1, (Integer) model.getValueAt(i, 0));
+		String findSql = "SELECT b.id FROM Budget b, Category c WHERE b.categoryID = c.id and type = 'Expenditure' and year = ? AND month = ? and categoryID = ?";
+		String insertSql = "INSERT INTO Budget(categoryID, year, month, money) VALUES(?, ?, ?, ?)";
+		String updateSql = "UPDATE Budget set money = ? WHERE id = ?";
+
+		for (Integer categoryID : budget.keySet()) {
+			int id = -1;
+			try {
+				PreparedStatement ps = conn.prepareStatement(findSql);
+				ps.setInt(1, year);
+				ps.setInt(2, month);
+				ps.setInt(2, categoryID);
 				ResultSet rs = ps.executeQuery();
-				rs.next();
-				model.setValueAt(rs.getInt(2), i, 6);
+				if (rs.next()) {
+					id = rs.getInt(1);
+				}
 				rs.close();
+
+				if (id != -1) {
+					ps = conn.prepareStatement(updateSql);
+					ps.setFloat(1, budget.get(categoryID));
+					ps.setInt(2, id);
+				} else {
+					ps = conn.prepareStatement(insertSql);
+					ps.setInt(1, categoryID);
+					ps.setInt(2, year);
+					ps.setInt(3, month);
+					ps.setFloat(4, budget.get(categoryID));
+				}
+				ps.executeUpdate();
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-			ps.close();
-		} catch (Exception e) {
+		}
+
+		try {
+			conn.commit();
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-	}
-
-	public static void saveItemBudget(Integer year, Integer month,
-			Vector<Vector> dataVector) {
-		for (Vector v : dataVector) {
-			String item = (String) v.elementAt(1);
-			int money = Integer.valueOf(v.elementAt(2).toString());
-			saveBudget(year, month, item, money);
-		}
-
-		String strMonth = String.valueOf(month);
-		if (month != 10 || month != 11 || month != 12) {
-			strMonth = "0" + String.valueOf(month);
-		}
-		refreshBudgetColor(String.valueOf(year) + "-" + strMonth + "-" + "01");
 	}
 }
