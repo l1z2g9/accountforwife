@@ -37,6 +37,8 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
 
+import backup.Statistic;
+
 public class PopupDialog extends JDialog {
 	SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 
