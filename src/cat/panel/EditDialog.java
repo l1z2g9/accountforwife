@@ -33,14 +33,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class EditDialog extends JDialog {
-	private Item item;
 	Map<String, Category> categories;
-	Map<String, Integer> subcategories;
+	Map<String, Category> subcategories;
 
 	public EditDialog(Window parent, final Item item, String type,
 			final BalancePane balancePane, final int selectedRow) {
 		super(parent, "±à¼­ÏîÄ¿", ModalityType.APPLICATION_MODAL);
-		this.item = item;
+
 		categories = DBManager.getCategory(type);
 		JPanel container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
@@ -144,8 +143,8 @@ public class EditDialog extends JDialog {
 				toSaveItem.setId(item.getId());
 				toSaveItem.setTime(item.getTime());
 				toSaveItem.setMoney(_money);
-				toSaveItem.setCategoryID(subcategories
-						.get((String) subCategoryCombox.getSelectedItem()));
+				toSaveItem.setCategoryID(subcategories.get(
+						(String) subCategoryCombox.getSelectedItem()).getId());
 				toSaveItem.setRemark(remark.getText());
 				toSaveItem.setUser(user.getText());
 				toSaveItem.setAddress(address.getText());

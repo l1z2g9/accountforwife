@@ -1,10 +1,5 @@
 package cat.panel;
 
-import cat.Configure;
-import cat.DBManager;
-import cat.DateField2;
-import cat.model.Category;
-import cat.model.Item;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -14,9 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.Vector;
@@ -45,12 +38,16 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import sun.swing.DefaultLookup;
+import cat.Configure;
+import cat.DBManager;
+import cat.DateField2;
+import cat.model.Category;
+import cat.model.Item;
 
 public class BalancePane extends JPanel {
 	static Logger log = Logger.getLogger("PreparePane");
 	DateField2 selectedDate = new DateField2();
-	Map<String, Integer> subcategories;
+	Map<String, Category> subcategories;
 	JComboBox categoryCombox;
 	JComboBox subCategoryCombox;
 	JTextField moneyField;
@@ -167,8 +164,8 @@ public class BalancePane extends JPanel {
 				Item item = new Item();
 				item.setTime(((Date) selectedDate.getValue()).getTime());
 				item.setMoney(money);
-				item.setCategoryID(subcategories.get((String) subCategoryCombox
-						.getSelectedItem()));
+				item.setCategoryID(subcategories.get(
+						(String) subCategoryCombox.getSelectedItem()).getId());
 				item.setRemark(remark.getText());
 				item.setUser(user.getText());
 				item.setAddress(address.getText());

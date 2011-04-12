@@ -1,15 +1,12 @@
 package cat;
 
-import cat.panel.Budget;
-import cat.panel.Expenditure;
-import cat.panel.Income;
-import cat.panel.Statistic;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,15 +15,18 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import cat.panel.BalancePane;
+import cat.panel.Budget;
+import cat.panel.Statistic;
+
 public class AccountPanel extends JPanel {
 	public AccountPanel() {
 		super(new BorderLayout());
 		JPanel tabpane = new JPanel();
 		JTabbedPane tab = new JTabbedPane();
-		Expenditure payout = new Expenditure();
-		tab.addTab("支出", payout);
+		tab.addTab("支出", new BalancePane("Expenditure"));
 		tab.setMnemonicAt(0, KeyEvent.VK_1);
-		tab.addTab("收入", new Income());
+		tab.addTab("收入", new BalancePane("Income"));
 		tab.setMnemonicAt(1, KeyEvent.VK_2);
 		tab.addTab("统计", new Statistic());
 		tab.setMnemonicAt(2, KeyEvent.VK_3);

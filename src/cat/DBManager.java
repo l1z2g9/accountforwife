@@ -17,7 +17,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import cat.model.Category;
 import cat.model.Item;
@@ -38,6 +37,7 @@ public class DBManager {
 		}
 	}
 
+	// --------- start items ---------
 	/**
 	 * 统计页使用,读取当日的所有收支情况.
 	 * 
@@ -169,91 +169,6 @@ public class DBManager {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void assemble(Vector<Vector> result, ResultSet rs) {
-		try {
-			while (rs.next()) {
-				Vector vo = new Vector();
-				vo.addElement(rs.getInt(1));
-				vo.addElement(rs.getString(2));
-				vo.addElement(rs.getString(3));
-				vo.addElement(rs.getString(4));
-				vo.addElement(df.format(rs.getFloat(5)));
-				vo.addElement(rs.getString(6));
-				vo.addElement(rs.getString(7));
-				result.add(vo);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	// ---------- start 统计 ------------
-	@SuppressWarnings("unchecked")
-	public static Vector<Vector> getItemsBetweenDates(String fromDate,
-			String toDate) {
-		Vector<Vector> result = new Vector<Vector>();
-		try {
-			String sql = "SELECT ID, Type, Date, Item, Money, Remark, Color FROM Account WHERE Date BETWEEN ? AND ? ORDER BY Date";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ResultSet rs = ps.executeQuery();
-			assemble(result, rs);
-			rs.close();
-			ps.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-	// ---------- end 统计 ------------
-
-	public static Map<String, Category> getCategory(String type) {
-		String sql = "SELECT name, id, displayOrder FROM Category WHERE Type = ? and ParentID is null order by displayOrder desc";
-
-		Map<String, Category> result = new LinkedHashMap<String, Category>();
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Category category = new Category();
-				category.setId(rs.getInt(2));
-				category.setName(rs.getString(1));
-				category.setDisplayOrder(rs.getInt(3));
-
-				result.put(rs.getString(1), category);
-			}
-			rs.close();
-			ps.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-	public static Map<String, Integer> getSubCategory(Integer id) {
-		String sql = "SELECT ID, Name Item FROM Category WHERE ParentID = ? ORDER BY displayOrder desc";
-
-		Map<String, Integer> result = new HashMap<String, Integer>();
-		try {
-
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				result.put(rs.getString(2), rs.getInt(1));
-			}
-			rs.close();
-			ps.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
 	public static int saveItem(Item item) {
 		int rowID = 0;
 		try {
@@ -318,6 +233,171 @@ public class DBManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private static void assemble(Vector<Vector> result, ResultSet rs) {
+		try {
+			while (rs.next()) {
+				Vector vo = new Vector();
+				vo.addElement(rs.getInt(1));
+				vo.addElement(rs.getString(2));
+				vo.addElement(rs.getString(3));
+				vo.addElement(rs.getString(4));
+				vo.addElement(df.format(rs.getFloat(5)));
+				vo.addElement(rs.getString(6));
+				vo.addElement(rs.getString(7));
+				result.add(vo);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Vector<Vector> getItemsBetweenDates(String fromDate,
+			String toDate) {
+		Vector<Vector> result = new Vector<Vector>();
+		try {
+			String sql = "SELECT ID, Type, Date, Item, Money, Remark, Color FROM Account WHERE Date BETWEEN ? AND ? ORDER BY Date";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, fromDate);
+			ps.setString(2, toDate);
+			ResultSet rs = ps.executeQuery();
+			assemble(result, rs);
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	// --------- end items ---------
+
+	// ---------- start 类别 ------------
+	public static Map<String, Category> getCategory(String type) {
+		String sql = "SELECT name, id, displayOrder FROM Category WHERE Type = ? and ParentID is null order by displayOrder desc";
+
+		Map<String, Category> result = new LinkedHashMap<String, Category>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, type);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Category category = new Category();
+				category.setId(rs.getInt(2));
+				category.setName(rs.getString(1));
+				category.setDisplayOrder(rs.getInt(3));
+
+				result.put(rs.getString(1), category);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static Map<String, Category> getSubCategory(Integer id) {
+		String sql = "SELECT name, id, displayOrder FROM Category WHERE parentID = ? ORDER BY displayOrder desc";
+
+		Map<String, Category> result = new LinkedHashMap<String, Category>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Category category = new Category();
+				category.setId(rs.getInt(2));
+				category.setName(rs.getString(1));
+				category.setDisplayOrder(rs.getInt(3));
+
+				result.put(rs.getString(1), category);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static void saveCategory(String type, String name, int displayOrder) {
+		String findLastCategoryIDsql = "select max(id) from Category where parentID is null";
+		int lastID = -1;
+		try {
+			PreparedStatement ps = conn.prepareStatement(findLastCategoryIDsql);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				lastID = rs.getInt(1);
+				lastID += 100;
+			}
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		String sql = "insert into Category(id, type, name, displayOrder) values(?, ?, ?, ?)";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, lastID);
+			ps.setString(2, type);
+			ps.setString(3, name);
+			ps.setInt(4, displayOrder);
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void saveSubCategory(int parentID, String type, String name,
+			int displayOrder) {
+		String findLastCategoryIDsql = "select max(id) from Category where parentID = ?";
+		int lastID = -1;
+		try {
+			PreparedStatement ps = conn.prepareStatement(findLastCategoryIDsql);
+			ps.setInt(1, parentID);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				lastID = rs.getInt(1);
+				lastID += 1;
+			}
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		String sql = "insert into Category(id, parentId, type, name, displayOrder) values(?, ?, ?, ?, ?)";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, lastID);
+			ps.setInt(2, parentID);
+			ps.setString(3, type);
+			ps.setString(4, name);
+			ps.setInt(5, displayOrder);
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void deleteCategory(int id) {
+		String sql = "delete from Category where id = ?";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// ---------- end 类别 ------------
+	// ---------- start 预算 ------------
 	public static Vector<Vector> getBudgetItems(int year, int month) {
 		Vector<Vector> result = new Vector<Vector>();
 		Map budget = new HashMap();
@@ -360,6 +440,57 @@ public class DBManager {
 		return result;
 	}
 
+	public static void saveBudget(int year, int month,
+			Map<Integer, Float> budget) {
+		try {
+			conn.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		String findSql = "SELECT b.id FROM Budget b, Category c WHERE b.categoryID = c.id and type = 'Expenditure' and year = ? AND month = ? and categoryID = ?";
+		String insertSql = "INSERT INTO Budget(categoryID, year, month, money) VALUES(?, ?, ?, ?)";
+		String updateSql = "UPDATE Budget set money = ? WHERE id = ?";
+
+		for (Integer categoryID : budget.keySet()) {
+			int id = -1;
+			try {
+				PreparedStatement ps = conn.prepareStatement(findSql);
+				ps.setInt(1, year);
+				ps.setInt(2, month);
+				ps.setInt(2, categoryID);
+				ResultSet rs = ps.executeQuery();
+				if (rs.next()) {
+					id = rs.getInt(1);
+				}
+				rs.close();
+
+				if (id != -1) {
+					ps = conn.prepareStatement(updateSql);
+					ps.setFloat(1, budget.get(categoryID));
+					ps.setInt(2, id);
+				} else {
+					ps = conn.prepareStatement(insertSql);
+					ps.setInt(1, categoryID);
+					ps.setInt(2, year);
+					ps.setInt(3, month);
+					ps.setFloat(4, budget.get(categoryID));
+				}
+				ps.executeUpdate();
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			conn.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// ---------- end 预算 ------------
 	private static void addList(String date, String type, float money,
 			Map<String, StatItem> dateMap) {
 		StatItem stat = null;
@@ -458,48 +589,6 @@ public class DBManager {
 		}
 	}
 
-	public static void deleteCategory(int id) {
-		String sql = "delete from Category where id = ?";
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void saveCategory(String type, String name, int displayOrder) {
-		String findLastCategoryIDsql = "select max(id) from Category where parentID is null";
-		int lastID = -1;
-		try {
-			PreparedStatement ps = conn.prepareStatement(findLastCategoryIDsql);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				lastID = rs.getInt(1);
-				lastID += 100;
-			}
-			rs.close();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		String sql = "insert into Category(id, type, name, displayOrder) values(?, ?, ?, ?)";
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, lastID);
-			ps.setString(2, type);
-			ps.setString(3, name);
-			ps.setInt(4, displayOrder);
-			ps.executeUpdate();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * 统计页使用,获取各项统计结果
 	 * 
@@ -548,55 +637,5 @@ public class DBManager {
 			e.printStackTrace();
 		}
 		return result;
-	}
-
-	public static void saveBudget(int year, int month,
-			Map<Integer, Float> budget) {
-		try {
-			conn.setAutoCommit(false);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		String findSql = "SELECT b.id FROM Budget b, Category c WHERE b.categoryID = c.id and type = 'Expenditure' and year = ? AND month = ? and categoryID = ?";
-		String insertSql = "INSERT INTO Budget(categoryID, year, month, money) VALUES(?, ?, ?, ?)";
-		String updateSql = "UPDATE Budget set money = ? WHERE id = ?";
-
-		for (Integer categoryID : budget.keySet()) {
-			int id = -1;
-			try {
-				PreparedStatement ps = conn.prepareStatement(findSql);
-				ps.setInt(1, year);
-				ps.setInt(2, month);
-				ps.setInt(2, categoryID);
-				ResultSet rs = ps.executeQuery();
-				if (rs.next()) {
-					id = rs.getInt(1);
-				}
-				rs.close();
-
-				if (id != -1) {
-					ps = conn.prepareStatement(updateSql);
-					ps.setFloat(1, budget.get(categoryID));
-					ps.setInt(2, id);
-				} else {
-					ps = conn.prepareStatement(insertSql);
-					ps.setInt(1, categoryID);
-					ps.setInt(2, year);
-					ps.setInt(3, month);
-					ps.setFloat(4, budget.get(categoryID));
-				}
-				ps.executeUpdate();
-				ps.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		try {
-			conn.commit();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 	}
 }
