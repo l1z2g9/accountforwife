@@ -32,18 +32,14 @@ import cat.model.Category;
 public class CategoryDialog extends JDialog {
 	Logger log = Logger.getLogger("CategoryPane");
 
-	private JTextField categoryName;
-	private JTextField displayOrder;
 	private JList list;
 
 	private DefaultListModel listModel;
 
-	private Map<String, Category> cates;
-
 	public CategoryDialog(Window frame, final String type) {
 		super(frame, "类别设置", Dialog.ModalityType.DOCUMENT_MODAL);
 		setLayout(new BorderLayout());
-		cates = DBManager.getCategory(type);
+		final Map<String, Category> cates = DBManager.getCategory(type);
 		JPanel leftPanel = new JPanel();
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
@@ -51,14 +47,14 @@ public class CategoryDialog extends JDialog {
 		JLabel nameLabel = new JLabel("名称：");
 		nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
 		itemPanel.add(nameLabel);
-		categoryName = new JTextField();
+		final JTextField categoryName = new JTextField();
 		categoryName.setPreferredSize(new Dimension(80, 25));
 		itemPanel.add(categoryName);
 		leftPanel.add(itemPanel);
 
 		itemPanel = new JPanel();
 		itemPanel.add(new JLabel("显示顺序："));
-		displayOrder = new JTextField();
+		final JTextField displayOrder = new JTextField();
 		displayOrder.setPreferredSize(new Dimension(80, 25));
 		itemPanel.add(displayOrder);
 		leftPanel.add(itemPanel);
@@ -90,6 +86,9 @@ public class CategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(SwingUtilities
+						.getWindowAncestor(CategoryDialog.this), "请重启软件来激活类别!",
+						"类别设置", JOptionPane.INFORMATION_MESSAGE);
 				CategoryDialog.this.setVisible(false);
 				CategoryDialog.this.dispose();
 			}

@@ -17,6 +17,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import cat.panel.BalancePane;
 import cat.panel.Budget;
+import cat.panel.QueryPane;
 import cat.panel.Statistic;
 
 public class AccountPanel extends JPanel {
@@ -26,13 +27,19 @@ public class AccountPanel extends JPanel {
 		JTabbedPane tab = new JTabbedPane();
 		tab.addTab("支出", new BalancePane("Expenditure"));
 		tab.setMnemonicAt(0, KeyEvent.VK_1);
+		
 		tab.addTab("收入", new BalancePane("Income"));
 		tab.setMnemonicAt(1, KeyEvent.VK_2);
+		
 		tab.addTab("统计", new Statistic());
 		tab.setMnemonicAt(2, KeyEvent.VK_3);
+		
 		tab.addTab("预算", new Budget());
 		tab.setMnemonicAt(3, KeyEvent.VK_4);
-
+		
+		tab.addTab("查询", new QueryPane());
+		tab.setMnemonicAt(3, KeyEvent.VK_5);
+		
 		tab.setPreferredSize(new Dimension(620, 460));
 		tabpane.setLayout(new GridLayout(1, 1));
 		tabpane.add(tab);

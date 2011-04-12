@@ -38,14 +38,8 @@ public class DBManager {
 	}
 
 	// --------- start items ---------
-	/**
-	 * 统计页使用,读取当日的所有收支情况.
-	 * 
-	 * @param date
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
 	public static Vector<Vector> getItemsByDate(String type, Date date) {
+
 		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
 				Locale.SIMPLIFIED_CHINESE);
 		startTime.setTime(date);
@@ -59,9 +53,23 @@ public class DBManager {
 		endtTime.set(Calendar.MINUTE, 59);
 		endtTime.set(Calendar.SECOND, 59);
 
+		Vector<Vector> data = DBManager.getItemsByDate(type, startTime,
+				endtTime, -1, -1, null);
+		return data;
+	}
+
+	/**
+	 * 统计页使用,读取当日的所有收支情况.
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public static Vector<Vector> getItemsByDate(String type,
+			Calendar startTime, Calendar endtTime, int parentID,
+			int categoryIDD, String user) {
 		Calendar monthFirstDay = Calendar
 				.getInstance(Locale.SIMPLIFIED_CHINESE);
-		monthFirstDay.setTime(date);
+		monthFirstDay.setTime(endtTime.getTime());
 		monthFirstDay.set(Calendar.DAY_OF_MONTH, 1);
 		monthFirstDay.set(Calendar.HOUR, 0);
 		monthFirstDay.set(Calendar.MINUTE, 0);
@@ -114,6 +122,14 @@ public class DBManager {
 			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id FROM Item i, Category c, Category cp "
 					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
 					+ "c.type = ? and time between ? and ?";
+
+			if (parentID != -1)
+				sql += " and cp.id = " + parentID;
+			if (categoryIDD != -1)
+				sql += " and c.id = " + categoryIDD;
+			if (user != null)
+				sql += " and user like '%" + user + "%'";
+
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, type);
 			ps.setLong(2, startTime.getTimeInMillis());
@@ -513,71 +529,27 @@ public class DBManager {
 		}
 	}
 
-	public static float queryPayoutTotal(String fromDate, String toDate,
-			String type) {
-		String sql = "SELECT sum(Money) FROM Account WHERE date BETWEEN ? AND ? and Type = ?";
-		float total = 0;
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ps.setString(3, type);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				total = rs.getFloat(1);
-			}
-			rs.close();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return total;
-	}
+	public static Vector<Vector> query(int year, int month, String type,
+			int parentCategoryID, int categoryID, String user) {
 
-	public static Vector<Vector<String>> query(String fromDate, String toDate) {
-		Map<String, StatItem> dateMap = new TreeMap<String, StatItem>();
-		try {
-			String sql = "SELECT Date, Type, sum(Money) FROM Account WHERE date BETWEEN ? AND ? and Type = ? GROUP BY Date";
+		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
+				Locale.SIMPLIFIED_CHINESE);
+		startTime.set(Calendar.YEAR, year);
+		startTime.set(Calendar.MONTH, month - 1);
+		startTime.set(Calendar.DAY_OF_MONTH, 1);
+		startTime.set(Calendar.HOUR_OF_DAY, 0);
+		startTime.set(Calendar.MINUTE, 0);
+		startTime.set(Calendar.SECOND, 0);
 
-			PreparedStatement ps = conn.prepareStatement(sql);
-
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ps.setString(3, "支出");
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				String date = rs.getString(1);
-				String type = rs.getString(2);
-				float money = rs.getFloat(3);
-				addList(date, type, money, dateMap);
-			}
-			rs.close();
-
-			ps.setString(3, "收入");
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				String date = rs.getString(1);
-				String type = rs.getString(2);
-				float money = rs.getFloat(3);
-				addList(date, type, money, dateMap);
-			}
-
-			rs.close();
-			ps.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Vector<Vector<String>> list = new Vector<Vector<String>>();
-
-		for (StatItem stat : dateMap.values()) {
-			Vector<String> v = new Vector<String>();
-			v.addElement(stat.getDate());
-			v.addElement(df.format(stat.getPayout()));
-			v.addElement(df.format(stat.getIncome()));
-			list.add(v);
-		}
-		return list;
+		Calendar endtTime = Calendar.getInstance(Locale.SIMPLIFIED_CHINESE);
+		endtTime.set(Calendar.YEAR, year);
+		endtTime.set(Calendar.MONTH, month - 1);
+		endtTime.set(Calendar.DAY_OF_MONTH, 30);
+		endtTime.set(Calendar.HOUR_OF_DAY, 23);
+		endtTime.set(Calendar.MINUTE, 59);
+		endtTime.set(Calendar.SECOND, 59);
+		return getItemsByDate(type, startTime, endtTime, parentCategoryID,
+				categoryID, user);
 	}
 
 	public static void releaseConnection() {

@@ -45,15 +45,17 @@ import cat.model.Category;
 import cat.model.Item;
 
 public class BalancePane extends JPanel {
-	static Logger log = Logger.getLogger("PreparePane");
+	static Logger log = Logger.getLogger("BalancePane");
 	DateField2 selectedDate = new DateField2();
+
+	Map<String, Category> categories;
 	Map<String, Category> subcategories;
+
 	JComboBox categoryCombox;
 	JComboBox subCategoryCombox;
 	JTextField moneyField;
 	String type = "Expenditure";
 	final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-	Map<String, Category> categories;
 
 	public BalancePane(String type) {
 		super(new BorderLayout());
@@ -202,44 +204,6 @@ public class BalancePane extends JPanel {
 	JTable table;
 	DefaultTableModel tableModel;
 
-	private void arrangeColumn() {
-		// вўВиIDСа
-		TableColumn idCol = table.getColumnModel().getColumn(0);
-		idCol.setMaxWidth(0);
-		idCol.setMinWidth(0);
-		idCol.setPreferredWidth(0);
-
-		// вўВибеЩЋСа
-
-		TableColumn colorCol = table.getColumnModel().getColumn(9);
-		colorCol.setMaxWidth(0);
-		colorCol.setMinWidth(0);
-		colorCol.setPreferredWidth(0);
-
-		TableColumn seqCol = table.getColumnModel().getColumn(1);
-		seqCol.setMaxWidth(45);
-
-		table.getColumnModel().getColumn(5).setCellRenderer(
-				new DefaultTableCellRenderer() {
-					public Component getTableCellRendererComponent(
-							JTable table, Object value, boolean isSelected,
-							boolean hasFocus, int row, int column) {
-
-						Color color = (Color) table.getModel().getValueAt(row,
-								9);
-						if (!Color.white.equals(color)) {
-							super.setBackground(color);
-						} else {
-							super.setBackground(null);
-						}
-
-						return super.getTableCellRendererComponent(table,
-								value, isSelected, hasFocus, row, column);
-					}
-				});
-
-	}
-
 	private JScrollPane createDataTable() {
 		Vector<Vector> data = DBManager.getItemsByDate(type,
 				(Date) selectedDate.getValue());
@@ -334,5 +298,42 @@ public class BalancePane extends JPanel {
 		s.setBorder(BorderFactory.createCompoundBorder(BorderFactory
 				.createEmptyBorder(20, 20, 10, 10), s.getBorder()));
 		return s;
+	}
+
+	private void arrangeColumn() {
+		// вўВиIDСа
+		TableColumn idCol = table.getColumnModel().getColumn(0);
+		idCol.setMaxWidth(0);
+		idCol.setMinWidth(0);
+		idCol.setPreferredWidth(0);
+
+		// вўВибеЩЋСа
+
+		TableColumn colorCol = table.getColumnModel().getColumn(9);
+		colorCol.setMaxWidth(0);
+		colorCol.setMinWidth(0);
+		colorCol.setPreferredWidth(0);
+
+		TableColumn seqCol = table.getColumnModel().getColumn(1);
+		seqCol.setMaxWidth(45);
+
+		table.getColumnModel().getColumn(5).setCellRenderer(
+				new DefaultTableCellRenderer() {
+					public Component getTableCellRendererComponent(
+							JTable table, Object value, boolean isSelected,
+							boolean hasFocus, int row, int column) {
+
+						Color color = (Color) table.getModel().getValueAt(row,
+								9);
+						if (!Color.white.equals(color)) {
+							super.setBackground(color);
+						} else {
+							super.setBackground(null);
+						}
+
+						return super.getTableCellRendererComponent(table,
+								value, isSelected, hasFocus, row, column);
+					}
+				});
 	}
 }

@@ -98,7 +98,6 @@ public class SubCategoryDialog extends JDialog {
 							"不能添加空白数据!", "添加错误", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-
 				DBManager.saveSubCategory(cates.get(cate).getId(), type,
 						subCate, dispOrder);
 				listModel.addElement(subCate + "  [ " + dispOrder + " ]");
@@ -113,6 +112,12 @@ public class SubCategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JOptionPane
+						.showMessageDialog(SwingUtilities
+								.getWindowAncestor(SubCategoryDialog.this),
+								"请重启软件来激活类别!", "小类别设置",
+								JOptionPane.INFORMATION_MESSAGE);
+
 				SubCategoryDialog.this.setVisible(false);
 				SubCategoryDialog.this.dispose();
 			}

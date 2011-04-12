@@ -498,8 +498,8 @@ public class Statistic extends JPanel implements ListSelectionListener,
 		Calendar c2 = Calendar.getInstance();
 		c2.setTime((Date) toDate.getValue());
 
-		Vector<Vector<String>> data = DBManager.query(sf.format(c1.getTime()),
-				sf.format(c2.getTime()));
+		Vector<Vector<String>> data = null;// DBManager.query(sf.format(c1.getTime()),
+		// sf.format(c2.getTime()));
 		statModel.setDataVector(data, Configure.getStatColumns());
 		int diff = 0;
 		if ((c1 != null) && (c2 != null)) {
@@ -509,21 +509,23 @@ public class Statistic extends JPanel implements ListSelectionListener,
 			diff = (int) (t / (3600000 * 24));
 			dateDiff.setText(String.valueOf(diff));
 		}
-		float payout = DBManager.queryPayoutTotal(sf.format(c1.getTime()), sf
-				.format(c2.getTime()), "支出");
-		float income = DBManager.queryPayoutTotal(sf.format(c1.getTime()), sf
-				.format(c2.getTime()), "收入");
-
+		/*
+		 * float payout = DBManager.queryPayoutTotal(sf.format(c1.getTime()), sf
+		 * .format(c2.getTime()), "支出"); float income =
+		 * DBManager.queryPayoutTotal(sf.format(c1.getTime()), sf
+		 * .format(c2.getTime()), "收入");
+		 */
 		DecimalFormat df = new DecimalFormat("##.##");
 
-		payoutTotal.setText(df.format(payout));
-		imcomeTotal.setText(df.format(income));
-
+		/*
+		 * payoutTotal.setText(df.format(payout));
+		 * imcomeTotal.setText(df.format(income));
+		 */
 		// budget.setText(String.valueOf(DBManager.getTotalBudget(c1
 		// .get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1)));
 		// dateAveragePayout.setText(df.format(payout / diff));
 		// dateAverageIncome.setText(df.format(income / diff));
-		balance.setText(df.format(income - payout));
+		// balance.setText(df.format(income - payout));
 	}
 
 	class StatChart {
