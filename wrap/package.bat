@@ -13,3 +13,12 @@ xcopy ..\..\dependencies .\dependencies
 rem 初始化数据库
 sqlite3 Account.db < ..\src\Account.sql
 
+python zip-all.py
+
+rem 清除文件
+del /f /q dependencies
+rmdir dependencies
+del Account.db
+del 小艺有数.exe
+del core.jar
+del account-res.o

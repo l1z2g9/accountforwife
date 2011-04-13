@@ -34,8 +34,8 @@ public class SubCategoryDialog extends JDialog {
 	Logger log = Logger.getLogger("SubCategoryPane");
 
 	private DefaultListModel listModel;
-	private JTextField displayOrder;
 	private JList list;
+	private boolean itemchanged;
 
 	public SubCategoryDialog(Window frame, final String type) {
 		super(frame, "小类别设置", Dialog.ModalityType.DOCUMENT_MODAL);
@@ -79,7 +79,8 @@ public class SubCategoryDialog extends JDialog {
 
 		itemPanel = new JPanel();
 		itemPanel.add(new JLabel("显示顺序："));
-		displayOrder = new JTextField();
+		final JTextField displayOrder = new JTextField();
+		displayOrder.setToolTipText("数值越大，越靠前显示");
 		displayOrder.setPreferredSize(new Dimension(80, 25));
 		itemPanel.add(displayOrder);
 		leftPanel.add(itemPanel);
@@ -103,6 +104,7 @@ public class SubCategoryDialog extends JDialog {
 				listModel.addElement(subCate + "  [ " + dispOrder + " ]");
 				list.setSelectedIndex(index);
 				list.ensureIndexIsVisible(index);
+				itemchanged = true;
 			}
 		});
 
@@ -112,11 +114,11 @@ public class SubCategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane
-						.showMessageDialog(SwingUtilities
-								.getWindowAncestor(SubCategoryDialog.this),
-								"请重启软件来激活类别!", "小类别设置",
-								JOptionPane.INFORMATION_MESSAGE);
+				if (itemchanged)
+					JOptionPane.showMessageDialog(SwingUtilities
+							.getWindowAncestor(SubCategoryDialog.this),
+							"请重启软件来激活类别!", "小类别设置",
+							JOptionPane.INFORMATION_MESSAGE);
 
 				SubCategoryDialog.this.setVisible(false);
 				SubCategoryDialog.this.dispose();
@@ -167,6 +169,7 @@ public class SubCategoryDialog extends JDialog {
 				}
 				list.setSelectedIndex(index);
 				list.ensureIndexIsVisible(index);
+				itemchanged = true;
 			}
 		});
 

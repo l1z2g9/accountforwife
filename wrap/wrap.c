@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 int main(){
-	puts("hello java");
+	// puts("hello java");
 	system("start javaw -jar core.jar");
 	return 0;
 }
