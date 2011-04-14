@@ -4,3 +4,6 @@ compile:
 	
 deploy: compile
 	mv 小艺有数.exe ../
+
+clean:
+	del account-res.o

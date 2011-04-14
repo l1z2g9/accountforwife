@@ -3,8 +3,7 @@ rem 打包
 jar cvfm core.jar MANIFEST.MF -C ..\..\bin\ .
 
 rem 用可执行文件包装java程序运行
-rem make -f gcc/Makefile deploy
-nmake /f vc/Makefile deploy
+nmake 
 
 rem 依赖包
 mkdir dependencies
@@ -21,4 +20,4 @@ rmdir dependencies
 del Account.db
 del 小艺有数.exe
 del core.jar
-del vc\wrapper.obj
+nmake clean

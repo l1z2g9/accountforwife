@@ -7,3 +7,7 @@ link:
 
 deploy: compile link
 	mv 小艺有数.exe ..\
+
+clean:
+	del wrapper.obj
+	del account.res
