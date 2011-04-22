@@ -79,7 +79,7 @@ public class SubCategoryDialog extends JDialog {
 
 		itemPanel = new JPanel();
 		itemPanel.add(new JLabel("显示顺序："));
-		final JTextField displayOrder = new JTextField();
+		final JTextField displayOrder = new JTextField("0");
 		displayOrder.setToolTipText("数值越大，越靠前显示");
 		displayOrder.setPreferredSize(new Dimension(80, 25));
 		itemPanel.add(displayOrder);
