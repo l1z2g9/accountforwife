@@ -36,7 +36,7 @@ public class CategoryDialog extends JDialog {
 
 	private DefaultListModel listModel;
 
-	private boolean itemchanged = false;
+	public static boolean itemchanged = false;
 
 	public CategoryDialog(Window frame, final String type) {
 		super(frame, "类别设置", Dialog.ModalityType.DOCUMENT_MODAL);
@@ -89,12 +89,12 @@ public class CategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (itemchanged) {
-					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(CategoryDialog.this),
-							"请重启软件来激活类别!", "类别设置",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
+				/*
+				 * if (itemchanged) {
+				 * JOptionPane.showMessageDialog(SwingUtilities
+				 * .getWindowAncestor(CategoryDialog.this), "请重启软件来激活类别!",
+				 * "类别设置", JOptionPane.INFORMATION_MESSAGE); }
+				 */
 				CategoryDialog.this.setVisible(false);
 				CategoryDialog.this.dispose();
 			}

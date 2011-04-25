@@ -1,12 +1,17 @@
 package cat;
 
+import cat.model.Category;
+import cat.model.Item;
 import java.awt.Color;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.text.DecimalFormat;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,13 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.Vector;
 import java.util.logging.Logger;
-
-import cat.model.Category;
-import cat.model.Item;
-import cat.vo.StatItem;
 
 public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
@@ -507,27 +507,6 @@ public class DBManager {
 	}
 
 	// ---------- end 预算 ------------
-	private static void addList(String date, String type, float money,
-			Map<String, StatItem> dateMap) {
-		StatItem stat = null;
-		if (dateMap.containsKey(date)) {
-			stat = dateMap.get(date);
-			if ("支出".equalsIgnoreCase(type)) {
-				stat.setPayout(money);
-			} else {
-				stat.setIncome(money);
-			}
-		} else {
-			stat = new StatItem();
-			dateMap.put(date, stat);
-			stat.setDate(date);
-			if ("支出".equalsIgnoreCase(type)) {
-				stat.setPayout(money);
-			} else {
-				stat.setIncome(money);
-			}
-		}
-	}
 
 	public static Vector<Vector> query(int year, int month, String type,
 			int parentCategoryID, int categoryID, String user) {

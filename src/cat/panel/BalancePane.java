@@ -66,6 +66,20 @@ public class BalancePane extends JPanel {
 		add(createDataTable(), BorderLayout.SOUTH);
 	}
 
+	public void categoryReload() {
+		categories = DBManager.getCategory(type);
+		final DefaultComboBoxModel model = new DefaultComboBoxModel(categories
+				.keySet().toArray());
+		categoryCombox.setModel(model);
+		
+		// 更新子类
+		subcategories = DBManager.getSubCategory(categories.get(
+				(String) categoryCombox.getSelectedItem()).getId());
+		final DefaultComboBoxModel subModel = new DefaultComboBoxModel(
+				subcategories.keySet().toArray());
+		subCategoryCombox.setModel(subModel);
+	}
+
 	public void refreshData() {
 		Vector<Vector> data = DBManager.getItemsByDate(type,
 				(Date) selectedDate.getValue());

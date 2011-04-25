@@ -14,20 +14,25 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import cat.panel.BalancePane;
 import cat.panel.Budget;
+import cat.panel.CategoryDialog;
 import cat.panel.QueryPane;
 
 public class AccountPanel extends JPanel {
 	public AccountPanel() {
 		super(new BorderLayout());
 		JPanel tabpane = new JPanel();
-		JTabbedPane tab = new JTabbedPane();
-		tab.addTab("支出", new BalancePane("Expenditure"));
+		final JTabbedPane tab = new JTabbedPane();
+		final BalancePane expenditure = new BalancePane("Expenditure");
+		tab.addTab("支出", expenditure);
 		tab.setMnemonicAt(0, KeyEvent.VK_1);
 
-		tab.addTab("收入", new BalancePane("Income"));
+		final BalancePane income = new BalancePane("Income");
+		tab.addTab("收入", income);
 		tab.setMnemonicAt(1, KeyEvent.VK_2);
 
 		tab.addTab("预算", new Budget());
@@ -39,6 +44,21 @@ public class AccountPanel extends JPanel {
 		tab.setPreferredSize(new Dimension(620, 460));
 		tabpane.setLayout(new GridLayout(1, 1));
 		tabpane.add(tab);
+
+		tab.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int selectedIndex = tab.getModel().getSelectedIndex();
+				if (selectedIndex == 0 || selectedIndex == 1) {
+					if (CategoryDialog.itemchanged) {
+						expenditure.categoryReload();
+						income.categoryReload();
+						CategoryDialog.itemchanged = false;
+					}
+				}
+			}
+		});
+
 		add(tabpane, BorderLayout.PAGE_START);
 
 		JLabel sign = new JLabel("谨以此软件献给我最爱的婆婆猪－小艺 {O(∩_∩)O~");

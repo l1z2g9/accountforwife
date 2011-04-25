@@ -1,5 +1,7 @@
 package cat.panel;
 
+import cat.Configure;
+import cat.DBManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -12,6 +14,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +36,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
-
-import cat.Configure;
-import cat.DBManager;
-import cat.editor.MoneyCellEditor;
-import cat.model.Category;
 
 public class Budget extends JPanel {
 	static Logger log = Logger.getLogger("Budget");
