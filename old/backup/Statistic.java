@@ -7,7 +7,6 @@ import java.io.IOException;
 import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
-import cat.TableUtility;
 import cat.panel.PopupDialog;
 
 import java.awt.BorderLayout;

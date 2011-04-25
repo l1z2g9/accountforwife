@@ -3,7 +3,6 @@ package backup;
 import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
-import cat.TableUtility;
 import cat.model.Item;
 import java.awt.BorderLayout;
 import java.awt.Container;

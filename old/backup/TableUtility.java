@@ -1,8 +1,6 @@
-package cat;
+package backup;
 
-import cat.editor.DateCellEditor;
-import cat.editor.ItemCellEditor;
-import cat.editor.MoneyCellEditor;
+import cat.DBManager;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;

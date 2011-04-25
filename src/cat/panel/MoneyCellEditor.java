@@ -1,4 +1,4 @@
-package cat.editor;
+package cat.panel;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
