@@ -12,8 +12,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+
+import java.text.AttributedString;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -73,6 +79,7 @@ public class QueryPane extends JPanel {
 	JTable table;
 	DefaultTableModel tableModel;
 	JLabel summaryMoney = new JLabel();
+	NumberFormat nf = DecimalFormat.getCurrencyInstance();
 
 	public QueryPane() {
 		setLayout(new BorderLayout());
@@ -133,12 +140,12 @@ public class QueryPane extends JPanel {
 								rownum, 5).toString());
 				}
 				if (typeCombox.getSelectedIndex() == 0) {
-					summaryMoney.setText("总收入：" + incomeTotal + " 元   总支出："
-							+ expenditureTotal + " 元");
+					summaryMoney.setText("总收入：" + nf.format(incomeTotal)
+							+ "   总支出：" + nf.format(expenditureTotal));
 				} else if (typeCombox.getSelectedIndex() == 1)
-					summaryMoney.setText("总收入：" + incomeTotal + " 元");
+					summaryMoney.setText("总收入：" + nf.format(incomeTotal));
 				else if (typeCombox.getSelectedIndex() == 2)
-					summaryMoney.setText("总支出：" + expenditureTotal + " 元");
+					summaryMoney.setText("总支出：" + nf.format(expenditureTotal));
 			}
 		});
 		search.add(find);
@@ -146,10 +153,13 @@ public class QueryPane extends JPanel {
 		JButton chartButton = new JButton("统计图");
 		chartButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				int statCategoryColunm = 3;
+				if (categoryCombox.getSelectedIndex() != -1)
+					statCategoryColunm = 4;
 				Vector<Vector> data = tableModel.getDataVector();
 				Map<String, Float> categoryStat = new HashMap<String, Float>();
 				for (int row = 0; row < table.getRowCount(); row++) {
-					String categoryName = tableModel.getValueAt(row, 3)
+					String categoryName = tableModel.getValueAt(row, statCategoryColunm)
 							.toString();
 					Float money = Float.valueOf(tableModel.getValueAt(row, 5)
 							.toString());
@@ -179,14 +189,15 @@ public class QueryPane extends JPanel {
 				jfreechart.getLegend().setItemFont(font.deriveFont(Font.BOLD));
 
 				PiePlot pieplot = (PiePlot) jfreechart.getPlot();
-				pieplot.setLabelFont(font.deriveFont(14f));
+				pieplot.setLabelFont(font.deriveFont(12f));
 				pieplot.setNoDataMessage("没有数据");
 				pieplot.setCircular(false);
 				pieplot.setLabelGenerator(new StandardPieSectionLabelGenerator(
-						"{0} = {1}"));
-				pieplot.setLabelGap(0.02D);
-				ChartPanel pane = new ChartPanel(jfreechart, 500, 350, 500,
-						350, 400, 350, true, true, true, true, true, true);
+						"{0}({1})", DecimalFormat.getCurrencyInstance(),
+						NumberFormat.getInstance()));
+				pieplot.setLabelGap(0.02d);
+				ChartPanel pane = new ChartPanel(jfreechart, 600, 350, 600,
+						350, 600, 350, false, false, false, false, false, true);
 
 				// 显示
 				final JDialog dialog = new JDialog(SwingUtilities
@@ -203,7 +214,6 @@ public class QueryPane extends JPanel {
 				dialog.pack();
 				dialog.setLocationRelativeTo(QueryPane.this);
 				dialog.setVisible(true);
-
 			}
 		});
 		search.add(chartButton);
