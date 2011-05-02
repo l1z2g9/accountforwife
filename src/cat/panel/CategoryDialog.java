@@ -75,10 +75,18 @@ public class CategoryDialog extends JDialog {
 							"不能添加空白数据!", "添加错误", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				DBManager.saveCategory(type, cate, dispOrder);
+
+				int categoryID = DBManager.saveCategory(type, cate, dispOrder);
 				listModel.addElement(cate + "  [ " + dispOrder + " ]");
 				list.setSelectedIndex(index);
 				list.ensureIndexIsVisible(index);
+
+				Category category = new Category();
+				category.setId(categoryID);
+				category.setName(cate);
+				category.setDisplayOrder(dispOrder);
+
+				cates.put(cate, category);
 				itemchanged = true;
 			}
 		});
@@ -89,12 +97,6 @@ public class CategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*
-				 * if (itemchanged) {
-				 * JOptionPane.showMessageDialog(SwingUtilities
-				 * .getWindowAncestor(CategoryDialog.this), "请重启软件来激活类别!",
-				 * "类别设置", JOptionPane.INFORMATION_MESSAGE); }
-				 */
 				CategoryDialog.this.setVisible(false);
 				CategoryDialog.this.dispose();
 			}
@@ -133,7 +135,15 @@ public class CategoryDialog extends JDialog {
 
 				String cateName = (String) list.getSelectedValue();
 				cateName = cateName.replaceAll("^(.*)\\[.*$", "$1").trim();
-				DBManager.deleteCategory(cates.get(cateName).getId());
+				boolean subCategoryCount = DBManager.deleteCategory(cates.get(
+						cateName).getId());
+				if (!subCategoryCount) {
+					JOptionPane.showMessageDialog(SwingUtilities
+							.getWindowAncestor((JButton) e.getSource()),
+							"请先删除小类别，然后删除该类别!");
+					return;
+				}
+
 				listModel.removeElementAt(index);
 				if (index == 0) {
 					index = 0;

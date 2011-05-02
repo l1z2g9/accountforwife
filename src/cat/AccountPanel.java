@@ -18,7 +18,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import cat.panel.BalancePane;
-import cat.panel.Budget;
+import cat.panel.BudgetPane;
 import cat.panel.CategoryDialog;
 import cat.panel.QueryPane;
 
@@ -34,11 +34,12 @@ public class AccountPanel extends JPanel {
 		final BalancePane income = new BalancePane("Income");
 		tab.addTab("收入", income);
 		tab.setMnemonicAt(1, KeyEvent.VK_2);
-
-		tab.addTab("预算", new Budget());
+		final BudgetPane budget = new BudgetPane();
+		tab.addTab("预算", budget);
 		tab.setMnemonicAt(2, KeyEvent.VK_3);
 
-		tab.addTab("查询", new QueryPane());
+		final QueryPane queryPane = new QueryPane();
+		tab.addTab("查询", queryPane);
 		tab.setMnemonicAt(3, KeyEvent.VK_4);
 
 		tab.setPreferredSize(new Dimension(620, 460));
@@ -48,13 +49,13 @@ public class AccountPanel extends JPanel {
 		tab.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				int selectedIndex = tab.getModel().getSelectedIndex();
-				if (selectedIndex == 0 || selectedIndex == 1) {
-					if (CategoryDialog.itemchanged) {
-						expenditure.categoryReload();
-						income.categoryReload();
-						CategoryDialog.itemchanged = false;
-					}
+				if (CategoryDialog.itemchanged) {
+
+					expenditure.categoryReload();
+					income.categoryReload();
+					budget.refreshTableData();
+					queryPane.categoryReload();
+					CategoryDialog.itemchanged = false;
 				}
 			}
 		});

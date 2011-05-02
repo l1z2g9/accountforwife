@@ -56,6 +56,7 @@ public class BalancePane extends JPanel {
 	JTextField moneyField;
 	String type = "Expenditure";
 	final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+	final JLabel summaryMoney = new JLabel();
 
 	public BalancePane(String type) {
 		super(new BorderLayout());
@@ -71,7 +72,7 @@ public class BalancePane extends JPanel {
 		final DefaultComboBoxModel model = new DefaultComboBoxModel(categories
 				.keySet().toArray());
 		categoryCombox.setModel(model);
-		
+
 		// 更新子类
 		subcategories = DBManager.getSubCategory(categories.get(
 				(String) categoryCombox.getSelectedItem()).getId());
@@ -85,6 +86,8 @@ public class BalancePane extends JPanel {
 				(Date) selectedDate.getValue());
 		tableModel.setDataVector(data, Configure.getDateColumns());
 		arrangeColumn();
+
+		refreshSummaryMoney();
 	}
 
 	private JPanel createItems() {
@@ -218,7 +221,7 @@ public class BalancePane extends JPanel {
 	JTable table;
 	DefaultTableModel tableModel;
 
-	private JScrollPane createDataTable() {
+	private JPanel createDataTable() {
 		Vector<Vector> data = DBManager.getItemsByDate(type,
 				(Date) selectedDate.getValue());
 		// type);
@@ -304,14 +307,32 @@ public class BalancePane extends JPanel {
 				}
 			}
 		});
-		// new TableUtility().makeTableCell(table);
 
-		table.setPreferredScrollableViewportSize(new Dimension(400, 300));
+		JPanel pane = new JPanel(new BorderLayout());
+		refreshSummaryMoney();
+		pane.add(summaryMoney, BorderLayout.PAGE_START);
+
+		table.setPreferredScrollableViewportSize(new Dimension(400, 290));
 		JScrollPane s = new JScrollPane(table);
 		s.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		s.setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEmptyBorder(20, 20, 10, 10), s.getBorder()));
-		return s;
+				.createEmptyBorder(5, 20, 10, 10), s.getBorder()));
+
+		pane.add(s, BorderLayout.PAGE_END);
+		return pane;
+	}
+
+	private void refreshSummaryMoney() {
+		Float sum = 0f;
+		for (int i = 0; i < table.getRowCount(); i++) {
+			sum += (Float) table.getValueAt(i, 5);
+		}
+
+		summaryMoney.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
+		if (this.type.equalsIgnoreCase("Expenditure"))
+			summaryMoney.setText("总支出：" + sum + " 元");
+		else
+			summaryMoney.setText("总收入：" + sum + " 元");
 	}
 
 	private void arrangeColumn() {
@@ -321,9 +342,14 @@ public class BalancePane extends JPanel {
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
-		// 隐藏颜色列
+		// 隐藏类型列
+		TableColumn typeCol = table.getColumnModel().getColumn(9);
+		typeCol.setMaxWidth(0);
+		typeCol.setMinWidth(0);
+		typeCol.setPreferredWidth(0);
 
-		TableColumn colorCol = table.getColumnModel().getColumn(9);
+		// 隐藏颜色列
+		TableColumn colorCol = table.getColumnModel().getColumn(10);
 		colorCol.setMaxWidth(0);
 		colorCol.setMinWidth(0);
 		colorCol.setPreferredWidth(0);
@@ -338,7 +364,7 @@ public class BalancePane extends JPanel {
 							boolean hasFocus, int row, int column) {
 
 						Color color = (Color) table.getModel().getValueAt(row,
-								9);
+								10);
 						if (!Color.white.equals(color)) {
 							super.setBackground(color);
 						} else {

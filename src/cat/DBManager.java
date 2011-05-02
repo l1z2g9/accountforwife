@@ -39,7 +39,6 @@ public class DBManager {
 
 	// --------- start items ---------
 	public static Vector<Vector> getItemsByDate(String type, Date date) {
-
 		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
 				Locale.SIMPLIFIED_CHINESE);
 		startTime.setTime(date);
@@ -58,15 +57,48 @@ public class DBManager {
 		return data;
 	}
 
-	/**
-	 * 统计页使用,读取当日的所有收支情况.
-	 * 
-	 * @param date
-	 * @return
-	 */
+	public static float getTotalMonthMoney(int year, int month, String type) {
+		Calendar monthFirstDay = Calendar
+				.getInstance(Locale.SIMPLIFIED_CHINESE);
+		monthFirstDay.set(Calendar.YEAR, year);
+		monthFirstDay.set(Calendar.MONTH, month - 1);
+		monthFirstDay.set(Calendar.DAY_OF_MONTH, 1);
+		monthFirstDay.set(Calendar.HOUR, 0);
+		monthFirstDay.set(Calendar.MINUTE, 0);
+		monthFirstDay.set(Calendar.SECOND, 0);
+
+		Calendar monthEndDay = Calendar.getInstance(Locale.SIMPLIFIED_CHINESE);
+		monthEndDay.set(Calendar.YEAR, year);
+		monthEndDay.set(Calendar.MONTH, month - 1);
+		monthEndDay.set(Calendar.DAY_OF_MONTH, 30);
+		monthEndDay.set(Calendar.HOUR, 23);
+		monthEndDay.set(Calendar.MINUTE, 59);
+		monthEndDay.set(Calendar.SECOND, 59);
+
+		float sumMoney = 0f;
+		String sumSql = "SELECT sum(money) FROM Item i, Category c, Category cp "
+				+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
+				+ "c.type = ? and time between ? and ?";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sumSql);
+			ps.setString(1, type);
+			ps.setLong(2, monthFirstDay.getTimeInMillis());
+			ps.setLong(3, monthEndDay.getTimeInMillis());
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				sumMoney = rs.getFloat(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return sumMoney;
+	}
+
 	public static Vector<Vector> getItemsByDate(String type,
 			Calendar startTime, Calendar endtTime, int parentID,
-			int categoryIDD, String user) {
+			int subCategoryID, String user) {
+
 		Calendar monthFirstDay = Calendar
 				.getInstance(Locale.SIMPLIFIED_CHINESE);
 		monthFirstDay.setTime(endtTime.getTime());
@@ -79,7 +111,7 @@ public class DBManager {
 		// 预算比较
 		Map<Integer, Float> sumMap = new HashMap<Integer, Float>();
 		Map<Integer, Float> budgetMap = new HashMap<Integer, Float>();
-		if ("Expenditure".equals(type)) {
+		if (!"Income".equalsIgnoreCase(type)) {
 			try {
 				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
 						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
@@ -119,21 +151,21 @@ public class DBManager {
 		}
 
 		try {
-			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id FROM Item i, Category c, Category cp "
-					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
-					+ "c.type = ? and time between ? and ?";
+			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
+					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?";
 
+			if (!type.equalsIgnoreCase("All"))
+				sql += " and c.type = '" + type + "'";
 			if (parentID != -1)
 				sql += " and cp.id = " + parentID;
-			if (categoryIDD != -1)
-				sql += " and c.id = " + categoryIDD;
+			if (subCategoryID != -1)
+				sql += " and c.id = " + subCategoryID;
 			if (user != null)
 				sql += " and user like '%" + user + "%'";
 
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, type);
-			ps.setLong(2, startTime.getTimeInMillis());
-			ps.setLong(3, endtTime.getTimeInMillis());
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
 			ResultSet rs = ps.executeQuery();
 
 			int seq = 0;
@@ -148,8 +180,10 @@ public class DBManager {
 				vo.addElement(rs.getString(6));
 				vo.addElement(rs.getString(7));
 				vo.addElement(rs.getString(8));
+				// vo.addElement(rs.getString(9));
+				vo.addElement(rs.getString(10));
 
-				if ("Expenditure".equals(type)) {
+				if (!"Income".equalsIgnoreCase(type)) {
 					int categoryID = rs.getInt(9);
 					if (sumMap.containsKey(categoryID)) {
 						sumMap.put(categoryID, sumMap.get(categoryID)
@@ -338,7 +372,7 @@ public class DBManager {
 		return result;
 	}
 
-	public static void saveCategory(String type, String name, int displayOrder) {
+	public static int saveCategory(String type, String name, int displayOrder) {
 		String findLastCategoryIDsql = "select max(id) from Category where parentID is null";
 		int lastID = -1;
 		try {
@@ -366,6 +400,8 @@ public class DBManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		return lastID;
 	}
 
 	public static void saveSubCategory(int parentID, String type, String name,
@@ -378,6 +414,8 @@ public class DBManager {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				lastID = rs.getInt(1);
+				if (lastID == 0)
+					lastID = parentID;
 				lastID += 1;
 			}
 			rs.close();
@@ -388,6 +426,8 @@ public class DBManager {
 		String sql = "insert into Category(id, parentId, type, name, displayOrder) values(?, ?, ?, ?, ?)";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
+			log.info("lastID: " + lastID);
+			log.info("parentID: " + parentID);
 			ps.setInt(1, lastID);
 			ps.setInt(2, parentID);
 			ps.setString(3, type);
@@ -400,7 +440,24 @@ public class DBManager {
 		}
 	}
 
-	public static void deleteCategory(int id) {
+	public static boolean deleteCategory(int id) {
+		String checkSubCategories = "select count(*) from Category where parentID = ?";
+		int subCategorySum = 0;
+		try {
+			PreparedStatement ps = conn.prepareStatement(checkSubCategories);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				subCategorySum = rs.getInt(1);
+			}
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		if (subCategorySum > 0)
+			return false;
 		String sql = "delete from Category where id = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -410,6 +467,7 @@ public class DBManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return true;
 	}
 
 	// ---------- end 类别 ------------

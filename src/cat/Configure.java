@@ -11,12 +11,6 @@ public class Configure {
 
 	static final Vector<String> dateColumns = new Vector<String>();
 
-	static final Vector<String> fieldColumns = new Vector<String>();
-
-	static final Vector<String> statColumns = new Vector<String>();
-
-	static final Vector<String> itemStatColumns = new Vector<String>();
-
 	static final Vector<String> categoryBudgetColumns = new Vector<String>();
 
 	static final String LOGIN_USER = "cat";
@@ -30,22 +24,8 @@ public class Configure {
 		dateColumns.addElement("用户");
 		dateColumns.addElement("场所");
 		dateColumns.addElement("备注");
+		dateColumns.addElement("类型");
 		dateColumns.addElement("颜色");
-
-		fieldColumns.addElement("Type");
-		fieldColumns.addElement("Date");
-		fieldColumns.addElement("Item");
-		fieldColumns.addElement("Money");
-		fieldColumns.addElement("Remark");
-		fieldColumns.addElement("Color");
-
-		statColumns.addElement("日期");
-		statColumns.addElement("支出");
-		statColumns.addElement("收入");
-
-		itemStatColumns.addElement("项目");
-		itemStatColumns.addElement("金额");
-		itemStatColumns.addElement("百分比(%)");
 
 		categoryBudgetColumns.addElement("序号");
 		categoryBudgetColumns.addElement("类别ID");
@@ -55,18 +35,6 @@ public class Configure {
 
 	public static Vector<String> getDateColumns() {
 		return dateColumns;
-	}
-
-	public static Vector<String> getStatColumns() {
-		return statColumns;
-	}
-
-	public static Vector<String> getItemStatColumns() {
-		return itemStatColumns;
-	}
-
-	public static Vector<String> getFieldColumns() {
-		return fieldColumns;
 	}
 
 	public static Vector<String> getCategoryBudgetColumns() {

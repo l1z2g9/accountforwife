@@ -113,12 +113,6 @@ public class SubCategoryDialog extends JDialog {
 		JButton close = new JButton("关闭");
 		close.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*if (itemchanged)
-					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(SubCategoryDialog.this),
-							"请重启软件来激活类别!", "小类别设置",
-							JOptionPane.INFORMATION_MESSAGE);
-*/
 				SubCategoryDialog.this.setVisible(false);
 				SubCategoryDialog.this.dispose();
 			}
@@ -159,7 +153,10 @@ public class SubCategoryDialog extends JDialog {
 				String subCateName = (String) list.getSelectedValue();
 				subCateName = subCateName.replaceAll("^(.*)\\[.*$", "$1")
 						.trim();
-				DBManager.deleteCategory(subCates.get(subCateName).getId());
+				final Map<String, Category> subCates2 = DBManager.getSubCategory(cates.get(
+						categoryName.getSelectedItem().toString()).getId());
+				
+				DBManager.deleteCategory(subCates2.get(subCateName).getId());
 				listModel.removeElementAt(index);
 				if (index == 0) {
 					index = 0;

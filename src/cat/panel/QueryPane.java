@@ -47,6 +47,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
@@ -71,6 +72,7 @@ public class QueryPane extends JPanel {
 	Map<String, String> typeMap = new HashMap<String, String>();
 	JTable table;
 	DefaultTableModel tableModel;
+	JLabel summaryMoney = new JLabel();
 
 	public QueryPane() {
 		setLayout(new BorderLayout());
@@ -81,23 +83,35 @@ public class QueryPane extends JPanel {
 		add(createDataTable(), BorderLayout.SOUTH);
 	}
 
+	public void categoryReload() {
+		int selected = typeCombox.getSelectedIndex();
+
+		typeCombox.setSelectedIndex(0);
+		typeCombox.setSelectedIndex(1);
+		typeCombox.setSelectedIndex(2);
+		typeCombox.setSelectedIndex(selected);
+	}
+
 	private JPanel createButtons() {
 		JPanel search = new JPanel();
 		JButton find = new JButton("查询");
 		find.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String cateName = categoryCombox.getSelectedItem().toString();
 				int parentCategoryID = -1;
-
-				if (!cateName.equals("全部")) {
-					parentCategoryID = categories.get(cateName).getId();
-				}
-
 				int categoryID = -1;
-				String subCateName = subCategoryCombox.getSelectedItem()
-						.toString();
-				if (!cateName.equals("全部") && !subCateName.equals("全部")) {
-					categoryID = subcategories.get(subCateName).getId();
+				if (typeCombox.getSelectedIndex() > 0) {
+					String cateName = categoryCombox.getSelectedItem()
+							.toString();
+
+					if (!cateName.equals("全部")) {
+						parentCategoryID = categories.get(cateName).getId();
+					}
+
+					String subCateName = subCategoryCombox.getSelectedItem()
+							.toString();
+					if (!cateName.equals("全部") && !subCateName.equals("全部")) {
+						categoryID = subcategories.get(subCateName).getId();
+					}
 				}
 
 				Vector<Vector> data = DBManager.query((Integer) year
@@ -106,6 +120,25 @@ public class QueryPane extends JPanel {
 						parentCategoryID, categoryID, user.getText().trim());
 				tableModel.setDataVector(data, Configure.getDateColumns());
 				arrangeColumn();
+
+				float incomeTotal = 0f;
+				float expenditureTotal = 0f;
+				for (int rownum = 0; rownum < table.getRowCount(); rownum++) {
+					if (table.getValueAt(rownum, 9).toString()
+							.equalsIgnoreCase("Income"))
+						incomeTotal += Float.valueOf(table
+								.getValueAt(rownum, 5).toString());
+					else
+						expenditureTotal += Float.valueOf(table.getValueAt(
+								rownum, 5).toString());
+				}
+				if (typeCombox.getSelectedIndex() == 0) {
+					summaryMoney.setText("总收入：" + incomeTotal + " 元   总支出："
+							+ expenditureTotal + " 元");
+				} else if (typeCombox.getSelectedIndex() == 1)
+					summaryMoney.setText("总收入：" + incomeTotal + " 元");
+				else if (typeCombox.getSelectedIndex() == 2)
+					summaryMoney.setText("总支出：" + expenditureTotal + " 元");
 			}
 		});
 		search.add(find);
@@ -149,6 +182,8 @@ public class QueryPane extends JPanel {
 				pieplot.setLabelFont(font.deriveFont(14f));
 				pieplot.setNoDataMessage("没有数据");
 				pieplot.setCircular(false);
+				pieplot.setLabelGenerator(new StandardPieSectionLabelGenerator(
+						"{0} = {1}"));
 				pieplot.setLabelGap(0.02D);
 				ChartPanel pane = new ChartPanel(jfreechart, 500, 350, 500,
 						350, 400, 350, true, true, true, true, true, true);
@@ -192,9 +227,8 @@ public class QueryPane extends JPanel {
 						.getColumnModel();
 
 				// 标题
-
 				HSSFRow row = sheet.createRow(0);
-				for (int colnum = 1; colnum < headModel.getColumnCount() - 1; colnum++) {
+				for (int colnum = 1; colnum < headModel.getColumnCount() - 2; colnum++) {
 					HSSFCell header = row.createCell(colnum - 1);
 
 					header.setCellValue(headModel.getColumn(colnum)
@@ -205,14 +239,14 @@ public class QueryPane extends JPanel {
 				// 内容
 				for (int rownum = 1; rownum < table.getRowCount() + 1; rownum++) {
 					HSSFRow data = sheet.createRow(rownum);
-					for (int colnum = 1; colnum < tableModel.getColumnCount() - 1; colnum++) {
+					for (int colnum = 1; colnum < tableModel.getColumnCount() - 2; colnum++) {
 						HSSFCell cell = data.createCell(colnum - 1);
 						cell.setCellValue(tableModel.getValueAt(rownum - 1,
 								colnum).toString());
 
 						if (colnum == 5) {
 							Color color = (Color) tableModel.getValueAt(
-									rownum - 1, 9);
+									rownum - 1, 10);
 
 							if (!Color.white.equals(color)) {
 								HSSFCellStyle moneyHighlight = wb
@@ -233,6 +267,10 @@ public class QueryPane extends JPanel {
 						}
 					}
 				}
+
+				HSSFRow data = sheet.createRow(table.getRowCount() + 3);
+				HSSFCell cell = data.createCell(0);
+				cell.setCellValue(summaryMoney.getText());
 
 				// 调整列宽
 				sheet.setColumnWidth(1, (short) 3000);
@@ -274,9 +312,10 @@ public class QueryPane extends JPanel {
 		items.add(new JLabel("月"));
 
 		items.add(new JLabel("类型"));
+		typeMap.put("全部", "All");
 		typeMap.put("收入", "Income");
 		typeMap.put("支出", "Expenditure");
-		typeCombox = new JComboBox(new Object[] { "收入", "支出" });
+		typeCombox = new JComboBox(new Object[] { "全部", "收入", "支出" });
 		items.add(typeCombox);
 
 		items.add(new JLabel("类别"));
@@ -311,11 +350,15 @@ public class QueryPane extends JPanel {
 		DefaultComboBoxModel model = (DefaultComboBoxModel) categoryCombox
 				.getModel();
 		model.removeAllElements();
-		categories = DBManager.getCategory(typeMap.get(typeCombox
-				.getSelectedItem().toString()));
-		model.addElement("全部");
-		for (String name : categories.keySet()) {
-			model.addElement(name);
+		if (typeCombox.getSelectedIndex() > 0) {
+			categories = DBManager.getCategory(typeMap.get(typeCombox
+					.getSelectedItem().toString()));
+			model.addElement("全部");
+			for (String name : categories.keySet()) {
+				model.addElement(name);
+			}
+		} else {
+			model.addElement("全部");
 		}
 	}
 
@@ -342,7 +385,11 @@ public class QueryPane extends JPanel {
 	/**
 	 * 根BalancePane的table的结构一样。
 	 */
-	private JScrollPane createDataTable() {
+	private JPanel createDataTable() {
+		JPanel pane = new JPanel();
+		pane.setLayout(new BorderLayout());
+		summaryMoney.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		pane.add(summaryMoney, BorderLayout.PAGE_START);
 		Vector<Vector> data = new Vector<Vector>();
 		tableModel = new DefaultTableModel(data, Configure.getDateColumns()) {
 			@Override
@@ -360,8 +407,9 @@ public class QueryPane extends JPanel {
 		JScrollPane s = new JScrollPane(table);
 		s.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		s.setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEmptyBorder(10, 8, 10, 10), s.getBorder()));
-		return s;
+				.createEmptyBorder(5, 8, 10, 10), s.getBorder()));
+		pane.add(s, BorderLayout.PAGE_END);
+		return pane;
 	}
 
 	private void arrangeColumn() {
@@ -371,8 +419,14 @@ public class QueryPane extends JPanel {
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
+		// 隐藏类别列
+		TableColumn typeCol = table.getColumnModel().getColumn(9);
+		typeCol.setMaxWidth(0);
+		typeCol.setMinWidth(0);
+		typeCol.setPreferredWidth(0);
+
 		// 隐藏颜色列
-		TableColumn colorCol = table.getColumnModel().getColumn(9);
+		TableColumn colorCol = table.getColumnModel().getColumn(10);
 		colorCol.setMaxWidth(0);
 		colorCol.setMinWidth(0);
 		colorCol.setPreferredWidth(0);
@@ -387,7 +441,7 @@ public class QueryPane extends JPanel {
 							boolean hasFocus, int row, int column) {
 
 						Color color = (Color) table.getModel().getValueAt(row,
-								9);
+								10);
 						if (!Color.white.equals(color)) {
 							super.setBackground(color);
 						} else {
