@@ -50,12 +50,14 @@ public class AccountPanel extends JPanel {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				if (CategoryDialog.itemchanged) {
-
 					expenditure.categoryReload();
 					income.categoryReload();
 					budget.refreshTableData();
 					queryPane.categoryReload();
 					CategoryDialog.itemchanged = false;
+				}
+				if (tab.getSelectedIndex() == 2) {
+					budget.refreshSummary();
 				}
 			}
 		});

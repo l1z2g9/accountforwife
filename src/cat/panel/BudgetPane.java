@@ -37,13 +37,16 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
-public class Budget extends JPanel {
+public class BudgetPane extends JPanel {
 	static Logger log = Logger.getLogger("Budget");
 
 	JComboBox year;
-
 	JComboBox month;
 	JTable budgetTable;
+	JLabel summaryMoney = new JLabel();
+	JLabel expenditureMoney = new JLabel();
+	JLabel incomeMoney = new JLabel();
+
 	DefaultTableModel model = new DefaultTableModel() {
 		@Override
 		public boolean isCellEditable(int row, int column) {
@@ -54,7 +57,7 @@ public class Budget extends JPanel {
 		}
 	};
 
-	public Budget() {
+	public BudgetPane() {
 		super(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
 
@@ -75,7 +78,7 @@ public class Budget extends JPanel {
 				CategoryDialog panel = new CategoryDialog(SwingUtilities
 						.getWindowAncestor((JButton) e.getSource()), typeMap
 						.get(typeCombox.getSelectedItem().toString()));
-				panel.setLocationRelativeTo(Budget.this);
+				panel.setLocationRelativeTo(BudgetPane.this);
 				panel.setVisible(true);
 			}
 		});
@@ -86,7 +89,7 @@ public class Budget extends JPanel {
 				SubCategoryDialog panel = new SubCategoryDialog(SwingUtilities
 						.getWindowAncestor((JButton) e.getSource()), typeMap
 						.get(typeCombox.getSelectedItem().toString()));
-				panel.setLocationRelativeTo(Budget.this);
+				panel.setLocationRelativeTo(BudgetPane.this);
 				panel.setVisible(true);
 			}
 		});
@@ -122,6 +125,16 @@ public class Budget extends JPanel {
 		yearMonth.add(new JLabel("年"));
 		yearMonth.add(month);
 		yearMonth.add(new JLabel("月"));
+
+		JPanel summaryPanel = new JPanel();
+		summaryPanel
+				.setLayout(new BoxLayout(summaryPanel, BoxLayout.LINE_AXIS));
+		summaryPanel.add(incomeMoney);
+		summaryPanel.add(Box.createHorizontalGlue());
+		summaryPanel.add(summaryMoney);
+		summaryPanel.add(Box.createHorizontalGlue());
+		summaryPanel.add(expenditureMoney);
+		yearMonth.add(summaryPanel);
 		choose.add(yearMonth);
 
 		year.addItemListener(new SelectChangeListenter());
@@ -166,8 +179,10 @@ public class Budget extends JPanel {
 				DBManager.saveBudget((Integer) year.getSelectedItem(),
 						(Integer) month.getSelectedItem(), map);
 
-				JOptionPane.showMessageDialog(Budget.this, "保存成功。", "预算设置",
+				JOptionPane.showMessageDialog(BudgetPane.this, "保存成功。", "预算设置",
 						JOptionPane.INFORMATION_MESSAGE);
+
+				refreshSummary();
 			}
 		});
 
@@ -188,20 +203,33 @@ public class Budget extends JPanel {
 		});
 	}
 
-	private void categoryConfig(JPanel pane, String title, final String type) {
-		final JButton payoutEdit = new JButton(title);
-		payoutEdit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CategoryDialog panel = new CategoryDialog(SwingUtilities
-						.getWindowAncestor((JButton) e.getSource()), type);
-				panel.setLocationRelativeTo(Budget.this);
-				panel.setVisible(true);
+	public void refreshSummary() {
+		summaryMoney.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		float sum = 0f;
+		for (int row = 0; row < budgetTable.getRowCount(); row++) {
+			float money = Float.valueOf(model.getValueAt(row, 3).toString());
+			if (money != -1) {
+				sum += money;
 			}
-		});
-		pane.add(payoutEdit);
+		}
+		summaryMoney.setText("总预算：" + sum);
+
+		expenditureMoney
+				.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		expenditureMoney.setText("总支出："
+				+ DBManager.getTotalMonthMoney(Integer.valueOf(year
+						.getSelectedItem().toString()), Integer.valueOf(month
+						.getSelectedItem().toString()), "Expenditure"));
+
+		incomeMoney.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		incomeMoney.setText("总收入："
+				+ DBManager.getTotalMonthMoney(Integer.valueOf(year
+						.getSelectedItem().toString()), Integer.valueOf(month
+						.getSelectedItem().toString()), "Income"));
+
 	}
 
-	private void refreshTableData() {
+	public void refreshTableData() {
 		Vector<Vector> items = DBManager.getBudgetItems((Integer) year
 				.getSelectedItem(), (Integer) month.getSelectedItem());
 		model.setDataVector(items, Configure.getCategoryBudgetColumns());
@@ -227,6 +255,8 @@ public class Budget extends JPanel {
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
+
+		refreshSummary();
 	}
 
 	/**

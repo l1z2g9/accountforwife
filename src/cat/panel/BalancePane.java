@@ -9,6 +9,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -16,6 +19,8 @@ import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.print.attribute.standard.NumberOfDocuments;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -57,6 +62,7 @@ public class BalancePane extends JPanel {
 	String type = "Expenditure";
 	final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 	final JLabel summaryMoney = new JLabel();
+	NumberFormat nf = DecimalFormat.getCurrencyInstance();
 
 	public BalancePane(String type) {
 		super(new BorderLayout());
@@ -65,6 +71,7 @@ public class BalancePane extends JPanel {
 		add(createItems(), BorderLayout.NORTH);
 		add(createItems2(), BorderLayout.CENTER);
 		add(createDataTable(), BorderLayout.SOUTH);
+
 	}
 
 	public void categoryReload() {
@@ -330,9 +337,9 @@ public class BalancePane extends JPanel {
 
 		summaryMoney.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
 		if (this.type.equalsIgnoreCase("Expenditure"))
-			summaryMoney.setText("总支出：" + sum + " 元");
+			summaryMoney.setText("总支出：" + nf.format(sum));
 		else
-			summaryMoney.setText("总收入：" + sum + " 元");
+			summaryMoney.setText("总收入：" + nf.format(sum));
 	}
 
 	private void arrangeColumn() {
