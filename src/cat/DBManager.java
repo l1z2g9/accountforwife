@@ -2,6 +2,8 @@ package cat;
 
 import cat.model.Category;
 import cat.model.Item;
+import cat.model.NavigatePage;
+
 import java.awt.Color;
 
 import java.sql.Connection;
@@ -26,7 +28,7 @@ public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
 
 	static DecimalFormat df = new DecimalFormat("##.##");
-
+	static int limit = 30;
 	static Connection conn = null;
 	static {
 		try {
@@ -38,7 +40,7 @@ public class DBManager {
 	}
 
 	// --------- start items ---------
-	public static Vector<Vector> getItemsByDate(String type, Date date) {
+	public static NavigatePage getItemsByDate(String type, Date date) {
 		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
 				Locale.SIMPLIFIED_CHINESE);
 		startTime.setTime(date);
@@ -52,9 +54,8 @@ public class DBManager {
 		endtTime.set(Calendar.MINUTE, 59);
 		endtTime.set(Calendar.SECOND, 59);
 
-		Vector<Vector> data = DBManager.getItemsByDate(type, startTime,
-				endtTime, -1, -1, null);
-		return data;
+		return DBManager.getItemsByDate(type, startTime, endtTime, -1, -1,
+				null, -1);
 	}
 
 	public static float getTotalMonthMoney(int year, int month, String type) {
@@ -95,9 +96,25 @@ public class DBManager {
 		return sumMoney;
 	}
 
-	public static Vector<Vector> getItemsByDate(String type,
-			Calendar startTime, Calendar endtTime, int parentID,
-			int subCategoryID, String user) {
+	private static String buildCondition(String sql, String type, int parentID,
+			int subCategoryID, String user, int currentPage) {
+		StringBuilder builder = new StringBuilder(sql);
+		if (!type.equalsIgnoreCase("All"))
+			builder.append(" and c.type = '" + type + "'");
+		if (parentID != -1)
+			builder.append(" and cp.id = " + parentID);
+		if (subCategoryID != -1)
+			builder.append(" and c.id = " + subCategoryID);
+		if (user != null)
+			builder.append(" and user like '%" + user + "%'");
+
+		return builder.toString();
+	}
+
+	public static NavigatePage getItemsByDate(String type, Calendar startTime,
+			Calendar endtTime, int parentID, int subCategoryID, String user,
+			int currentPage) {
+		final NavigatePage navigatePage = new NavigatePage();
 
 		Calendar monthFirstDay = Calendar
 				.getInstance(Locale.SIMPLIFIED_CHINESE);
@@ -107,11 +124,46 @@ public class DBManager {
 		monthFirstDay.set(Calendar.MINUTE, 0);
 		monthFirstDay.set(Calendar.SECOND, 0);
 
-		Vector<Vector> result = new Vector<Vector>();
-		// 预算比较
+		// 计算总页数和offset
+		String totalSql = buildCondition(
+				"SELECT count(i.id) FROM Item i, Category c, Category cp "
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+				type, parentID, subCategoryID, user, currentPage);
+
+		int total = 0;
+		try {
+			PreparedStatement ps = conn.prepareStatement(totalSql);
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				total = rs.getInt(1);
+			}
+
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		int total_pages = 1;
+		if (total > 0)
+			total_pages = (int) Math.ceil(total / limit) + 1;
+
+		if (currentPage > total_pages)
+			currentPage = total_pages;
+
+		int offset = limit * currentPage - limit;
+		if (offset < 0)
+			offset = 0;
+
+		navigatePage.setTotalPage(total_pages);
+		navigatePage.setTotal(total);
+
 		Map<Integer, Float> sumMap = new HashMap<Integer, Float>();
 		Map<Integer, Float> budgetMap = new HashMap<Integer, Float>();
 		if (!"Income".equalsIgnoreCase(type)) {
+			// 获取月初到开始时间之前的开销
 			try {
 				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
 						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
@@ -133,6 +185,7 @@ public class DBManager {
 				e.printStackTrace();
 			}
 
+			// 获取当月预算
 			String sql = "select c.id, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
 					+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder desc";
 			try {
@@ -150,25 +203,23 @@ public class DBManager {
 			}
 		}
 
+		// 封装结果
+		Vector<Vector> result = new Vector<Vector>();
 		try {
-			String sql = "SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
-					+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?";
-
-			if (!type.equalsIgnoreCase("All"))
-				sql += " and c.type = '" + type + "'";
-			if (parentID != -1)
-				sql += " and cp.id = " + parentID;
-			if (subCategoryID != -1)
-				sql += " and c.id = " + subCategoryID;
-			if (user != null)
-				sql += " and user like '%" + user + "%'";
+			String sql = buildCondition(
+					"SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
+							+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+					type, parentID, subCategoryID, user, currentPage);
+			if (currentPage != -1) // == -1时候处理分页内容
+				sql += String.format(" order by i.id limit %s offset %s ",
+						limit, offset);
 
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setLong(1, startTime.getTimeInMillis());
 			ps.setLong(2, endtTime.getTimeInMillis());
 			ResultSet rs = ps.executeQuery();
 
-			int seq = 0;
+			int seq = (currentPage - 1) * offset;
 			while (rs.next()) {
 				Vector vo = new Vector();
 				vo.addElement(rs.getInt(1));
@@ -216,7 +267,37 @@ public class DBManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return result;
+
+		navigatePage.setCurrentPageResult(result);
+
+		// 总输入支出统计
+		String sql = buildCondition(
+				"SELECT c.type, sum(money) FROM Item i, Category c, Category cp "
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+				type, parentID, subCategoryID, user, currentPage);
+
+		sql += " group by c.type";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				if ("Expenditure".equals(rs.getString(1))) {
+					navigatePage.setTotalExpenditure(rs.getFloat(2));
+				}
+				if ("Income".equals(rs.getString(1))) {
+					navigatePage.setTotalIncome(rs.getFloat(2));
+				}
+			}
+
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return navigatePage;
 	}
 
 	public static int saveItem(Item item) {
@@ -566,8 +647,8 @@ public class DBManager {
 
 	// ---------- end 预算 ------------
 
-	public static Vector<Vector> query(int year, int month, String type,
-			int parentCategoryID, int categoryID, String user) {
+	public static NavigatePage query(int year, int month, String type,
+			int parentCategoryID, int categoryID, String user, int currentPage) {
 
 		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
 				Locale.SIMPLIFIED_CHINESE);
@@ -586,7 +667,7 @@ public class DBManager {
 		endtTime.set(Calendar.MINUTE, 59);
 		endtTime.set(Calendar.SECOND, 59);
 		return getItemsByDate(type, startTime, endtTime, parentCategoryID,
-				categoryID, user);
+				categoryID, user, currentPage);
 	}
 
 	public static void releaseConnection() {

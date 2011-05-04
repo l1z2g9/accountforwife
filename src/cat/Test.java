@@ -20,7 +20,7 @@ public class Test {
 	static Logger log = Logger.getLogger("Test");
 
 	public static void main(String[] args) throws Exception {
-//		testGetLocalInfo();
+		// testGetLocalInfo();
 		RemoteOne.run();
 	}
 
@@ -64,20 +64,26 @@ public class Test {
 }
 
 class RemoteOne implements DiscoveryListener {
+	static Logger log = Logger.getLogger("RemoteOne");
+
 	public static void run() throws BluetoothStateException {
 		LocalDevice localdev = null;
 		RemoteOne listener = new RemoteOne();
 
 		try {
 			localdev = LocalDevice.getLocalDevice();
+
 		} catch (BluetoothStateException e) {
 			System.out.println("ERROR: cannot access local device");
 			System.exit(1);
 		}
 
 		DiscoveryAgent agent = localdev.getDiscoveryAgent();
+
 		try {
-			agent.startInquiry(DiscoveryAgent.GIAC, listener);
+			log.info("@@@@ "
+					+ agent.startInquiry(DiscoveryAgent.GIAC, listener));
+
 		} catch (BluetoothStateException e) {
 			System.out.println("Device unable to inquiry");
 			System.exit(2);
@@ -107,8 +113,10 @@ class RemoteOne implements DiscoveryListener {
 	}
 
 	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+		log.info("@@@");
 	}
 
 	public void serviceSearchCompleted(int transID, int respCode) {
+		log.info("@@@XX");
 	}
 }
