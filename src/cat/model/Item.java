@@ -1,7 +1,5 @@
 package cat.model;
 
-import java.sql.Date;
-
 public class Item {
 	private Integer id;
 	private String title;

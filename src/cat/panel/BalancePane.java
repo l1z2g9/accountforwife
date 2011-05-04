@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -19,8 +18,6 @@ import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.print.attribute.standard.NumberOfDocuments;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -48,6 +45,7 @@ import cat.DBManager;
 import cat.DateField2;
 import cat.model.Category;
 import cat.model.Item;
+import cat.model.NavigatePage;
 
 public class BalancePane extends JPanel {
 	static Logger log = Logger.getLogger("BalancePane");
@@ -89,9 +87,10 @@ public class BalancePane extends JPanel {
 	}
 
 	public void refreshData() {
-		Vector<Vector> data = DBManager.getItemsByDate(type,
+		NavigatePage navigatePage = DBManager.getItemsByDate(type,
 				(Date) selectedDate.getValue());
-		tableModel.setDataVector(data, Configure.getDateColumns());
+		tableModel.setDataVector(navigatePage.getCurrentPageResult(), Configure
+				.getDateColumns());
 		arrangeColumn();
 
 		refreshSummaryMoney();
@@ -229,10 +228,11 @@ public class BalancePane extends JPanel {
 	DefaultTableModel tableModel;
 
 	private JPanel createDataTable() {
-		Vector<Vector> data = DBManager.getItemsByDate(type,
+		final NavigatePage navigatePage = DBManager.getItemsByDate(type,
 				(Date) selectedDate.getValue());
 		// type);
-		tableModel = new DefaultTableModel(data, Configure.getDateColumns()) {
+		tableModel = new DefaultTableModel(navigatePage.getCurrentPageResult(),
+				Configure.getDateColumns()) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;

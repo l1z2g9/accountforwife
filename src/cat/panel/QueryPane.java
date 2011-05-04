@@ -12,21 +12,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
-
-import java.text.AttributedString;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -58,10 +57,13 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
 
+import sun.security.pkcs11.Secmod.DbMode;
+
 import cat.Configure;
 import cat.DBManager;
 import cat.DateField2;
 import cat.model.Category;
+import cat.model.NavigatePage;
 
 public class QueryPane extends JPanel {
 	static Logger log = Logger.getLogger("BalancePane");
@@ -80,6 +82,13 @@ public class QueryPane extends JPanel {
 	DefaultTableModel tableModel;
 	JLabel summaryMoney = new JLabel();
 	NumberFormat nf = DecimalFormat.getCurrencyInstance();
+	int currentPage = 1;
+	int totalPage = 1;
+	final JLabel number = new JLabel();
+	final JButton previous = new JButton(new ImageIcon(getClass().getResource(
+			"/images/back.png")));
+	final JButton forward = new JButton(new ImageIcon(getClass().getResource(
+			"/images/forward.png")));
 
 	public QueryPane() {
 		setLayout(new BorderLayout());
@@ -99,53 +108,71 @@ public class QueryPane extends JPanel {
 		typeCombox.setSelectedIndex(selected);
 	}
 
+	private NavigatePage triggerFindData(int currPage) {
+		int parentCategoryID = -1;
+		int categoryID = -1;
+		if (typeCombox.getSelectedIndex() > 0) {
+			String cateName = categoryCombox.getSelectedItem().toString();
+
+			if (!cateName.equals("全部")) {
+				parentCategoryID = categories.get(cateName).getId();
+			}
+
+			String subCateName = subCategoryCombox.getSelectedItem().toString();
+			if (!cateName.equals("全部") && !subCateName.equals("全部")) {
+				categoryID = subcategories.get(subCateName).getId();
+			}
+		}
+
+		final NavigatePage navigatePage = DBManager.query((Integer) year
+				.getSelectedItem(), (Integer) month.getSelectedItem(), typeMap
+				.get(typeCombox.getSelectedItem()), parentCategoryID,
+				categoryID, user.getText().trim(), currPage);
+		return navigatePage;
+	}
+
+	private void refreshData() {
+		final NavigatePage navigatePage = triggerFindData(currentPage);
+		totalPage = navigatePage.getTotalPage();
+
+		tableModel.setDataVector(navigatePage.getCurrentPageResult(), Configure
+				.getDateColumns());
+		arrangeColumn();
+
+		float incomeTotal = navigatePage.getTotalIncome();
+		float expenditureTotal = navigatePage.getTotalExpenditure();
+		/*
+		 * for (int rownum = 0; rownum < table.getRowCount(); rownum++) { if
+		 * (table.getValueAt(rownum, 9).toString().equalsIgnoreCase( "Income"))
+		 * incomeTotal += Float.valueOf(table.getValueAt(rownum, 5)
+		 * .toString()); else expenditureTotal +=
+		 * Float.valueOf(table.getValueAt(rownum, 5) .toString()); }
+		 */
+		if (typeCombox.getSelectedIndex() == 0) {
+			summaryMoney.setText("总收入：" + nf.format(incomeTotal) + "   总支出："
+					+ nf.format(expenditureTotal));
+		} else if (typeCombox.getSelectedIndex() == 1)
+			summaryMoney.setText("总收入：" + nf.format(incomeTotal));
+		else if (typeCombox.getSelectedIndex() == 2)
+			summaryMoney.setText("总支出：" + nf.format(expenditureTotal));
+
+		number.setText(currentPage + " / " + totalPage + " 页");
+
+		if (currentPage == 1)
+			previous.setEnabled(false);
+		if (currentPage < totalPage)
+			forward.setEnabled(true);
+		else
+			forward.setEnabled(false);
+	}
+
 	private JPanel createButtons() {
 		JPanel search = new JPanel();
 		JButton find = new JButton("查询");
 		find.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int parentCategoryID = -1;
-				int categoryID = -1;
-				if (typeCombox.getSelectedIndex() > 0) {
-					String cateName = categoryCombox.getSelectedItem()
-							.toString();
-
-					if (!cateName.equals("全部")) {
-						parentCategoryID = categories.get(cateName).getId();
-					}
-
-					String subCateName = subCategoryCombox.getSelectedItem()
-							.toString();
-					if (!cateName.equals("全部") && !subCateName.equals("全部")) {
-						categoryID = subcategories.get(subCateName).getId();
-					}
-				}
-
-				Vector<Vector> data = DBManager.query((Integer) year
-						.getSelectedItem(), (Integer) month.getSelectedItem(),
-						typeMap.get(typeCombox.getSelectedItem()),
-						parentCategoryID, categoryID, user.getText().trim());
-				tableModel.setDataVector(data, Configure.getDateColumns());
-				arrangeColumn();
-
-				float incomeTotal = 0f;
-				float expenditureTotal = 0f;
-				for (int rownum = 0; rownum < table.getRowCount(); rownum++) {
-					if (table.getValueAt(rownum, 9).toString()
-							.equalsIgnoreCase("Income"))
-						incomeTotal += Float.valueOf(table
-								.getValueAt(rownum, 5).toString());
-					else
-						expenditureTotal += Float.valueOf(table.getValueAt(
-								rownum, 5).toString());
-				}
-				if (typeCombox.getSelectedIndex() == 0) {
-					summaryMoney.setText("总收入：" + nf.format(incomeTotal)
-							+ "   总支出：" + nf.format(expenditureTotal));
-				} else if (typeCombox.getSelectedIndex() == 1)
-					summaryMoney.setText("总收入：" + nf.format(incomeTotal));
-				else if (typeCombox.getSelectedIndex() == 2)
-					summaryMoney.setText("总支出：" + nf.format(expenditureTotal));
+				currentPage = 1;
+				refreshData();
 			}
 		});
 		search.add(find);
@@ -156,13 +183,13 @@ public class QueryPane extends JPanel {
 				int statCategoryColunm = 3;
 				if (categoryCombox.getSelectedIndex() != -1)
 					statCategoryColunm = 4;
-				Vector<Vector> data = tableModel.getDataVector();
+				final NavigatePage navigatePage = triggerFindData(-1);
+				Vector<Vector> data = navigatePage.getCurrentPageResult();
 				Map<String, Float> categoryStat = new HashMap<String, Float>();
-				for (int row = 0; row < table.getRowCount(); row++) {
-					String categoryName = tableModel.getValueAt(row, statCategoryColunm)
-							.toString();
-					Float money = Float.valueOf(tableModel.getValueAt(row, 5)
-							.toString());
+
+				for (Vector v : data) {
+					String categoryName = v.get(statCategoryColunm).toString();
+					Float money = Float.valueOf(v.get(5).toString());
 					if (categoryStat.containsKey(categoryName)) {
 						categoryStat.put(categoryName, categoryStat
 								.get(categoryName)
@@ -247,16 +274,19 @@ public class QueryPane extends JPanel {
 				}
 
 				// 内容
-				for (int rownum = 1; rownum < table.getRowCount() + 1; rownum++) {
-					HSSFRow data = sheet.createRow(rownum);
+				final NavigatePage navigatePage = triggerFindData(-1);
+				Vector<Vector> data = navigatePage.getCurrentPageResult();
+
+				for (int rownum = 1; rownum < data.size() + 1; rownum++) {
+					HSSFRow row2 = sheet.createRow(rownum);
+
 					for (int colnum = 1; colnum < tableModel.getColumnCount() - 2; colnum++) {
-						HSSFCell cell = data.createCell(colnum - 1);
-						cell.setCellValue(tableModel.getValueAt(rownum - 1,
-								colnum).toString());
+						HSSFCell cell = row2.createCell(colnum - 1);
+						cell.setCellValue(data.get(rownum - 1).get(colnum)
+								.toString());
 
 						if (colnum == 5) {
-							Color color = (Color) tableModel.getValueAt(
-									rownum - 1, 10);
+							Color color = (Color) data.get(rownum - 1).get(10);
 
 							if (!Color.white.equals(color)) {
 								HSSFCellStyle moneyHighlight = wb
@@ -278,8 +308,9 @@ public class QueryPane extends JPanel {
 					}
 				}
 
-				HSSFRow data = sheet.createRow(table.getRowCount() + 3);
-				HSSFCell cell = data.createCell(0);
+				HSSFRow row2 = sheet.createRow(navigatePage.getTotal() + 3);
+
+				HSSFCell cell = row2.createCell(0);
 				cell.setCellValue(summaryMoney.getText());
 
 				// 调整列宽
@@ -399,7 +430,62 @@ public class QueryPane extends JPanel {
 		JPanel pane = new JPanel();
 		pane.setLayout(new BorderLayout());
 		summaryMoney.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-		pane.add(summaryMoney, BorderLayout.PAGE_START);
+		JPanel bar = new JPanel(new BorderLayout());
+
+		JPanel navigator = new JPanel();
+		navigator.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+		navigator.setLayout(new BoxLayout(navigator, BoxLayout.LINE_AXIS));
+
+		previous.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+		forward.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+
+		if (totalPage <= 1) {
+			previous.setEnabled(false);
+			forward.setEnabled(false);
+		} else {
+			previous.setEnabled(false);
+		}
+
+		previous.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (currentPage >= 2) {
+					currentPage = Integer.valueOf(currentPage) - 1;
+				}
+				if (currentPage <= 1) {
+					previous.setEnabled(false);
+				}
+				forward.setEnabled(true);
+				refreshData();
+			}
+		});
+
+		forward.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (currentPage < totalPage) {
+					currentPage = Integer.valueOf(currentPage) + 1;
+				}
+				if (currentPage >= totalPage) {
+					forward.setEnabled(false);
+				}
+				previous.setEnabled(true);
+				refreshData();
+			}
+		});
+
+		number.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+		navigator.add(previous);
+		navigator.add(Box.createHorizontalGlue());
+		navigator.add(number);
+		navigator.add(Box.createHorizontalGlue());
+		navigator.add(forward);
+
+		bar.add(summaryMoney, BorderLayout.LINE_START);
+		bar.add(navigator, BorderLayout.LINE_END);
+
+		pane.add(bar, BorderLayout.PAGE_START);
+
 		Vector<Vector> data = new Vector<Vector>();
 		tableModel = new DefaultTableModel(data, Configure.getDateColumns()) {
 			@Override
@@ -417,7 +503,7 @@ public class QueryPane extends JPanel {
 		JScrollPane s = new JScrollPane(table);
 		s.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		s.setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEmptyBorder(5, 8, 10, 10), s.getBorder()));
+				.createEmptyBorder(2, 5, 5, 10), s.getBorder()));
 		pane.add(s, BorderLayout.PAGE_END);
 		return pane;
 	}
