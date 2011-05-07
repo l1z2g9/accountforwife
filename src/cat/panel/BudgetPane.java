@@ -77,7 +77,7 @@ public class BudgetPane extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				CategoryDialog panel = new CategoryDialog(SwingUtilities
 						.getWindowAncestor((JButton) e.getSource()), typeMap
-						.get(typeCombox.getSelectedItem().toString()));
+						.get(typeCombox.getSelectedItem().toString()), false);
 				panel.setLocationRelativeTo(BudgetPane.this);
 				panel.setVisible(true);
 			}
@@ -86,9 +86,9 @@ public class BudgetPane extends JPanel {
 		final JButton subCategoryButton = new JButton("小类别设置");
 		subCategoryButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				SubCategoryDialog panel = new SubCategoryDialog(SwingUtilities
+				CategoryDialog panel = new CategoryDialog(SwingUtilities
 						.getWindowAncestor((JButton) e.getSource()), typeMap
-						.get(typeCombox.getSelectedItem().toString()));
+						.get(typeCombox.getSelectedItem().toString()), true);
 				panel.setLocationRelativeTo(BudgetPane.this);
 				panel.setVisible(true);
 			}

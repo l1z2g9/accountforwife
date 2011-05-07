@@ -3,7 +3,6 @@ package cat;
 import cat.model.Category;
 import cat.model.Item;
 import cat.model.NavigatePage;
-import cat.panel.BalancePane;
 import java.awt.Color;
 
 import java.sql.Connection;
@@ -29,7 +28,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
@@ -47,7 +45,7 @@ public class DBManager {
 
 		FileHandler fileHandler = null;
 		try {
-			fileHandler = new FileHandler("errors.log");
+			fileHandler = new FileHandler("db.log");
 			fileHandler.setFormatter(new Formatter() {
 				@Override
 				public String format(LogRecord record) {
@@ -151,7 +149,7 @@ public class DBManager {
 		// 计算总页数和offset
 		String totalSql = buildCondition(
 				"SELECT count(i.id) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
 				type, parentID, subCategoryID, user, currentPage);
 
 		int total = 0;
@@ -190,7 +188,7 @@ public class DBManager {
 			// 获取月初到开始时间之前的开销
 			try {
 				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and "
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
 						+ "c.type = ? and time between ? and ? group by cp.id";
 
 				PreparedStatement ps = conn.prepareStatement(sumSql);
@@ -232,7 +230,7 @@ public class DBManager {
 		try {
 			String sql = buildCondition(
 					"SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
-							+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
+							+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
 					type, parentID, subCategoryID, user, currentPage);
 			if (currentPage != -1) // == -1时候处理分页内容
 				sql += String.format(" order by i.id limit %s offset %s ",
@@ -299,7 +297,7 @@ public class DBManager {
 		// 总输入支出统计
 		String sql = buildCondition(
 				"SELECT c.type, sum(money) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
+						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
 				type, parentID, subCategoryID, user, currentPage);
 
 		sql += " group by c.type";
@@ -511,7 +509,7 @@ public class DBManager {
 		return lastID;
 	}
 
-	public static void saveSubCategory(int parentID, String type, String name,
+	public static int saveSubCategory(int parentID, String type, String name,
 			int displayOrder) {
 		String findLastCategoryIDsql = "select max(id) from Category where parentID = ?";
 		int lastID = -1;
@@ -533,8 +531,8 @@ public class DBManager {
 		String sql = "insert into Category(id, parentId, type, name, displayOrder) values(?, ?, ?, ?, ?)";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			log.info("lastID: " + lastID);
-			log.info("parentID: " + parentID);
+			log.info("保存子类别：id: " + lastID);
+			log.info("父类别：parentID: " + parentID);
 			ps.setInt(1, lastID);
 			ps.setInt(2, parentID);
 			ps.setString(3, type);
@@ -545,6 +543,7 @@ public class DBManager {
 		} catch (SQLException e) {
 			exitProgram(e);
 		}
+		return lastID;
 	}
 
 	public static void updateCategory(int id, String name, int displayOrder) {
@@ -770,7 +769,10 @@ public class DBManager {
 	}
 
 	static void exitProgram(Exception e) {
-		log.severe(e.getMessage());
+		log.severe(e.toString());
+		StackTraceElement[] trace = e.getStackTrace();
+		for (int i = 0; i < trace.length; i++)
+			log.severe("\tat " + trace[i]);
 		releaseConnection();
 		JOptionPane.showMessageDialog(null, "程序出现意想不到的错误，请与小强联系！", "程序出错",
 				JOptionPane.ERROR_MESSAGE);
