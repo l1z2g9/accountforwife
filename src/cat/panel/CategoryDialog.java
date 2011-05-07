@@ -15,6 +15,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -34,7 +35,6 @@ import cat.model.Category;
 public class CategoryDialog extends JDialog {
 	Logger log = Logger.getLogger("CategoryPane");
 
-	private JList list;
 	private JButton add;
 	private JButton delete;
 	private JButton close;
@@ -43,21 +43,48 @@ public class CategoryDialog extends JDialog {
 	private JTextField modifyDisplayOrder;
 	private JTextField categoryName;
 	private JTextField displayOrder;
-	private DefaultListModel listModel;
+	private DefaultListModel listModel = new DefaultListModel();
+	private JList list = new JList(listModel);
 	private Map<String, Category> cates;
+	private Map<String, Category> subCates;
 	public static boolean itemchanged = false;
 	private String type;
+	private boolean subCategory;
+	private JComboBox parentCategoryName;
 
-	public CategoryDialog(Window frame, final String type) {
+	public CategoryDialog(Window frame, final String type, boolean subCategory) {
 		super(frame, "类别设置", Dialog.ModalityType.DOCUMENT_MODAL);
 		this.type = type;
+		this.subCategory = subCategory;
 		setLayout(new BorderLayout());
-		cates = DBManager.getCategory(type);
+
 		JPanel leftPanel = new JPanel();
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+		JPanel itemPanel;
+		JLabel nameLabel;
 
-		JPanel itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel nameLabel = new JLabel("名称：");
+		cates = DBManager.getCategory(type);
+		if (subCategory) {
+			this.setTitle("小类别设置");
+			itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			nameLabel = new JLabel("类别：");
+			nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
+			itemPanel.add(nameLabel);
+			parentCategoryName = new JComboBox(cates.keySet().toArray());
+			parentCategoryName.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					refreshList();
+				}
+			});
+			parentCategoryName.setPreferredSize(new Dimension(80, 25));
+			itemPanel.add(parentCategoryName);
+			leftPanel.add(itemPanel);
+		}
+
+		refreshList();
+
+		itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		nameLabel = new JLabel("名称：");
 		nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
 		itemPanel.add(nameLabel);
 		categoryName = new JTextField();
@@ -104,14 +131,6 @@ public class CategoryDialog extends JDialog {
 		close = new JButton("关闭");
 		leftPanel.add(close);
 
-		listModel = new DefaultListModel();
-		for (String cate : cates.keySet()) {
-			Category category = cates.get(cate);
-			listModel.addElement(category.getName() + "  [ "
-					+ category.getDisplayOrder() + " ]");
-		}
-		list = new JList(listModel);
-
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setSelectedIndex(0);
 
@@ -138,7 +157,6 @@ public class CategoryDialog extends JDialog {
 	private void configAction() {
 		add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int index = listModel.getSize();
 				String cate = categoryName.getText().trim();
 				int dispOrder = Integer.valueOf(displayOrder.getText().trim());
 				if (cate.equalsIgnoreCase("")) {
@@ -147,18 +165,30 @@ public class CategoryDialog extends JDialog {
 							"不能添加空白数据!", "添加错误", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-
-				int categoryID = DBManager.saveCategory(type, cate, dispOrder);
-				listModel.addElement(cate + "  [ " + dispOrder + " ]");
-				list.setSelectedIndex(index);
-				list.ensureIndexIsVisible(index);
-
 				Category category = new Category();
-				category.setId(categoryID);
+
 				category.setName(cate);
 				category.setDisplayOrder(dispOrder);
 
-				cates.put(cate, category);
+				int categoryID = -1;
+				if (!subCategory) {
+					categoryID = DBManager.saveCategory(type, cate, dispOrder);
+					category.setId(categoryID);
+					cates.put(cate, category);
+				} else {
+					String parentCate = parentCategoryName.getSelectedItem()
+							.toString().trim();
+					categoryID = DBManager.saveSubCategory(cates
+							.get(parentCate).getId(), type, cate, dispOrder);
+					category.setId(categoryID);
+					subCates.put(cate, category);
+				}
+				refreshList();
+
+				int index = listModel.getSize();
+				list.setSelectedIndex(index);
+				list.ensureIndexIsVisible(index);
+
 				itemchanged = true;
 			}
 		});
@@ -175,8 +205,13 @@ public class CategoryDialog extends JDialog {
 
 				String cateName = (String) list.getSelectedValue();
 				cateName = cateName.replaceAll("^(.*)\\[.*$", "$1").trim();
-				boolean subCategoryCount = DBManager.deleteCategory(cates.get(
-						cateName).getId());
+				int categoryID = -1;
+				if (subCategory)
+					categoryID = subCates.get(cateName).getId();
+				else
+					categoryID = cates.get(cateName).getId();
+
+				boolean subCategoryCount = DBManager.deleteCategory(categoryID);
 				if (!subCategoryCount) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor((JButton) e.getSource()),
@@ -184,13 +219,7 @@ public class CategoryDialog extends JDialog {
 					return;
 				}
 
-				listModel.removeElementAt(index);
-				if (index == 0) {
-					index = 0;
-				} else {
-					index--;
-				}
-				list.setSelectedIndex(index);
+				refreshList();
 				list.ensureIndexIsVisible(index);
 				itemchanged = true;
 			}
@@ -222,19 +251,19 @@ public class CategoryDialog extends JDialog {
 				String name = (String) list.getSelectedValue();
 				String cateName = name.replaceAll("^(.*)\\s+\\[(.*)\\]$", "$1")
 						.trim();
-				Category cate = cates.get(cateName);
+				Category cate;
+				if (subCategory)
+					cate = subCates.get(cateName);
+				else
+					cate = cates.get(cateName);
+
 				int dispOrder = Integer.valueOf(modifyDisplayOrder.getText()
 						.trim());
 				DBManager.updateCategory(cate.getId(), modifyText.getText(),
 						dispOrder);
-				cates = DBManager.getCategory(type);
-				listModel.removeAllElements();
-				for (String c : cates.keySet()) {
-					Category category = cates.get(c);
-					listModel.addElement(category.getName() + "  [ "
-							+ category.getDisplayOrder() + " ]");
-				}
-				list.setSelectedIndex(0);
+				int i = list.getSelectedIndex();
+				refreshList();
+				list.setSelectedIndex(i);
 			}
 		});
 
@@ -255,6 +284,26 @@ public class CategoryDialog extends JDialog {
 					.trim();
 			modifyText.setText(cateName);
 			modifyDisplayOrder.setText(cateOrder);
+		}
+	}
+
+	private void refreshList() {
+		listModel.removeAllElements();
+		if (subCategory) {
+			subCates = DBManager.getSubCategory(cates.get(
+					parentCategoryName.getSelectedItem().toString()).getId());
+			for (String cate : subCates.keySet()) {
+				Category category = subCates.get(cate);
+				listModel.addElement(category.getName() + "  [ "
+						+ category.getDisplayOrder() + " ]");
+			}
+		} else {
+			cates = DBManager.getCategory(type);
+			for (String cate : cates.keySet()) {
+				Category category = cates.get(cate);
+				listModel.addElement(category.getName() + "  [ "
+						+ category.getDisplayOrder() + " ]");
+			}
 		}
 	}
 }
