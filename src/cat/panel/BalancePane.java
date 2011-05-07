@@ -189,8 +189,18 @@ public class BalancePane extends JPanel {
 				Item item = new Item();
 				item.setTime(((Date) selectedDate.getValue()).getTime());
 				item.setMoney(money);
-				item.setCategoryID(subcategories.get(
-						(String) subCategoryCombox.getSelectedItem()).getId());
+
+				Category category = subcategories
+						.get((String) subCategoryCombox.getSelectedItem());
+
+				if (category == null) {
+					JOptionPane.showMessageDialog(SwingUtilities
+							.getWindowAncestor(BalancePane.this), "请选择相应的小类别！",
+							"输入错误", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				item.setCategoryID(category.getId());
 				item.setRemark(remark.getText());
 				item.setUser(user.getText());
 				item.setAddress(address.getText());
