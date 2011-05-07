@@ -3,7 +3,7 @@ package cat;
 import cat.model.Category;
 import cat.model.Item;
 import cat.model.NavigatePage;
-
+import cat.panel.BalancePane;
 import java.awt.Color;
 
 import java.sql.Connection;
@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 
 import java.util.Calendar;
@@ -22,7 +23,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
@@ -37,6 +44,23 @@ public class DBManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		FileHandler fileHandler = null;
+		try {
+			fileHandler = new FileHandler("errors.log");
+			fileHandler.setFormatter(new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					DateFormat df = DateFormat.getInstance();
+					String time = df.format(new Date());
+
+					return time + "： " + record.getMessage() + "\r\n";
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.addHandler(fileHandler);
 	}
 
 	// --------- start items ---------
@@ -78,7 +102,7 @@ public class DBManager {
 
 		float sumMoney = 0f;
 		String sumSql = "SELECT sum(money) FROM Item i, Category c, Category cp "
-				+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
+				+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and "
 				+ "c.type = ? and time between ? and ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sumSql);
@@ -90,7 +114,7 @@ public class DBManager {
 				sumMoney = rs.getFloat(1);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		return sumMoney;
@@ -127,7 +151,7 @@ public class DBManager {
 		// 计算总页数和offset
 		String totalSql = buildCondition(
 				"SELECT count(i.id) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
 				type, parentID, subCategoryID, user, currentPage);
 
 		int total = 0;
@@ -144,7 +168,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		int total_pages = 1;
 		if (total > 0)
@@ -166,7 +190,7 @@ public class DBManager {
 			// 获取月初到开始时间之前的开销
 			try {
 				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
+						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and "
 						+ "c.type = ? and time between ? and ? group by cp.id";
 
 				PreparedStatement ps = conn.prepareStatement(sumSql);
@@ -182,7 +206,7 @@ public class DBManager {
 				rs.close();
 				ps.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				exitProgram(e);
 			}
 
 			// 获取当月预算
@@ -199,7 +223,7 @@ public class DBManager {
 				rs.close();
 				ps.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				exitProgram(e);
 			}
 		}
 
@@ -208,11 +232,13 @@ public class DBManager {
 		try {
 			String sql = buildCondition(
 					"SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
-							+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+							+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
 					type, parentID, subCategoryID, user, currentPage);
 			if (currentPage != -1) // == -1时候处理分页内容
 				sql += String.format(" order by i.id limit %s offset %s ",
 						limit, offset);
+			else
+				sql += String.format(" order by i.id ");
 
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setLong(1, startTime.getTimeInMillis());
@@ -265,7 +291,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		navigatePage.setCurrentPageResult(result);
@@ -273,7 +299,7 @@ public class DBManager {
 		// 总输入支出统计
 		String sql = buildCondition(
 				"SELECT c.type, sum(money) FROM Item i, Category c, Category cp "
-						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
+						+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and time between ? and ?",
 				type, parentID, subCategoryID, user, currentPage);
 
 		sql += " group by c.type";
@@ -295,7 +321,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return navigatePage;
 	}
@@ -326,7 +352,7 @@ public class DBManager {
 			ps.close();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return rowID;
 	}
@@ -348,7 +374,7 @@ public class DBManager {
 
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 	}
 
@@ -360,7 +386,7 @@ public class DBManager {
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 	}
 
@@ -379,7 +405,7 @@ public class DBManager {
 				result.add(vo);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 	}
 
@@ -397,7 +423,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return result;
 	}
@@ -424,7 +450,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return result;
 	}
@@ -448,7 +474,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return result;
 	}
@@ -466,7 +492,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		String sql = "insert into Category(id, type, name, displayOrder) values(?, ?, ?, ?)";
@@ -479,7 +505,7 @@ public class DBManager {
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		return lastID;
@@ -502,7 +528,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		String sql = "insert into Category(id, parentId, type, name, displayOrder) values(?, ?, ?, ?, ?)";
 		try {
@@ -517,7 +543,21 @@ public class DBManager {
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
+		}
+	}
+
+	public static void updateCategory(int id, String name, int displayOrder) {
+		String sql = "update Category set name = ?, displayOrder = ? where id = ?";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, name);
+			ps.setInt(2, displayOrder);
+			ps.setInt(3, id);
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
 		}
 	}
 
@@ -534,7 +574,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		if (subCategorySum > 0)
@@ -546,7 +586,7 @@ public class DBManager {
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return true;
 	}
@@ -590,7 +630,7 @@ public class DBManager {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return result;
 	}
@@ -600,7 +640,7 @@ public class DBManager {
 		try {
 			conn.setAutoCommit(false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 
 		String findSql = "SELECT b.id FROM Budget b, Category c WHERE b.categoryID = c.id and type = 'Expenditure' and year = ? AND month = ? and categoryID = ?";
@@ -634,14 +674,14 @@ public class DBManager {
 				ps.executeUpdate();
 				ps.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				exitProgram(e);
 			}
 		}
 
 		try {
 			conn.commit();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 	}
 
@@ -675,7 +715,7 @@ public class DBManager {
 			log.info("释放数据库连接");
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 	}
 
@@ -724,8 +764,16 @@ public class DBManager {
 			ps.close();
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			exitProgram(e);
 		}
 		return result;
+	}
+
+	static void exitProgram(Exception e) {
+		log.severe(e.getMessage());
+		releaseConnection();
+		JOptionPane.showMessageDialog(null, "程序出现意想不到的错误，请与小强联系！", "程序出错",
+				JOptionPane.ERROR_MESSAGE);
+		System.exit(1);
 	}
 }
