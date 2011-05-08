@@ -8,6 +8,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,6 +21,7 @@ import javax.swing.event.ChangeListener;
 import cat.panel.BalancePane;
 import cat.panel.BudgetPane;
 import cat.panel.CategoryDialog;
+import cat.panel.OverdrawPane;
 import cat.panel.QueryPane;
 
 public class AccountPanel extends JPanel {
@@ -42,6 +44,10 @@ public class AccountPanel extends JPanel {
 		tab.addTab("查询", queryPane);
 		tab.setMnemonicAt(3, KeyEvent.VK_4);
 
+		final OverdrawPane overdrawPane = new OverdrawPane();
+		tab.addTab("预支付", overdrawPane);
+		tab.setMnemonicAt(4, KeyEvent.VK_5);
+		tab.setSelectedIndex(4);
 		tab.setPreferredSize(new Dimension(620, 460));
 		tabpane.setLayout(new GridLayout(1, 1));
 		tabpane.add(tab);
@@ -83,6 +89,9 @@ public class AccountPanel extends JPanel {
 		}
 
 		JFrame frame = new JFrame("小艺有数");
+
+		frame.setIconImage(new ImageIcon(AccountPanel.class
+				.getResource("/images/piggy_bank.png")).getImage());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override

@@ -134,7 +134,7 @@ public class CategoryDialog extends JDialog {
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setSelectedIndex(0);
 
-		updateModifyText();
+		autoUpdateModifyText();
 
 		list.setVisibleRowCount(10);
 
@@ -270,12 +270,12 @@ public class CategoryDialog extends JDialog {
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				updateModifyText();
+				autoUpdateModifyText();
 			}
 		});
 	}
 
-	private void updateModifyText() {
+	private void autoUpdateModifyText() {
 		if (list.getSelectedValue() != null) {
 			String name = (String) list.getSelectedValue();
 			String cateName = name.replaceAll("^(.*)\\s+\\[(.*)\\]$", "$1")

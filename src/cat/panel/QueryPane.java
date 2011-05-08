@@ -141,13 +141,7 @@ public class QueryPane extends JPanel {
 
 		float incomeTotal = navigatePage.getTotalIncome();
 		float expenditureTotal = navigatePage.getTotalExpenditure();
-		/*
-		 * for (int rownum = 0; rownum < table.getRowCount(); rownum++) { if
-		 * (table.getValueAt(rownum, 9).toString().equalsIgnoreCase( "Income"))
-		 * incomeTotal += Float.valueOf(table.getValueAt(rownum, 5)
-		 * .toString()); else expenditureTotal +=
-		 * Float.valueOf(table.getValueAt(rownum, 5) .toString()); }
-		 */
+		
 		if (typeCombox.getSelectedIndex() == 0) {
 			summaryMoney.setText("总收入：" + nf.format(incomeTotal) + "   总支出："
 					+ nf.format(expenditureTotal));
