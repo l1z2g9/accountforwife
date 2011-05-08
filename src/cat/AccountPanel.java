@@ -47,7 +47,9 @@ public class AccountPanel extends JPanel {
 		final OverdrawPane overdrawPane = new OverdrawPane();
 		tab.addTab("Ô¤Ö§¸¶", overdrawPane);
 		tab.setMnemonicAt(4, KeyEvent.VK_5);
-		tab.setSelectedIndex(4);
+
+		// tab.setSelectedIndex(4);
+
 		tab.setPreferredSize(new Dimension(620, 460));
 		tabpane.setLayout(new GridLayout(1, 1));
 		tabpane.add(tab);
