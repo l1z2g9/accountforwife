@@ -303,8 +303,9 @@ public class OverdrawPane extends JPanel implements ItemListener {
 											JOptionPane.YES_NO_OPTION,
 											JOptionPane.INFORMATION_MESSAGE);
 							if (result == 0)
-								DBManager.deleteItem((Integer) tableModel
-										.getValueAt(selectedRow, 0));
+								DBManager
+										.deleteOverDrawItems((Integer) tableModel
+												.getValueAt(selectedRow, 0));
 							tableModel.removeRow(selectedRow);
 						}
 					});

@@ -326,6 +326,8 @@ public class DBManager {
 	}
 
 	public static int saveItem(Item item) {
+		log.info("新增项目, time=" + item.getTime() + " , money=" + item.getMoney()
+				+ "categoryID=" + item.getCategoryID());
 		int rowID = 0;
 		try {
 			String sql = "insert into Item(title, time, money, categoryID, remark, user, address) values(?, ?, ?, ?, ?, ?, ?)";
@@ -791,6 +793,7 @@ public class DBManager {
 	}
 
 	public static void saveOverDrawItems(Overdraw overdraw) {
+		log.info("新增预支付项" + overdraw.getTime() + " , " + overdraw.getMoney());
 		String sql = "insert into Overdraw(time, money, remark, address, returnTime, returnMoney, returnRemark) values(?,?,?,?,?,?,?)";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -820,6 +823,19 @@ public class DBManager {
 			ps.setFloat(6, overdraw.getReturnMoney());
 			ps.setString(7, overdraw.getReturnRemark());
 			ps.setInt(8, overdraw.getId());
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+	}
+
+	public static void deleteOverDrawItems(int id) {
+		String sql = "delete from Overdraw where id = ?";
+		log.info("删除预支付项，ID= " + id);
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
