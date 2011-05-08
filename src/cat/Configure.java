@@ -10,8 +10,8 @@ public class Configure {
 			" yyyy - MM - dd ");
 
 	static final Vector<String> dateColumns = new Vector<String>();
-
 	static final Vector<String> categoryBudgetColumns = new Vector<String>();
+	static final Vector<String> overDrawColumns = new Vector<String>();
 
 	static final String LOGIN_USER = "cat";
 	static {
@@ -31,6 +31,16 @@ public class Configure {
 		categoryBudgetColumns.addElement("类别ID");
 		categoryBudgetColumns.addElement("类别");
 		categoryBudgetColumns.addElement("预算金额");
+
+		overDrawColumns.addElement("ID");
+		overDrawColumns.addElement("序号");
+		overDrawColumns.addElement("支付日期");
+		overDrawColumns.addElement("支付金额");
+		overDrawColumns.addElement("场所");
+		overDrawColumns.addElement("备注");
+		overDrawColumns.addElement("归还日期");
+		overDrawColumns.addElement("归还金额");
+		overDrawColumns.addElement("归还备注");
 	}
 
 	public static Vector<String> getDateColumns() {
@@ -39,5 +49,9 @@ public class Configure {
 
 	public static Vector<String> getCategoryBudgetColumns() {
 		return categoryBudgetColumns;
+	}
+
+	public static Vector<String> getOverDrawColumns() {
+		return overDrawColumns;
 	}
 }

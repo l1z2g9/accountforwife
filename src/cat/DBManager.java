@@ -3,6 +3,7 @@ package cat;
 import cat.model.Category;
 import cat.model.Item;
 import cat.model.NavigatePage;
+import cat.model.Overdraw;
 import java.awt.Color;
 
 import java.sql.Connection;
@@ -388,44 +389,6 @@ public class DBManager {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void assemble(Vector<Vector> result, ResultSet rs) {
-		try {
-			while (rs.next()) {
-				Vector vo = new Vector();
-				vo.addElement(rs.getInt(1));
-				vo.addElement(rs.getString(2));
-				vo.addElement(rs.getString(3));
-				vo.addElement(rs.getString(4));
-				vo.addElement(df.format(rs.getFloat(5)));
-				vo.addElement(rs.getString(6));
-				vo.addElement(rs.getString(7));
-				result.add(vo);
-			}
-		} catch (Exception e) {
-			exitProgram(e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Vector<Vector> getItemsBetweenDates(String fromDate,
-			String toDate) {
-		Vector<Vector> result = new Vector<Vector>();
-		try {
-			String sql = "SELECT ID, Type, Date, Item, Money, Remark, Color FROM Account WHERE Date BETWEEN ? AND ? ORDER BY Date";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ResultSet rs = ps.executeQuery();
-			assemble(result, rs);
-			rs.close();
-			ps.close();
-		} catch (Exception e) {
-			exitProgram(e);
-		}
-		return result;
-	}
-
 	// --------- end items ---------
 
 	// ---------- start 类别 ------------
@@ -685,7 +648,6 @@ public class DBManager {
 	}
 
 	// ---------- end 预算 ------------
-
 	public static NavigatePage query(int year, int month, String type,
 			int parentCategoryID, int categoryID, String user, int currentPage) {
 
@@ -718,57 +680,182 @@ public class DBManager {
 		}
 	}
 
-	/**
-	 * 统计页使用,获取各项统计结果
-	 * 
-	 * @param type
-	 * @param fromDate
-	 * @param toDate
-	 * @return
-	 */
-	public static Vector<Vector<String>> getItemStat(String type,
-			String fromDate, String toDate) {
-		Vector<Vector<String>> result = new Vector<Vector<String>>();
-		String sumsql = "SELECT Item, SUM(money) FROM Account WHERE Date BETWEEN ? and ? and Type = ? ";
-		String sql = "SELECT Item, SUM(Money) FROM Account WHERE Date BETWEEN ? and ? and Type = ? group by Item";
+	// --------- start 预支付
+	public static NavigatePage getOverDrawItems(int year, int month,
+			int currentPage) {
+		NavigatePage navigatePage = new NavigatePage();
+		Calendar startTime = Calendar.getInstance(TimeZone.getDefault(),
+				Locale.SIMPLIFIED_CHINESE);
+		startTime.set(Calendar.YEAR, year);
+		startTime.set(Calendar.MONTH, month - 1);
+		startTime.set(Calendar.DAY_OF_MONTH, 1);
+		startTime.set(Calendar.HOUR_OF_DAY, 0);
+		startTime.set(Calendar.MINUTE, 0);
+		startTime.set(Calendar.SECOND, 0);
 
+		Calendar endtTime = Calendar.getInstance(Locale.SIMPLIFIED_CHINESE);
+		endtTime.set(Calendar.YEAR, year);
+		endtTime.set(Calendar.MONTH, month - 1);
+		endtTime.set(Calendar.DAY_OF_MONTH, 30);
+		endtTime.set(Calendar.HOUR_OF_DAY, 23);
+		endtTime.set(Calendar.MINUTE, 59);
+		endtTime.set(Calendar.SECOND, 59);
+		// 总数
+		String sql = "SELECT COUNT(id) FROM Overdraw WHERE time between ? and ?";
+		int total = 0;
 		try {
-			PreparedStatement ps = conn.prepareStatement(sumsql);
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ps.setString(3, type);
-
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
 			ResultSet rs = ps.executeQuery();
-			float total = 0;
 			while (rs.next()) {
-				total = rs.getFloat(2);
-			}
-			rs.close();
-
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, fromDate);
-			ps.setString(2, toDate);
-			ps.setString(3, type);
-
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				Vector<String> v = new Vector<String>();
-				v.addElement(rs.getString(1));
-				v.addElement(df.format(rs.getFloat(2)));
-				v.addElement(df.format(rs.getFloat(2) / total * 100));
-				result.addElement(v);
+				total = rs.getInt(1);
+				navigatePage.setTotal(total);
 			}
 
 			rs.close();
 			ps.close();
-
 		} catch (SQLException e) {
 			exitProgram(e);
 		}
-		return result;
+		int total_pages = 1;
+		if (total > 0)
+			total_pages = (int) Math.ceil(total / limit) + 1;
+
+		if (currentPage > total_pages)
+			currentPage = total_pages;
+
+		int offset = limit * currentPage - limit;
+		if (offset < 0)
+			offset = 0;
+		navigatePage.setTotalPage(total_pages);
+
+		// 结果集
+		sql = String
+				.format(
+						"SELECT id, time, money, remark, address, returnTime, returnMoney, returnRemark FROM Overdraw WHERE time BETWEEN ? and ? order by id limit %s offset %s",
+						limit, offset);
+		Vector<Vector> currentPageResult = new Vector<Vector>();
+
+		int seq = (currentPage - 1) * offset;
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Vector v = new Vector();
+				v.addElement(rs.getInt(1));
+				v.addElement(++seq);
+				v.addElement(rs.getDate(2));
+				v.addElement(rs.getFloat(3));
+				v.addElement(rs.getString(4));
+				v.addElement(rs.getString(5));
+				if (rs.getFloat(7) == 0f) {
+					v.addElement("");
+					v.addElement("");
+					v.addElement("");
+				} else {
+					v.addElement(rs.getDate(6));
+					v.addElement(rs.getFloat(7));
+					v.addElement(rs.getString(8));
+				}
+				currentPageResult.add(v);
+			}
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+		navigatePage.setCurrentPageResult(currentPageResult);
+
+		// 支出收入
+		sql = "SELECT SUM(money), SUM(returnMoney) FROM Overdraw WHERE time between ? and ?";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, startTime.getTimeInMillis());
+			ps.setLong(2, endtTime.getTimeInMillis());
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				navigatePage.setTotalExpenditure(rs.getFloat(1));
+				navigatePage.setTotalIncome(rs.getFloat(2));
+			}
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+
+		return navigatePage;
 	}
 
-	static void exitProgram(Exception e) {
+	public static void saveOverDrawItems(Overdraw overdraw) {
+		String sql = "insert into Overdraw(time, money, remark, address, returnTime, returnMoney, returnRemark) values(?,?,?,?,?,?,?)";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, overdraw.getTime());
+			ps.setFloat(2, overdraw.getMoney());
+			ps.setString(3, overdraw.getRemark());
+			ps.setString(4, overdraw.getAddress());
+			ps.setLong(5, overdraw.getReturnTime());
+			ps.setFloat(6, overdraw.getReturnMoney());
+			ps.setString(7, overdraw.getReturnRemark());
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+	}
+
+	public static void updateOverDrawItems(Overdraw overdraw) {
+		String sql = "update Overdraw set time = ?, money = ?, remark = ?, address = ?, returnTime = ?, returnMoney = ?, returnRemark = ? where id = ?";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setLong(1, overdraw.getTime());
+			ps.setFloat(2, overdraw.getMoney());
+			ps.setString(3, overdraw.getRemark());
+			ps.setString(4, overdraw.getAddress());
+			ps.setLong(5, overdraw.getReturnTime());
+			ps.setFloat(6, overdraw.getReturnMoney());
+			ps.setString(7, overdraw.getReturnRemark());
+			ps.setInt(8, overdraw.getId());
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+	}
+
+	public static Overdraw getOverDrawItems(int id) {
+		Overdraw overdraw = new Overdraw();
+		String sql = "select time, money, remark, address, returnTime, returnMoney, returnRemark from Overdraw where id = ?";
+
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				overdraw.setId(id);
+				overdraw.setTime(rs.getLong(1));
+				overdraw.setMoney(rs.getFloat(2));
+				overdraw.setRemark(rs.getString(3));
+				overdraw.setAddress(rs.getString(4));
+				overdraw.setReturnTime(rs.getLong(5));
+				overdraw.setReturnMoney(rs.getFloat(6));
+				overdraw.setReturnRemark(rs.getString(7));
+			}
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			exitProgram(e);
+		}
+		return overdraw;
+	}
+
+	// --------- end 预支付
+	private static void exitProgram(Exception e) {
 		log.severe(e.toString());
 		StackTraceElement[] trace = e.getStackTrace();
 		for (int i = 0; i < trace.length; i++)

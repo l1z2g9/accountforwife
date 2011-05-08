@@ -69,7 +69,6 @@ public class BalancePane extends JPanel {
 		add(createItems(), BorderLayout.NORTH);
 		add(createItems2(), BorderLayout.CENTER);
 		add(createDataTable(), BorderLayout.SOUTH);
-
 	}
 
 	public void categoryReload() {
@@ -290,7 +289,7 @@ public class BalancePane extends JPanel {
 
 							EditDialog dialog = new EditDialog(SwingUtilities
 									.getWindowAncestor(BalancePane.this), item,
-									type, BalancePane.this, selectedRow);
+									type, BalancePane.this);
 							dialog.setVisible(true);
 						}
 					});
