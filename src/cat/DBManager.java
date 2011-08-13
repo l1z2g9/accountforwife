@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +33,7 @@ import javax.swing.JOptionPane;
 
 public class DBManager {
 	static Logger log = Logger.getLogger("DBManager");
-
+	static SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	static DecimalFormat df = new DecimalFormat("##.##");
 	static int limit = 30;
 	static Connection conn = null;
@@ -101,7 +102,7 @@ public class DBManager {
 
 		float sumMoney = 0f;
 		String sumSql = "SELECT sum(money) FROM Item i, Category c, Category cp "
-				+ "WHERE i.categoryID = c.id and (c.parentID = cp.id or c.id = cp.id) and "
+				+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
 				+ "c.type = ? and time between ? and ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sumSql);
@@ -234,10 +235,11 @@ public class DBManager {
 							+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
 					type, parentID, subCategoryID, user, currentPage);
 			if (currentPage != -1) // == -1时候处理分页内容
-				sql += String.format(" order by i.id limit %s offset %s ",
+				sql += String.format(
+						" order by time asc, i.id asc limit %s offset %s ",
 						limit, offset);
 			else
-				sql += String.format(" order by i.id ");
+				sql += String.format(" order by time asc, i.id asc ");
 
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setLong(1, startTime.getTimeInMillis());
@@ -326,8 +328,8 @@ public class DBManager {
 	}
 
 	public static int saveItem(Item item) {
-		log.info("新增项目, time=" + item.getTime() + " , money=" + item.getMoney()
-				+ "categoryID=" + item.getCategoryID());
+		log.info("新增项目, time=" + sf.format(item.getTime()) + " , money="
+				+ item.getMoney() + "categoryID=" + item.getCategoryID());
 		int rowID = 0;
 		try {
 			String sql = "insert into Item(title, time, money, categoryID, remark, user, address) values(?, ?, ?, ?, ?, ?, ?)";
@@ -359,7 +361,7 @@ public class DBManager {
 	}
 
 	public static void updateItem(Item item) {
-		String sql = "update Item set title =?, money = ?, categoryID = ?, remark = ?, user = ?, address = ? where id= ?";
+		String sql = "update Item set title =?, money = ?, categoryID = ?, remark = ?, user = ?, address = ? where id = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, item.getTitle());
@@ -735,7 +737,7 @@ public class DBManager {
 		// 结果集
 		sql = String
 				.format(
-						"SELECT id, time, money, remark, address, returnTime, returnMoney, returnRemark, (returnMoney - money), completed FROM Overdraw "
+						"SELECT id, time, money, address, remark, returnTime, returnMoney, returnRemark, (returnMoney - money), completed FROM Overdraw "
 								+ "WHERE time BETWEEN ? and ? order by completed desc, id limit %s offset %s",
 						limit, offset);
 		Vector<Vector> currentPageResult = new Vector<Vector>();
@@ -797,7 +799,8 @@ public class DBManager {
 	}
 
 	public static void saveOverDrawItems(Overdraw overdraw) {
-		log.info("新增预支付项" + overdraw.getTime() + " , " + overdraw.getMoney());
+		log.info("新增预支付项" + sf.format(overdraw.getTime()) + " , 透支: "
+				+ overdraw.getMoney());
 		String sql = "insert into Overdraw(time, money, remark, address, returnTime, returnMoney, returnRemark) values(?,?,?,?,?,?,?)";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -837,7 +840,7 @@ public class DBManager {
 
 	public static void deleteOverDrawItems(int id) {
 		String sql = "delete from Overdraw where id = ?";
-		log.info("删除预支付项，ID= " + id);
+		log.info("删除预支付项，id = " + id);
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);

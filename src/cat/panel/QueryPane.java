@@ -1,5 +1,10 @@
 package cat.panel;
 
+import cat.Configure;
+import cat.DBManager;
+import cat.DateField2;
+import cat.model.Category;
+import cat.model.NavigatePage;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -10,10 +15,13 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+
 import java.io.File;
 import java.io.FileOutputStream;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +49,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
+import org.apache.poi.hssf.record.formula.functions.Column;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -49,6 +57,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -56,14 +65,6 @@ import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
-
-import sun.security.pkcs11.Secmod.DbMode;
-
-import cat.Configure;
-import cat.DBManager;
-import cat.DateField2;
-import cat.model.Category;
-import cat.model.NavigatePage;
 
 public class QueryPane extends JPanel {
 	static Logger log = Logger.getLogger("BalancePane");
@@ -141,7 +142,7 @@ public class QueryPane extends JPanel {
 
 		float incomeTotal = navigatePage.getTotalIncome();
 		float expenditureTotal = navigatePage.getTotalExpenditure();
-		
+
 		if (typeCombox.getSelectedIndex() == 0) {
 			summaryMoney.setText("总收入：" + nf.format(incomeTotal) + "   总支出："
 					+ nf.format(expenditureTotal));
@@ -276,9 +277,13 @@ public class QueryPane extends JPanel {
 
 					for (int colnum = 1; colnum < tableModel.getColumnCount() - 2; colnum++) {
 						HSSFCell cell = row2.createCell(colnum - 1);
-						cell.setCellValue(data.get(rownum - 1).get(colnum)
-								.toString());
-
+						if (colnum == 1) {
+							cell.setCellValue(Integer.parseInt(data.get(
+									rownum - 1).get(colnum).toString(), 10));
+						} else {
+							cell.setCellValue(data.get(rownum - 1).get(colnum)
+									.toString());
+						}
 						if (colnum == 5) {
 							Color color = (Color) data.get(rownum - 1).get(10);
 
