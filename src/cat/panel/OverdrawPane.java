@@ -29,7 +29,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -152,7 +151,7 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		itemPane.add(year);
 		itemPane.add(new JLabel("月"));
 		itemPane.add(month);
-		itemPane.add(summaryMoney);
+
 		controlPane.add(itemPane, BorderLayout.LINE_START);
 		// 导航
 		previous.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
@@ -169,7 +168,7 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		controlPane.add(navigator, BorderLayout.LINE_END);
 
 		pane.add(controlPane, BorderLayout.NORTH);
-
+		pane.add(summaryMoney, BorderLayout.CENTER);
 		// 表格
 		table.setRowHeight(22);
 		table.setAutoCreateRowSorter(true);
@@ -179,7 +178,7 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
-		table.setPreferredScrollableViewportSize(new Dimension(400, 270));
+		table.setPreferredScrollableViewportSize(new Dimension(400, 260));
 		JScrollPane s = new JScrollPane(table);
 		s.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		s.setBorder(BorderFactory.createCompoundBorder(BorderFactory
@@ -343,10 +342,12 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		// 更新统计结果面板
 		float incomeTotal = navigatePage.getTotalIncome();
 		float expenditureTotal = navigatePage.getTotalExpenditure();
+		float balanceTotal = navigatePage.getTotalBalance();
 
-		summaryMoney.setText("总归还额：" + nf.format(incomeTotal) + "   总预付额："
-				+ nf.format(expenditureTotal));
-
+		summaryMoney.setText(String.format("总归还额： %s   总预付额：%s    结余:%s", nf
+				.format(incomeTotal), nf.format(expenditureTotal), nf
+				.format(balanceTotal)));
+		summaryMoney.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 		number.setText(currentPage + " / " + totalPage + " 页");
 
 		if (currentPage == 1)

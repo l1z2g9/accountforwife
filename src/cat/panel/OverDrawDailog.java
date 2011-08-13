@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -29,6 +30,7 @@ public class OverDrawDailog extends JDialog {
 	DateField2 returnDate = new DateField2();
 	JTextField inputMoney = new JTextField();
 	JTextField returnRemark = new JTextField();
+	JCheckBox completed = new JCheckBox();
 	JButton save = new JButton("保存");
 	OverdrawPane overdrawPane;
 
@@ -91,7 +93,13 @@ public class OverDrawDailog extends JDialog {
 		items.add(new JLabel("归还备注："));
 		returnRemark.setPreferredSize(new Dimension(100, 30));
 		items.add(returnRemark);
+		pane.add(items);
 
+		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel completedLabel = new JLabel("完成：");
+		completedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
+		items.add(completedLabel);
+		items.add(completed);
 		pane.add(items);
 
 		items = new JPanel();
@@ -123,6 +131,7 @@ public class OverDrawDailog extends JDialog {
 				overdraw.setMoney(Float.parseFloat(money));
 				overdraw.setRemark(remark.getText());
 				overdraw.setAddress(address.getText());
+				overdraw.setCompleted(completed.isSelected() ? 1 : 0);
 
 				if (returnMoney.length() != 0) {
 					overdraw.setReturnMoney(Float.parseFloat(returnMoney));
@@ -147,6 +156,8 @@ public class OverDrawDailog extends JDialog {
 		outputMoney.setText(String.valueOf(overdraw.getMoney()));
 		address.setText(overdraw.getAddress());
 		remark.setText(overdraw.getRemark());
+		if (overdraw.getCompleted() == 1)
+			completed.setSelected(true);
 		if (overdraw.getReturnMoney() != 0f) {
 			Date inputDate = new Date(overdraw.getReturnTime());
 			returnDate.setValue(inputDate);

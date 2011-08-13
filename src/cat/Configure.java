@@ -41,6 +41,8 @@ public class Configure {
 		overDrawColumns.addElement("归还日期");
 		overDrawColumns.addElement("归还金额");
 		overDrawColumns.addElement("归还备注");
+		overDrawColumns.addElement("结余");
+		overDrawColumns.addElement("完成");
 	}
 
 	public static Vector<String> getDateColumns() {

@@ -8,7 +8,8 @@ public class NavigatePage {
 	private Vector<Vector> currentPageResult;
 	private Float totalIncome = 0f;
 	private Float totalExpenditure = 0f;
-
+	private Float totalBalance = 0f;
+	
 	public int getTotalPage() {
 		return totalPage;
 	}
@@ -47,5 +48,13 @@ public class NavigatePage {
 
 	public void setTotalExpenditure(Float totalExpenditure) {
 		this.totalExpenditure = totalExpenditure;
+	}
+
+	public Float getTotalBalance() {
+		return totalBalance;
+	}
+
+	public void setTotalBalance(Float totalBalance) {
+		this.totalBalance = totalBalance;
 	}
 }

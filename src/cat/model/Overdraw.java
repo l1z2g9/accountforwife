@@ -9,7 +9,8 @@ public class Overdraw {
 	private long returnTime;
 	private float returnMoney;
 	private String returnRemark;
-
+	private int completed;
+	
 	public int getId() {
 		return id;
 	}
@@ -72,5 +73,13 @@ public class Overdraw {
 
 	public void setReturnRemark(String returnRemark) {
 		this.returnRemark = returnRemark;
+	}
+
+	public int getCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(int completed) {
+		this.completed = completed;
 	}
 }
