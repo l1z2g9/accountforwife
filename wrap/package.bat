@@ -7,7 +7,7 @@ nmake
 
 rem 依赖包
 mkdir dependencies
-xcopy ..\..\dependencies .\dependencies
+xcopy ..\dependencies .\dependencies
 
 rem 初始化数据库
 sqlite3 Account.db < ..\src\Account.sql
