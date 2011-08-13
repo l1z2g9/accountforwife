@@ -735,7 +735,8 @@ public class DBManager {
 		// 结果集
 		sql = String
 				.format(
-						"SELECT id, time, money, remark, address, returnTime, returnMoney, returnRemark FROM Overdraw WHERE time BETWEEN ? and ? order by id limit %s offset %s",
+						"SELECT id, time, money, remark, address, returnTime, returnMoney, returnRemark, (returnMoney - money), completed FROM Overdraw "
+								+ "WHERE time BETWEEN ? and ? order by completed desc, id limit %s offset %s",
 						limit, offset);
 		Vector<Vector> currentPageResult = new Vector<Vector>();
 
@@ -762,6 +763,8 @@ public class DBManager {
 					v.addElement(rs.getFloat(7));
 					v.addElement(rs.getString(8));
 				}
+				v.addElement(rs.getFloat(9));
+				v.addElement(rs.getInt(10) == 1 ? "是" : "否");
 				currentPageResult.add(v);
 			}
 			rs.close();
@@ -781,6 +784,7 @@ public class DBManager {
 			while (rs.next()) {
 				navigatePage.setTotalExpenditure(rs.getFloat(1));
 				navigatePage.setTotalIncome(rs.getFloat(2));
+				navigatePage.setTotalBalance(rs.getFloat(2) - rs.getFloat(1));
 			}
 
 			rs.close();
@@ -812,7 +816,7 @@ public class DBManager {
 	}
 
 	public static void updateOverDrawItems(Overdraw overdraw) {
-		String sql = "update Overdraw set time = ?, money = ?, remark = ?, address = ?, returnTime = ?, returnMoney = ?, returnRemark = ? where id = ?";
+		String sql = "update Overdraw set time = ?, money = ?, remark = ?, address = ?, returnTime = ?, returnMoney = ?, returnRemark = ?, completed = ? where id = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setLong(1, overdraw.getTime());
@@ -822,7 +826,8 @@ public class DBManager {
 			ps.setLong(5, overdraw.getReturnTime());
 			ps.setFloat(6, overdraw.getReturnMoney());
 			ps.setString(7, overdraw.getReturnRemark());
-			ps.setInt(8, overdraw.getId());
+			ps.setInt(8, overdraw.getCompleted());
+			ps.setInt(9, overdraw.getId());
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
@@ -845,7 +850,7 @@ public class DBManager {
 
 	public static Overdraw getOverDrawItems(int id) {
 		Overdraw overdraw = new Overdraw();
-		String sql = "select time, money, remark, address, returnTime, returnMoney, returnRemark from Overdraw where id = ?";
+		String sql = "select time, money, remark, address, returnTime, returnMoney, returnRemark, completed from Overdraw where id = ?";
 
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -860,6 +865,7 @@ public class DBManager {
 				overdraw.setReturnTime(rs.getLong(5));
 				overdraw.setReturnMoney(rs.getFloat(6));
 				overdraw.setReturnRemark(rs.getString(7));
+				overdraw.setCompleted(rs.getInt(8));
 			}
 
 			rs.close();
