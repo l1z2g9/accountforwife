@@ -356,5 +356,10 @@ public class OverdrawPane extends JPanel implements ItemListener {
 			forward.setEnabled(true);
 		else
 			forward.setEnabled(false);
+
+		table.scrollRectToVisible(table.getCellRect(table.getRowCount() - 1, 0,
+				true));
+		int lastIndex = table.getRowCount() - 1;
+		table.setRowSelectionInterval(lastIndex, lastIndex);
 	}
 }
