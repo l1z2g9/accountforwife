@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -116,8 +117,14 @@ public class BalancePane extends JPanel {
 		categoryCombox = new JComboBox(categories.keySet().toArray());
 		pane.add(categoryCombox);
 		pane.add(setBorder(new JLabel("Ð¡Àà±ð£º"), 20, 0));
-		subcategories = DBManager.getSubCategory(categories.get(
-				(String) categoryCombox.getSelectedItem()).getId());
+
+		Category category = categories.get((String) categoryCombox
+				.getSelectedItem());
+		if (category != null) {
+			subcategories = DBManager.getSubCategory(category.getId());
+		} else {
+			subcategories = new HashMap<String, Category>();
+		}
 		subCategoryCombox = new JComboBox(subcategories.keySet().toArray());
 		subCategoryCombox.setPreferredSize(new Dimension(100, 30));
 		pane.add(subCategoryCombox);
