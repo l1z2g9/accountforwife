@@ -1,6 +1,6 @@
 @echo off
 rem 打包
-jar cvfm core.jar MANIFEST.MF -C ..\..\bin\ .
+jar cvfm core.jar MANIFEST.MF -C ..\..\..\bin\ .
 
 rem 用可执行文件包装java程序运行
 nmake 
@@ -21,3 +21,5 @@ del Account.db
 del 小艺有数.exe
 del core.jar
 nmake clean
+
+mv 小艺有数.zip accountforwife.zip
