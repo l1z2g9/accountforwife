@@ -765,7 +765,7 @@ public class DBManager {
 					v.addElement(rs.getFloat(7));
 					v.addElement(rs.getString(8));
 				}
-				v.addElement(rs.getFloat(9));
+				v.addElement(rs.getInt(10) == 1 ? rs.getFloat(9):"");
 				v.addElement(rs.getInt(10) == 1 ? "ÊÇ" : "·ñ");
 				currentPageResult.add(v);
 			}
