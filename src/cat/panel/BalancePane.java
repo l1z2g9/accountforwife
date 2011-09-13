@@ -154,6 +154,10 @@ public class BalancePane extends JPanel {
 		JPanel pane = new JPanel();
 		pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
+		pane.add(setBorder(new JLabel("汇率："), 20, 0));
+		final JTextField exchangeRate = new JTextField();
+		pane.add(exchangeRate);
+
 		pane.add(setBorder(new JLabel("用户："), 20, 0));
 		final JTextField user = new JTextField();
 		pane.add(user);
@@ -173,8 +177,8 @@ public class BalancePane extends JPanel {
 
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				if (moneyField.getText().trim().isEmpty()) {
+				String inputMoney = moneyField.getText().trim();
+				if (inputMoney.isEmpty()) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(BalancePane.this), "金额不能为空！",
 							"输入错误", JOptionPane.ERROR_MESSAGE);
@@ -182,7 +186,7 @@ public class BalancePane extends JPanel {
 				}
 				// 验证金额是否为数字，没有使用JFormattedTextField
 				Pattern pattern = Pattern.compile("^[0-9\\.]+$");
-				Matcher m = pattern.matcher(moneyField.getText());
+				Matcher m = pattern.matcher(inputMoney);
 				if (!m.matches()) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(BalancePane.this), "请输入正确的金额！",
@@ -190,8 +194,20 @@ public class BalancePane extends JPanel {
 					return;
 				}
 
+				float exchange = 1.0f;
+				if (!exchangeRate.getText().trim().isEmpty()) {
+					Matcher m2 = pattern.matcher(exchangeRate.getText().trim());
+					if (!m2.matches()) {
+						JOptionPane.showMessageDialog(SwingUtilities
+								.getWindowAncestor(BalancePane.this),
+								"请输入正确的汇率！", "输入错误", JOptionPane.ERROR_MESSAGE);
+						exchangeRate.requestFocus();
+						return;
+					}
+					exchange = Float.parseFloat(exchangeRate.getText().trim());
+				}
 				// 保存
-				float money = Float.valueOf(moneyField.getText());
+				float money = Float.valueOf(inputMoney) * exchange;
 				Item item = new Item();
 				item.setTime(((Date) selectedDate.getValue()).getTime());
 				item.setMoney(money);
