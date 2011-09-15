@@ -46,7 +46,7 @@ public class AccountPanel extends MIDlet implements ActionListener {
 
 		Form f = new Form();
 
-		f.setTitle("Hello World");
+		f.setTitle("Hello World, Java me");
 		f.setLayout(new BorderLayout());
 		f.addComponent("Center", new Label("I am a Label"));
 		f.show();
