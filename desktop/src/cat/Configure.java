@@ -16,33 +16,33 @@ public class Configure {
 	static final String LOGIN_USER = "cat";
 	static {
 		dateColumns.addElement("ID");
-		dateColumns.addElement("ĞòºÅ");
-		dateColumns.addElement("ÈÕÆÚ");
-		dateColumns.addElement("Àà±ğ");
-		dateColumns.addElement("Ğ¡Àà±ğ");
-		dateColumns.addElement("½ğ¶î(Ôª)");
-		dateColumns.addElement("ÓÃ»§");
-		dateColumns.addElement("³¡Ëù");
-		dateColumns.addElement("±¸×¢");
-		dateColumns.addElement("ÀàĞÍ");
-		dateColumns.addElement("ÑÕÉ«");
+		dateColumns.addElement("åºå·");
+		dateColumns.addElement("æ—¥æœŸ");
+		dateColumns.addElement("ç±»åˆ«");
+		dateColumns.addElement("å°ç±»åˆ«");
+		dateColumns.addElement("é‡‘é¢(å…ƒ)");
+		dateColumns.addElement("ç”¨æˆ·");
+		dateColumns.addElement("åœºæ‰€");
+		dateColumns.addElement("å¤‡æ³¨");
+		dateColumns.addElement("ç±»å‹");
+		dateColumns.addElement("é¢œè‰²");
 
-		categoryBudgetColumns.addElement("ĞòºÅ");
-		categoryBudgetColumns.addElement("Àà±ğID");
-		categoryBudgetColumns.addElement("Àà±ğ");
-		categoryBudgetColumns.addElement("Ô¤Ëã½ğ¶î");
+		categoryBudgetColumns.addElement("åºå·");
+		categoryBudgetColumns.addElement("ç±»åˆ«ID");
+		categoryBudgetColumns.addElement("ç±»åˆ«");
+		categoryBudgetColumns.addElement("é¢„ç®—é‡‘é¢");
 
 		overDrawColumns.addElement("ID");
-		overDrawColumns.addElement("ĞòºÅ");
-		overDrawColumns.addElement("Ö§¸¶ÈÕÆÚ");
-		overDrawColumns.addElement("Ö§¸¶½ğ¶î");
-		overDrawColumns.addElement("³¡Ëù");
-		overDrawColumns.addElement("±¸×¢");
-		overDrawColumns.addElement("¹é»¹ÈÕÆÚ");
-		overDrawColumns.addElement("¹é»¹½ğ¶î");
-		overDrawColumns.addElement("¹é»¹±¸×¢");
-		overDrawColumns.addElement("½áÓà");
-		overDrawColumns.addElement("Íê³É");
+		overDrawColumns.addElement("åºå·");
+		overDrawColumns.addElement("æ”¯ä»˜æ—¥æœŸ");
+		overDrawColumns.addElement("æ”¯ä»˜é‡‘é¢");
+		overDrawColumns.addElement("åœºæ‰€");
+		overDrawColumns.addElement("å¤‡æ³¨");
+		overDrawColumns.addElement("å½’è¿˜æ—¥æœŸ");
+		overDrawColumns.addElement("å½’è¿˜é‡‘é¢");
+		overDrawColumns.addElement("å½’è¿˜å¤‡æ³¨");
+		overDrawColumns.addElement("ç»“ä½™");
+		overDrawColumns.addElement("å®Œæˆ");
 	}
 
 	public static Vector<String> getDateColumns() {

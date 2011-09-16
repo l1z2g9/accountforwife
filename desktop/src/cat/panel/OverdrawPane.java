@@ -54,9 +54,9 @@ public class OverdrawPane extends JPanel implements ItemListener {
 	JTextField inputMoney = new JTextField();
 	JTextField returnRemark = new JTextField();
 
-	JButton save = new JButton("±£´æ");
+	JButton save = new JButton("ä¿å­˜");
 
-	// Êı¾İ±í¸ñ
+	// æ•°æ®è¡¨æ ¼
 	final JButton previous = new JButton(new ImageIcon(getClass().getResource(
 			"/images/back.png")));
 	final JButton forward = new JButton(new ImageIcon(getClass().getResource(
@@ -94,33 +94,33 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
 
-		pane.add(setBorder(new JLabel("Ö§¸¶ÈÕÆÚ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("æ”¯ä»˜æ—¥æœŸï¼š"), 20, 0));
 		overdrawDate.setMaximumSize(new Dimension(120, 30));
 		pane.add(overdrawDate);
 
-		pane.add(setBorder(new JLabel("Ö§¸¶½ğ¶î£º"), 20, 0));
+		pane.add(setBorder(new JLabel("æ”¯ä»˜é‡‘é¢ï¼š"), 20, 0));
 		pane.add(outputMoney);
-		pane.add(setBorder(new JLabel("Ôª"), 0, 0));
+		pane.add(setBorder(new JLabel("å…ƒ"), 0, 0));
 
-		pane.add(setBorder(new JLabel("³¡Ëù£º"), 20, 0));
+		pane.add(setBorder(new JLabel("åœºæ‰€ï¼š"), 20, 0));
 		pane.add(address);
 
-		pane.add(setBorder(new JLabel("±¸×¢£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å¤‡æ³¨ï¼š"), 20, 0));
 		pane.add(remark);
 		itemsPane.add(pane);
-		// µÚ¶şĞĞ
+		// ç¬¬äºŒè¡Œ
 		pane = new JPanel();
 
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
-		pane.add(setBorder(new JLabel("¹é»¹ÈÕÆÚ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å½’è¿˜æ—¥æœŸï¼š"), 20, 0));
 		returnDate.setMaximumSize(new Dimension(120, 30));
 		pane.add(returnDate);
 
-		pane.add(setBorder(new JLabel("¹é»¹½ğ¶î£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å½’è¿˜é‡‘é¢ï¼š"), 20, 0));
 		pane.add(inputMoney);
-		pane.add(setBorder(new JLabel("Ôª"), 0, 0));
+		pane.add(setBorder(new JLabel("å…ƒ"), 0, 0));
 
-		pane.add(setBorder(new JLabel("¹é»¹±¸×¢£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å½’è¿˜å¤‡æ³¨ï¼š"), 20, 0));
 		pane.add(returnRemark);
 		returnRemark.setPreferredSize(new Dimension(40, 30));
 		pane.add(Box.createHorizontalStrut(23));
@@ -136,24 +136,24 @@ public class OverdrawPane extends JPanel implements ItemListener {
 	}
 
 	private JPanel createDataTable() {
-		// ÄêÔÂ
+		// å¹´æœˆ
 		JPanel pane = new JPanel(new BorderLayout());
 		JPanel controlPane = new JPanel(new BorderLayout());
 		JPanel itemPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		itemPane.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 10));
 
 		Calendar c = Calendar.getInstance();
-		itemPane.add(new JLabel("Ñ¡ÔñÄêÔÂ£º"));
+		itemPane.add(new JLabel("é€‰æ‹©å¹´æœˆï¼š"));
 		year.setSelectedItem(c.get(Calendar.YEAR));
 		month.setSelectedItem(c.get(Calendar.MONTH) + 1);
 
-		itemPane.add(new JLabel("Äê"));
+		itemPane.add(new JLabel("å¹´"));
 		itemPane.add(year);
-		itemPane.add(new JLabel("ÔÂ"));
+		itemPane.add(new JLabel("æœˆ"));
 		itemPane.add(month);
 
 		controlPane.add(itemPane, BorderLayout.LINE_START);
-		// µ¼º½
+		// å¯¼èˆª
 		previous.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 		forward.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
@@ -169,10 +169,10 @@ public class OverdrawPane extends JPanel implements ItemListener {
 
 		pane.add(controlPane, BorderLayout.NORTH);
 		pane.add(summaryMoney, BorderLayout.CENTER);
-		// ±í¸ñ
+		// è¡¨æ ¼
 		table.setRowHeight(22);
 		table.setAutoCreateRowSorter(true);
-		// Òş²ØIDÁĞ
+		// éšè—IDåˆ—
 		TableColumn idCol = table.getColumnModel().getColumn(0);
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
@@ -225,16 +225,16 @@ public class OverdrawPane extends JPanel implements ItemListener {
 				String money = outputMoney.getText();
 				if (!money.matches("^[\\d\\.]+$")) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(OverdrawPane.this), "ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(OverdrawPane.this), "è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				String returnMoney = inputMoney.getText();
 				if (returnMoney.length() != 0
 						&& !returnMoney.matches("^[\\d\\.]+$")) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(OverdrawPane.this), "ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(OverdrawPane.this), "è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -261,14 +261,14 @@ public class OverdrawPane extends JPanel implements ItemListener {
 			public void mouseClicked(MouseEvent e) {
 				if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
 					JPopupMenu popup = new JPopupMenu();
-					JMenuItem menuItem = new JMenuItem("±à¼­");
+					JMenuItem menuItem = new JMenuItem("ç¼–è¾‘");
 					menuItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							int selectedRow = table.getSelectedRow();
 							if (selectedRow == -1) {
 								JOptionPane.showMessageDialog(SwingUtilities
 										.getWindowAncestor(OverdrawPane.this),
-										"ÇëÑ¡ÔñÒª±à¼­µÄĞĞ£¡", "´íÎó",
+										"è¯·é€‰æ‹©è¦ç¼–è¾‘çš„è¡Œï¼", "é”™è¯¯",
 										JOptionPane.ERROR_MESSAGE);
 								return;
 							}
@@ -283,14 +283,14 @@ public class OverdrawPane extends JPanel implements ItemListener {
 						}
 					});
 					popup.add(menuItem);
-					menuItem = new JMenuItem("É¾³ı");
+					menuItem = new JMenuItem("åˆ é™¤");
 					menuItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							int selectedRow = table.getSelectedRow();
 							if (selectedRow == -1) {
 								JOptionPane.showMessageDialog(SwingUtilities
 										.getWindowAncestor(OverdrawPane.this),
-										"ÇëÑ¡ÔñÒª±à¼­µÄĞĞ£¡", "´íÎó",
+										"è¯·é€‰æ‹©è¦ç¼–è¾‘çš„è¡Œï¼", "é”™è¯¯",
 										JOptionPane.ERROR_MESSAGE);
 								return;
 							}
@@ -298,7 +298,7 @@ public class OverdrawPane extends JPanel implements ItemListener {
 									.showConfirmDialog(
 											SwingUtilities
 													.getWindowAncestor(OverdrawPane.this),
-											"ÄãÈ·¶¨ÒªÉ¾³ıÑ¡ÔñµÄÄÚÈİ£¿", "É¾³ıÄÚÈİ",
+											"ä½ ç¡®å®šè¦åˆ é™¤é€‰æ‹©çš„å†…å®¹ï¼Ÿ", "åˆ é™¤å†…å®¹",
 											JOptionPane.YES_NO_OPTION,
 											JOptionPane.INFORMATION_MESSAGE);
 							if (result == 0)
@@ -331,7 +331,7 @@ public class OverdrawPane extends JPanel implements ItemListener {
 		tableModel.setDataVector(navigatePage.getCurrentPageResult(), Configure
 				.getOverDrawColumns());
 
-		// Òş²ØIDÁĞ
+		// éšè—IDåˆ—
 		TableColumn idCol = table.getColumnModel().getColumn(0);
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
@@ -339,16 +339,16 @@ public class OverdrawPane extends JPanel implements ItemListener {
 
 		TableColumn seqCol = table.getColumnModel().getColumn(1);
 		seqCol.setMaxWidth(45);
-		// ¸üĞÂÍ³¼Æ½á¹ûÃæ°å
+		// æ›´æ–°ç»Ÿè®¡ç»“æœé¢æ¿
 		float incomeTotal = navigatePage.getTotalIncome();
 		float expenditureTotal = navigatePage.getTotalExpenditure();
 		float balanceTotal = navigatePage.getTotalBalance();
 
-		summaryMoney.setText(String.format("×Ü¹é»¹¶î£º %s   ×ÜÔ¤¸¶¶î£º%s    ½áÓà:%s", nf
+		summaryMoney.setText(String.format("æ€»å½’è¿˜é¢ï¼š %s   æ€»é¢„ä»˜é¢ï¼š%s    ç»“ä½™:%s", nf
 				.format(incomeTotal), nf.format(expenditureTotal), nf
 				.format(balanceTotal)));
 		summaryMoney.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
-		number.setText(currentPage + " / " + totalPage + " Ò³");
+		number.setText(currentPage + " / " + totalPage + " é¡µ");
 
 		if (currentPage == 1)
 			previous.setEnabled(false);

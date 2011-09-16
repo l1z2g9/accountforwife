@@ -1,22 +1,22 @@
-/c ���룬һ���Ǳ����obj�ļ�
-/C Ԥ����
-/I:"c:\"    include��Ŀ¼���ɶ�γ���
-/O  �����Ż�����/O2 /Ot /Ox
-/W /w  Ϊ���뾯����صģ�Сд�ı�ʾ��ֹ����д��ʾ���ã���
-            /Wall��ʾ��ʾ���о��棬/w���ʾ����ʾ���棬���⻹�о��漶���ѡ��
-/ML /MT /MD ���̶߳��߳���ص�ѡ��
-/TC /TP /Tc /Tp ��c ��cpp��ʽ���룬��д��ʾ�����ļ���Сд��ʾ���ļ�
+/c 编译，一般是编译成obj文件
+/C 预编译
+/I:"c:\"    include的目录，可多次出现
+/O  多是优化，如/O2 /Ot /Ox
+/W /w  为编译警告相关的，小写的表示禁止，大写表示启用，如
+            /Wall表示显示所有警告，/w则表示不显示警告，另外还有警告级别的选项
+/ML /MT /MD 单线程多线程相关的选项
+/TC /TP /Tc /Tp 以c 或cpp方式编译，大写表示所有文件，小写表示本文件
 
 
-���ĵ�Ȼ��/c��
-����/?��������ϸ��˵��
-ѡ��٣����������
+最多的当然是/c啦
+不过/?可以有详细的说明
+选项不少，慢慢补充吧
 
-link��õľ��� 
-/LIBPATH:"c:\lib"  ָ��lib�ļ�Ŀ¼
+link最常用的就是 
+/LIBPATH:"c:\lib"  指定lib文件目录
 /OUT
 /SUBSYSTEM
    /SUBSYSTEM:WINDOWS /SUBSYSTEM:CONSOLE
 
-rc�ͱȽ����ˣ�һ��ֱ��rcһ��rc�ļ������˰�
-������cl��/I��rcҲ��һ��/i�Ĳ�������ָ����includeĿ¼
+rc就比较少了，一般直接rc一个rc文件就行了吧
+类似于cl的/I，rc也有一个/i的参数，来指定的include目录

@@ -61,18 +61,18 @@ public class BudgetPane extends JPanel {
 		super(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
 
-		// Àà±ğ²¿·Ö
+		// ç±»åˆ«éƒ¨åˆ†
 		JPanel categorySetPane = new JPanel();
 		categorySetPane.setLayout(new BoxLayout(categorySetPane,
 				BoxLayout.LINE_AXIS));
 		categorySetPane.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createLineBorder(Color.black), "Àà±ğÉèÖÃ"));
+				BorderFactory.createLineBorder(Color.black), "ç±»åˆ«è®¾ç½®"));
 		final Map<String, String> typeMap = new HashMap<String, String>();
-		typeMap.put("ÊÕÈë", "Income");
-		typeMap.put("Ö§³ö", "Expenditure");
+		typeMap.put("æ”¶å…¥", "Income");
+		typeMap.put("æ”¯å‡º", "Expenditure");
 
 		final JComboBox typeCombox = new JComboBox(typeMap.keySet().toArray());
-		final JButton categoryButton = new JButton("Àà±ğÉèÖÃ");
+		final JButton categoryButton = new JButton("ç±»åˆ«è®¾ç½®");
 		categoryButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CategoryDialog panel = new CategoryDialog(SwingUtilities
@@ -83,7 +83,7 @@ public class BudgetPane extends JPanel {
 			}
 		});
 
-		final JButton subCategoryButton = new JButton("Ğ¡Àà±ğÉèÖÃ");
+		final JButton subCategoryButton = new JButton("å°ç±»åˆ«è®¾ç½®");
 		subCategoryButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CategoryDialog panel = new CategoryDialog(SwingUtilities
@@ -105,11 +105,11 @@ public class BudgetPane extends JPanel {
 
 		add(categorySetPane, BorderLayout.PAGE_START);
 
-		// Ô¤Ëã²¿·Ö
+		// é¢„ç®—éƒ¨åˆ†
 		JPanel choose = new JPanel();
 		choose.setLayout(new BoxLayout(choose, BoxLayout.PAGE_AXIS));
 		choose.setBorder(BorderFactory.createTitledBorder(BorderFactory
-				.createLineBorder(Color.black), "Ô¤ËãÉèÖÃ"));
+				.createLineBorder(Color.black), "é¢„ç®—è®¾ç½®"));
 
 		Calendar c = Calendar.getInstance();
 
@@ -117,14 +117,14 @@ public class BudgetPane extends JPanel {
 		month = new JComboBox(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 				12 });
 		JPanel yearMonth = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		yearMonth.add(new JLabel("Ñ¡ÔñÄêÔÂ£º"));
+		yearMonth.add(new JLabel("é€‰æ‹©å¹´æœˆï¼š"));
 		year.setSelectedItem(c.get(Calendar.YEAR));
 		month.setSelectedItem(c.get(Calendar.MONTH) + 1);
 
 		yearMonth.add(year);
-		yearMonth.add(new JLabel("Äê"));
+		yearMonth.add(new JLabel("å¹´"));
 		yearMonth.add(month);
-		yearMonth.add(new JLabel("ÔÂ"));
+		yearMonth.add(new JLabel("æœˆ"));
 
 		JPanel summaryPanel = new JPanel();
 		summaryPanel
@@ -140,14 +140,14 @@ public class BudgetPane extends JPanel {
 		year.addItemListener(new SelectChangeListenter());
 		month.addItemListener(new SelectChangeListenter());
 
-		JLabel title = new JLabel("Ö§³öÔ¤Ëã±í");
+		JLabel title = new JLabel("æ”¯å‡ºé¢„ç®—è¡¨");
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 14));
 		title.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 		JPanel tmp = new JPanel();
 		tmp.add(title);
 		choose.add(tmp);
 
-		// Ô¤Ëã±í¸ñ
+		// é¢„ç®—è¡¨æ ¼
 		budgetTable = new JTable(model);
 		refreshTableData();
 
@@ -159,7 +159,7 @@ public class BudgetPane extends JPanel {
 		// sourceTable.getRowSorter().toggleSortOrder(0);
 		choose.add(scrollPane);
 
-		JButton save = new JButton("±£´æ");
+		JButton save = new JButton("ä¿å­˜");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (budgetTable.isEditing()) {
@@ -179,7 +179,7 @@ public class BudgetPane extends JPanel {
 				DBManager.saveBudget((Integer) year.getSelectedItem(),
 						(Integer) month.getSelectedItem(), map);
 
-				JOptionPane.showMessageDialog(BudgetPane.this, "±£´æ³É¹¦¡£", "Ô¤ËãÉèÖÃ",
+				JOptionPane.showMessageDialog(BudgetPane.this, "ä¿å­˜æˆåŠŸã€‚", "é¢„ç®—è®¾ç½®",
 						JOptionPane.INFORMATION_MESSAGE);
 
 				refreshSummary();
@@ -212,17 +212,17 @@ public class BudgetPane extends JPanel {
 				sum += money;
 			}
 		}
-		summaryMoney.setText("×ÜÔ¤Ëã£º" + sum);
+		summaryMoney.setText("æ€»é¢„ç®—ï¼š" + sum);
 
 		expenditureMoney
 				.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-		expenditureMoney.setText("×ÜÖ§³ö£º"
+		expenditureMoney.setText("æ€»æ”¯å‡ºï¼š"
 				+ DBManager.getTotalMonthMoney(Integer.valueOf(year
 						.getSelectedItem().toString()), Integer.valueOf(month
 						.getSelectedItem().toString()), "Expenditure"));
 
 		incomeMoney.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-		incomeMoney.setText("×ÜÊÕÈë£º"
+		incomeMoney.setText("æ€»æ”¶å…¥ï¼š"
 				+ DBManager.getTotalMonthMoney(Integer.valueOf(year
 						.getSelectedItem().toString()), Integer.valueOf(month
 						.getSelectedItem().toString()), "Income"));
@@ -260,7 +260,7 @@ public class BudgetPane extends JPanel {
 	}
 
 	/**
-	 * ÄêÔÂÈÕ±ä»¯Ê±£¬¸üĞÂÔ¤ËãÄÚÈİ¡£
+	 * å¹´æœˆæ—¥å˜åŒ–æ—¶ï¼Œæ›´æ–°é¢„ç®—å†…å®¹ã€‚
 	 */
 	class SelectChangeListenter implements ItemListener {
 		@Override

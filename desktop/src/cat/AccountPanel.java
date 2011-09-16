@@ -30,22 +30,22 @@ public class AccountPanel extends JPanel {
 		JPanel tabpane = new JPanel();
 		final JTabbedPane tab = new JTabbedPane();
 		final BalancePane expenditure = new BalancePane("Expenditure");
-		tab.addTab("Ö§³ö", expenditure);
+		tab.addTab("æ”¯å‡º", expenditure);
 		tab.setMnemonicAt(0, KeyEvent.VK_1);
 
 		final BalancePane income = new BalancePane("Income");
-		tab.addTab("ÊÕÈë", income);
+		tab.addTab("æ”¶å…¥", income);
 		tab.setMnemonicAt(1, KeyEvent.VK_2);
 		final BudgetPane budget = new BudgetPane();
-		tab.addTab("Ô¤Ëã", budget);
+		tab.addTab("é¢„ç®—", budget);
 		tab.setMnemonicAt(2, KeyEvent.VK_3);
 
 		final QueryPane queryPane = new QueryPane();
-		tab.addTab("²éÑ¯", queryPane);
+		tab.addTab("æŸ¥è¯¢", queryPane);
 		tab.setMnemonicAt(3, KeyEvent.VK_4);
 
 		final OverdrawPane overdrawPane = new OverdrawPane();
-		tab.addTab("Ô¤Ö§¸¶", overdrawPane);
+		tab.addTab("é¢„æ”¯ä»˜", overdrawPane);
 		tab.setMnemonicAt(4, KeyEvent.VK_5);
 
 		// tab.setSelectedIndex(4);
@@ -72,7 +72,7 @@ public class AccountPanel extends JPanel {
 
 		add(tabpane, BorderLayout.PAGE_START);
 
-		JLabel sign = new JLabel("½÷ÒÔ´ËÈí¼şÏ×¸øÎÒ×î°®µÄÆÅÆÅÖí£­Ğ¡ÒÕ {O(¡É_¡É)O~");
+		JLabel sign = new JLabel("è°¨ä»¥æ­¤è½¯ä»¶çŒ®ç»™æˆ‘æœ€çˆ±çš„å©†å©†çŒªï¼å°è‰º {O(âˆ©_âˆ©)O~");
 		sign.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		add(sign, BorderLayout.PAGE_END);
 	}
@@ -90,7 +90,7 @@ public class AccountPanel extends JPanel {
 			e.printStackTrace();
 		}
 
-		JFrame frame = new JFrame("Ğ¡ÒÕÓĞÊı");
+		JFrame frame = new JFrame("å°è‰ºæœ‰æ•°");
 
 		frame.setIconImage(new ImageIcon(AccountPanel.class
 				.getResource("/images/piggy_bank.png")).getImage());

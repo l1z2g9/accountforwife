@@ -1,5 +1,6 @@
 package cat;
 
+import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -11,14 +12,14 @@ import com.sun.lwuit.awtport.AwtImpl;
 
 public class DesktopRun {
 	private static void createAndShowGUI() {
-		JFrame f = new JFrame("run on desttop");
+		Frame f = new Frame("run on desttop");
 		f.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				Display.getInstance().exitApplication();
 			}
 		});
 		f.setLayout(new java.awt.BorderLayout());
-		f.setSize(480, 800);
+		f.setSize(320, 480);
 		AwtImpl.setUseNativeInput(false);
 		Display.init(f);
 		f.validate();

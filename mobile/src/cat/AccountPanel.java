@@ -7,6 +7,8 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.TabbedPane;
+import com.sun.lwuit.Tabs;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.io.ConnectionRequest;
@@ -22,25 +24,23 @@ public class AccountPanel implements ActionListener {
 	}
 
 	protected void destroyApp(boolean arg0) {
+		// TODO Auto-generated method stub
 
 	}
 
 	protected void pauseApp() {
+		// TODO Auto-generated method stub
 	}
 
 	protected void startApp() {
-		
-		Display.init(this);
 		String name = "TipsterTheme";
 		Resources r;
 		try {
 			r = Resources.open("/" + name + ".res");
 			UIManager.getInstance().setThemeProps(
 					r.getTheme(r.getThemeResourceNames()[0]));
-			System.out.println("<<<<<<<<<<" + r);
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("<<<<<<<<<<####");
 			e.printStackTrace();
 		}
 		Display.getInstance().callSerially(new Runnable() {
@@ -51,20 +51,26 @@ public class AccountPanel implements ActionListener {
 	}
 
 	protected void setMainForm() {
+		Form main = new Form();
+		main.setTitle("Hello World");
+
+		Tabs tab = new Tabs();
+		tab.addTab("Tab 1", new Label("Welcome to TabbedPane demo!"));
+
 		Form f = new Form();
 
-		f.setTitle("Hello World");
-		f.setLayout(new BorderLayout());
+		//f.setLayout(new BorderLayout());
 		Label label = new Label("I am a Label");
-		f.addComponent("Center", label);
-		f.show();
-
-		Command exitCommand = new Command("Exit");
-		f.addCommand(exitCommand);
-		f.addCommandListener(this);
+		f.addComponent( label);
 
 		testConnectHttp(label);
+		tab.addTab("Tab 2", f);
 
+		main.addComponent(tab);
+		Command exitCommand = new Command("Exit");
+		main.addCommand(exitCommand);
+		main.addCommandListener(this);
+		main.show();
 	}
 
 	private void testConnectHttp(final Label label) {
@@ -74,6 +80,8 @@ public class AccountPanel implements ActionListener {
 				byte[] buffer = new byte[10000];
 				int length = input.read(buffer);
 				while (length != -1) {
+					System.out.println("------ "
+							+ new String(buffer, 0, length));
 					label.setText(new String(buffer, 0, length));
 					length = input.read(buffer);
 				}
@@ -85,7 +93,6 @@ public class AccountPanel implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent ae) {
-		System.out.println("exit...");
 		Display.getInstance().exitApplication();
 	}
 
