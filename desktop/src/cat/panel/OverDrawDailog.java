@@ -31,12 +31,12 @@ public class OverDrawDailog extends JDialog {
 	JTextField inputMoney = new JTextField();
 	JTextField returnRemark = new JTextField();
 	JCheckBox completed = new JCheckBox();
-	JButton save = new JButton("±£´æ");
+	JButton save = new JButton("ä¿å­˜");
 	OverdrawPane overdrawPane;
 
 	public OverDrawDailog(Window parent, final int overdrawId,
 			final OverdrawPane overdrawPane) {
-		super(parent, "±à¼­ÏîÄ¿", ModalityType.APPLICATION_MODAL);
+		super(parent, "ç¼–è¾‘é¡¹ç›®", ModalityType.APPLICATION_MODAL);
 		this.overdrawPane = overdrawPane;
 		this.getContentPane().add(createItems(overdrawId));
 		setData(overdrawId);
@@ -51,19 +51,19 @@ public class OverDrawDailog extends JDialog {
 		pane.setLayout(new GridLayout(0, 1));
 		pane.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 		JPanel items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		items.add(new JLabel("Ö§¸¶ÈÕÆÚ£º"));
+		items.add(new JLabel("æ”¯ä»˜æ—¥æœŸï¼š"));
 		items.add(overdrawDate);
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		items.add(new JLabel("Ö§¸¶½ğ¶î£º"));
+		items.add(new JLabel("æ”¯ä»˜é‡‘é¢ï¼š"));
 		outputMoney.setPreferredSize(new Dimension(100, 30));
 		items.add(outputMoney);
-		items.add(new JLabel("Ôª"));
+		items.add(new JLabel("å…ƒ"));
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel label = new JLabel("³¡Ëù£º");
+		JLabel label = new JLabel("åœºæ‰€ï¼š");
 		items.add(label);
 		address.setPreferredSize(new Dimension(100, 30));
 		label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
@@ -71,7 +71,7 @@ public class OverDrawDailog extends JDialog {
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		label = new JLabel("±¸×¢£º");
+		label = new JLabel("å¤‡æ³¨ï¼š");
 		items.add(label);
 		remark.setPreferredSize(new Dimension(100, 30));
 		label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
@@ -79,24 +79,24 @@ public class OverDrawDailog extends JDialog {
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		items.add(new JLabel("¹é»¹ÈÕÆÚ£º"));
+		items.add(new JLabel("å½’è¿˜æ—¥æœŸï¼š"));
 		items.add(returnDate);
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		items.add(new JLabel("¹é»¹½ğ¶î£º"));
+		items.add(new JLabel("å½’è¿˜é‡‘é¢ï¼š"));
 		inputMoney.setPreferredSize(new Dimension(100, 30));
 		items.add(inputMoney);
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		items.add(new JLabel("¹é»¹±¸×¢£º"));
+		items.add(new JLabel("å½’è¿˜å¤‡æ³¨ï¼š"));
 		returnRemark.setPreferredSize(new Dimension(100, 30));
 		items.add(returnRemark);
 		pane.add(items);
 
 		items = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel completedLabel = new JLabel("Íê³É£º");
+		JLabel completedLabel = new JLabel("å®Œæˆï¼š");
 		completedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
 		items.add(completedLabel);
 		items.add(completed);
@@ -113,7 +113,7 @@ public class OverDrawDailog extends JDialog {
 				if (!money.matches("^[\\d\\.]+$")) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(OverDrawDailog.this),
-							"ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡", "ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							"è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼", "è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				String returnMoney = inputMoney.getText();
@@ -121,7 +121,7 @@ public class OverDrawDailog extends JDialog {
 						&& !returnMoney.matches("^[\\d\\.]+$")) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(OverDrawDailog.this),
-							"ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡", "ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							"è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼", "è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 

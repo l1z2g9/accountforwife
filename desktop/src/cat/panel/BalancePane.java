@@ -78,7 +78,7 @@ public class BalancePane extends JPanel {
 				.keySet().toArray());
 		categoryCombox.setModel(model);
 
-		// ¸üĞÂ×ÓÀà
+		// æ›´æ–°å­ç±»
 		subcategories = DBManager.getSubCategory(categories.get(
 				(String) categoryCombox.getSelectedItem()).getId());
 		final DefaultComboBoxModel subModel = new DefaultComboBoxModel(
@@ -100,7 +100,7 @@ public class BalancePane extends JPanel {
 		JPanel pane = new JPanel();
 		pane.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 5));
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
-		pane.add(setBorder(new JLabel("ÈÕÆÚ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("æ—¥æœŸï¼š"), 20, 0));
 		selectedDate.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				refreshData();
@@ -110,13 +110,13 @@ public class BalancePane extends JPanel {
 		selectedDate.setMaximumSize(new Dimension(120, 30));
 		pane.add(selectedDate);
 
-		// ´´½¨Àà±ğ
+		// åˆ›å»ºç±»åˆ«
 		// pane.add(Box.createHorizontalGlue());
-		pane.add(setBorder(new JLabel("Àà±ğ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("ç±»åˆ«ï¼š"), 20, 0));
 
 		categoryCombox = new JComboBox(categories.keySet().toArray());
 		pane.add(categoryCombox);
-		pane.add(setBorder(new JLabel("Ğ¡Àà±ğ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å°ç±»åˆ«ï¼š"), 20, 0));
 
 		Category category = categories.get((String) categoryCombox
 				.getSelectedItem());
@@ -142,11 +142,11 @@ public class BalancePane extends JPanel {
 			}
 		});
 
-		// ´´½¨½ğ¶î
-		pane.add(setBorder(new JLabel("½ğ¶î£º"), 20, 0));
+		// åˆ›å»ºé‡‘é¢
+		pane.add(setBorder(new JLabel("é‡‘é¢ï¼š"), 20, 0));
 		moneyField = new JTextField();
 		pane.add(moneyField);
-		pane.add(setBorder(new JLabel("Ôª"), 2, 9));
+		pane.add(setBorder(new JLabel("å…ƒ"), 2, 9));
 		return pane;
 	}
 
@@ -154,25 +154,25 @@ public class BalancePane extends JPanel {
 		JPanel pane = new JPanel();
 		pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
-		pane.add(setBorder(new JLabel("»ãÂÊ£º"), 20, 0));
+		pane.add(setBorder(new JLabel("æ±‡ç‡ï¼š"), 20, 0));
 		final JTextField exchangeRate = new JTextField();
 		pane.add(exchangeRate);
 
-		pane.add(setBorder(new JLabel("ÓÃ»§£º"), 20, 0));
+		pane.add(setBorder(new JLabel("ç”¨æˆ·ï¼š"), 20, 0));
 		final JTextField user = new JTextField();
 		pane.add(user);
 
-		pane.add(setBorder(new JLabel("³¡Ëù£º"), 20, 0));
+		pane.add(setBorder(new JLabel("åœºæ‰€ï¼š"), 20, 0));
 		final JTextField address = new JTextField();
 		pane.add(address);
 
-		pane.add(setBorder(new JLabel("±¸×¢£º"), 20, 0));
+		pane.add(setBorder(new JLabel("å¤‡æ³¨ï¼š"), 20, 0));
 		final JTextField remark = new JTextField();
 		pane.add(remark);
 
 		pane.add(Box.createHorizontalStrut(20));
 
-		final JButton save = new JButton("Ìí¼Ó");
+		final JButton save = new JButton("æ·»åŠ ");
 		pane.add(save);
 
 		save.addActionListener(new ActionListener() {
@@ -180,17 +180,17 @@ public class BalancePane extends JPanel {
 				String inputMoney = moneyField.getText().trim();
 				if (inputMoney.isEmpty()) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(BalancePane.this), "½ğ¶î²»ÄÜÎª¿Õ£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(BalancePane.this), "é‡‘é¢ä¸èƒ½ä¸ºç©ºï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				// ÑéÖ¤½ğ¶îÊÇ·ñÎªÊı×Ö£¬Ã»ÓĞÊ¹ÓÃJFormattedTextField
+				// éªŒè¯é‡‘é¢æ˜¯å¦ä¸ºæ•°å­—ï¼Œæ²¡æœ‰ä½¿ç”¨JFormattedTextField
 				Pattern pattern = Pattern.compile("^[0-9\\.]+$");
 				Matcher m = pattern.matcher(inputMoney);
 				if (!m.matches()) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(BalancePane.this), "ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(BalancePane.this), "è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -200,13 +200,13 @@ public class BalancePane extends JPanel {
 					if (!m2.matches()) {
 						JOptionPane.showMessageDialog(SwingUtilities
 								.getWindowAncestor(BalancePane.this),
-								"ÇëÊäÈëÕıÈ·µÄ»ãÂÊ£¡", "ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+								"è¯·è¾“å…¥æ­£ç¡®çš„æ±‡ç‡ï¼", "è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 						exchangeRate.requestFocus();
 						return;
 					}
 					exchange = Float.parseFloat(exchangeRate.getText().trim());
 				}
-				// ±£´æ
+				// ä¿å­˜
 				float money = Float.valueOf(inputMoney) * exchange;
 				Item item = new Item();
 				item.setTime(((Date) selectedDate.getValue()).getTime());
@@ -217,8 +217,8 @@ public class BalancePane extends JPanel {
 
 				if (category == null) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(BalancePane.this), "ÇëÑ¡ÔñÏàÓ¦µÄĞ¡Àà±ğ£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(BalancePane.this), "è¯·é€‰æ‹©ç›¸åº”çš„å°ç±»åˆ«ï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -228,7 +228,7 @@ public class BalancePane extends JPanel {
 				item.setAddress(address.getText());
 				int rowID = DBManager.saveItem(item);
 
-				// ÏÔÊ¾
+				// æ˜¾ç¤º
 				/*
 				 * Vector data = new Vector(); data.add(rowID);
 				 * data.add(table.getRowCount() + 1);
@@ -280,14 +280,14 @@ public class BalancePane extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
 					JPopupMenu popup = new JPopupMenu();
-					JMenuItem menuItem = new JMenuItem("±à¼­");
+					JMenuItem menuItem = new JMenuItem("ç¼–è¾‘");
 					menuItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							int selectedRow = table.getSelectedRow();
 							if (selectedRow == -1) {
 								JOptionPane.showMessageDialog(SwingUtilities
 										.getWindowAncestor(BalancePane.this),
-										"ÇëÑ¡ÔñÒª±à¼­µÄĞĞ£¡", "´íÎó",
+										"è¯·é€‰æ‹©è¦ç¼–è¾‘çš„è¡Œï¼", "é”™è¯¯",
 										JOptionPane.ERROR_MESSAGE);
 								return;
 							}
@@ -317,14 +317,14 @@ public class BalancePane extends JPanel {
 						}
 					});
 					popup.add(menuItem);
-					menuItem = new JMenuItem("É¾³ı");
+					menuItem = new JMenuItem("åˆ é™¤");
 					menuItem.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							int selectedRow = table.getSelectedRow();
 							if (selectedRow == -1) {
 								JOptionPane.showMessageDialog(SwingUtilities
 										.getWindowAncestor(BalancePane.this),
-										"ÇëÑ¡ÔñÒª±à¼­µÄĞĞ£¡", "´íÎó",
+										"è¯·é€‰æ‹©è¦ç¼–è¾‘çš„è¡Œï¼", "é”™è¯¯",
 										JOptionPane.ERROR_MESSAGE);
 								return;
 							}
@@ -332,7 +332,7 @@ public class BalancePane extends JPanel {
 									.showConfirmDialog(
 											SwingUtilities
 													.getWindowAncestor(BalancePane.this),
-											"ÄãÈ·¶¨ÒªÉ¾³ıÑ¡ÔñµÄÄÚÈİ£¿", "É¾³ıÄÚÈİ",
+											"ä½ ç¡®å®šè¦åˆ é™¤é€‰æ‹©çš„å†…å®¹ï¼Ÿ", "åˆ é™¤å†…å®¹",
 											JOptionPane.YES_NO_OPTION,
 											JOptionPane.INFORMATION_MESSAGE);
 							if (result == 0)
@@ -369,25 +369,25 @@ public class BalancePane extends JPanel {
 
 		summaryMoney.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
 		if (this.type.equalsIgnoreCase("Expenditure"))
-			summaryMoney.setText("×ÜÖ§³ö£º" + nf.format(sum));
+			summaryMoney.setText("æ€»æ”¯å‡ºï¼š" + nf.format(sum));
 		else
-			summaryMoney.setText("×ÜÊÕÈë£º" + nf.format(sum));
+			summaryMoney.setText("æ€»æ”¶å…¥ï¼š" + nf.format(sum));
 	}
 
 	private void arrangeColumn() {
-		// Òş²ØIDÁĞ
+		// éšè—IDåˆ—
 		TableColumn idCol = table.getColumnModel().getColumn(0);
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
-		// Òş²ØÀàĞÍÁĞ
+		// éšè—ç±»å‹åˆ—
 		TableColumn typeCol = table.getColumnModel().getColumn(9);
 		typeCol.setMaxWidth(0);
 		typeCol.setMinWidth(0);
 		typeCol.setPreferredWidth(0);
 
-		// Òş²ØÑÕÉ«ÁĞ
+		// éšè—é¢œè‰²åˆ—
 		TableColumn colorCol = table.getColumnModel().getColumn(10);
 		colorCol.setMaxWidth(0);
 		colorCol.setMinWidth(0);

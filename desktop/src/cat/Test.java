@@ -34,8 +34,8 @@ public class Test {
 	}
 
 	static void testStringFormat() {
-		log.info(String.format("%-" + (12 - 3) + "s%3.2f", "´ó³¤½ñ", 12.0));
-		log.info(String.format("%-" + (12 - 2) + "s%3.2f", "´ó³¤", 12.1));
+		log.info(String.format("%-" + (12 - 3) + "s%3.2f", "å¤§é•¿ä»Š", 12.0));
+		log.info(String.format("%-" + (12 - 2) + "s%3.2f", "å¤§é•¿", 12.1));
 	}
 
 	static void testGetLocalInfo() {

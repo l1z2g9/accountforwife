@@ -53,7 +53,7 @@ public class CategoryDialog extends JDialog {
 	private JComboBox parentCategoryName;
 
 	public CategoryDialog(Window frame, final String type, boolean subCategory) {
-		super(frame, "Àà±ğÉèÖÃ", Dialog.ModalityType.DOCUMENT_MODAL);
+		super(frame, "ç±»åˆ«è®¾ç½®", Dialog.ModalityType.DOCUMENT_MODAL);
 		this.type = type;
 		this.subCategory = subCategory;
 		setLayout(new BorderLayout());
@@ -65,9 +65,9 @@ public class CategoryDialog extends JDialog {
 
 		cates = DBManager.getCategory(type);
 		if (subCategory) {
-			this.setTitle("Ğ¡Àà±ğÉèÖÃ");
+			this.setTitle("å°ç±»åˆ«è®¾ç½®");
 			itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			nameLabel = new JLabel("Àà±ğ£º");
+			nameLabel = new JLabel("ç±»åˆ«ï¼š");
 			nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
 			itemPanel.add(nameLabel);
 			parentCategoryName = new JComboBox(cates.keySet().toArray());
@@ -84,7 +84,7 @@ public class CategoryDialog extends JDialog {
 		refreshList();
 
 		itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		nameLabel = new JLabel("Ãû³Æ£º");
+		nameLabel = new JLabel("åç§°ï¼š");
 		nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
 		itemPanel.add(nameLabel);
 		categoryName = new JTextField();
@@ -93,22 +93,22 @@ public class CategoryDialog extends JDialog {
 		leftPanel.add(itemPanel);
 
 		itemPanel = new JPanel();
-		itemPanel.add(new JLabel("ÏÔÊ¾Ë³Ğò£º"));
+		itemPanel.add(new JLabel("æ˜¾ç¤ºé¡ºåºï¼š"));
 		displayOrder = new JTextField("0");
-		displayOrder.setToolTipText("ÊıÖµÔ½´ó£¬Ô½¿¿Ç°ÏÔÊ¾");
+		displayOrder.setToolTipText("æ•°å€¼è¶Šå¤§ï¼Œè¶Šé å‰æ˜¾ç¤º");
 		displayOrder.setPreferredSize(new Dimension(80, 25));
 		itemPanel.add(displayOrder);
 		leftPanel.add(itemPanel);
 
-		add = new JButton("Ìí¼Ó");
+		add = new JButton("æ·»åŠ ");
 		add.setAlignmentX(JComponent.LEFT_ALIGNMENT);
 
 		leftPanel.add(add);
 		leftPanel.add(Box.createVerticalStrut(20));
 
-		// ĞŞ¸ÄÀàÃû
+		// ä¿®æ”¹ç±»å
 		JPanel modifPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel modifyLabel = new JLabel("Ãû³Æ£º");
+		JLabel modifyLabel = new JLabel("åç§°ï¼š");
 		modifyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 23));
 		modifPanel.add(modifyLabel);
 		modifyText = new JTextField();
@@ -117,18 +117,18 @@ public class CategoryDialog extends JDialog {
 		leftPanel.add(modifPanel);
 
 		modifPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel modifyDisplayOrderLabel = new JLabel("ÏÔÊ¾Ë³Ğò£º");
+		JLabel modifyDisplayOrderLabel = new JLabel("æ˜¾ç¤ºé¡ºåºï¼š");
 		modifPanel.add(modifyDisplayOrderLabel);
 		modifyDisplayOrder = new JTextField();
 		modifyDisplayOrder.setPreferredSize(new Dimension(80, 25));
 		modifPanel.add(modifyDisplayOrder);
 		leftPanel.add(modifPanel);
 
-		modify = new JButton("ĞŞ¸Ä");
+		modify = new JButton("ä¿®æ”¹");
 		leftPanel.add(modify);
 
 		leftPanel.add(Box.createVerticalStrut(20));
-		close = new JButton("¹Ø±Õ");
+		close = new JButton("å…³é—­");
 		leftPanel.add(close);
 
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -143,7 +143,7 @@ public class CategoryDialog extends JDialog {
 		JPanel rightPanel = new JPanel(new BorderLayout());
 		rightPanel.add(listScrollPane, BorderLayout.PAGE_START);
 
-		delete = new JButton("É¾³ı");
+		delete = new JButton("åˆ é™¤");
 		rightPanel.add(delete, BorderLayout.PAGE_END);
 		leftPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		rightPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -162,7 +162,7 @@ public class CategoryDialog extends JDialog {
 				if (cate.equalsIgnoreCase("")) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(CategoryDialog.this),
-							"²»ÄÜÌí¼Ó¿Õ°×Êı¾İ!", "Ìí¼Ó´íÎó", JOptionPane.ERROR_MESSAGE);
+							"ä¸èƒ½æ·»åŠ ç©ºç™½æ•°æ®!", "æ·»åŠ é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				Category category = new Category();
@@ -199,7 +199,7 @@ public class CategoryDialog extends JDialog {
 				if (index == -1) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor((JButton) e.getSource()),
-							"ÁĞ±íÈÎºÎÄÚÈİ!");
+							"åˆ—è¡¨ä»»ä½•å†…å®¹!");
 					return;
 				}
 
@@ -215,7 +215,7 @@ public class CategoryDialog extends JDialog {
 				if (!subCategoryCount) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor((JButton) e.getSource()),
-							"ÇëÏÈÉ¾³ıĞ¡Àà±ğ£¬È»ºóÉ¾³ı¸ÃÀà±ğ!");
+							"è¯·å…ˆåˆ é™¤å°ç±»åˆ«ï¼Œç„¶ååˆ é™¤è¯¥ç±»åˆ«!");
 					return;
 				}
 
@@ -237,14 +237,14 @@ public class CategoryDialog extends JDialog {
 				if (modifyText.getText().equalsIgnoreCase("")) {
 					JOptionPane.showMessageDialog(SwingUtilities
 							.getWindowAncestor(CategoryDialog.this),
-							"²»ÄÜÉèÖÃ¿Õ°×Êı¾İ!", "ĞŞ¸Ä´íÎó", JOptionPane.ERROR_MESSAGE);
+							"ä¸èƒ½è®¾ç½®ç©ºç™½æ•°æ®!", "ä¿®æ”¹é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
 				if (list.getSelectedIndex() == -1) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(CategoryDialog.this), "ÇëÑ¡ÔñÀà±ğ!",
-							"ĞŞ¸Ä´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(CategoryDialog.this), "è¯·é€‰æ‹©ç±»åˆ«!",
+							"ä¿®æ”¹é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 

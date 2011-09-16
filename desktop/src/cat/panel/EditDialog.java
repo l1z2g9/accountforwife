@@ -34,14 +34,14 @@ public class EditDialog extends JDialog {
 
 	public EditDialog(Window parent, final Item item, String type,
 			final BalancePane balancePane) {
-		super(parent, "±à¼­ÏîÄ¿", ModalityType.APPLICATION_MODAL);
+		super(parent, "ç¼–è¾‘é¡¹ç›®", ModalityType.APPLICATION_MODAL);
 
 		categories = DBManager.getCategory(type);
 		JPanel container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		container.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		JPanel pane = new JPanel();
-		arrange(pane, "ÈÕÆÚ£º");
+		arrange(pane, "æ—¥æœŸï¼š");
 		SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 
 		JLabel date = new JLabel(sf.format(item.getTime()));
@@ -50,7 +50,7 @@ public class EditDialog extends JDialog {
 		container.add(pane);
 
 		pane = new JPanel();
-		arrange(pane, "Àà±ğ£º");
+		arrange(pane, "ç±»åˆ«ï¼š");
 		final JComboBox categoryCombox = new JComboBox(categories.keySet()
 				.toArray());
 		categoryCombox.setPreferredSize(new Dimension(100, 30));
@@ -59,7 +59,7 @@ public class EditDialog extends JDialog {
 		container.add(pane);
 
 		pane = new JPanel();
-		arrange(pane, "Ğ¡Àà±ğ£º");
+		arrange(pane, "å°ç±»åˆ«ï¼š");
 		subcategories = DBManager.getSubCategory(categories.get(
 				(String) categoryCombox.getSelectedItem()).getId());
 
@@ -85,55 +85,55 @@ public class EditDialog extends JDialog {
 		});
 
 		pane = new JPanel();
-		arrange(pane, "½ğ¶î£º");
+		arrange(pane, "é‡‘é¢ï¼š");
 		final JTextField money = new JTextField(String.valueOf(item.getMoney()));
 		money.setPreferredSize(new Dimension(80, 30));
 		pane.add(money, BorderLayout.CENTER);
-		pane.add(new JLabel("Ôª"));
+		pane.add(new JLabel("å…ƒ"));
 		container.add(pane);
 
 		pane = new JPanel();
-		arrange(pane, "ÓÃ»§£º");
+		arrange(pane, "ç”¨æˆ·ï¼š");
 		final JTextField user = new JTextField(item.getUser());
 		user.setPreferredSize(new Dimension(100, 30));
 		pane.add(user);
 		container.add(pane);
 
 		pane = new JPanel();
-		arrange(pane, "³¡Ëù£º");
+		arrange(pane, "åœºæ‰€ï¼š");
 		final JTextField address = new JTextField(item.getAddress());
 		address.setPreferredSize(new Dimension(100, 30));
 		pane.add(address);
 		container.add(pane);
 
 		pane = new JPanel();
-		arrange(pane, "±¸×¢£º");
+		arrange(pane, "å¤‡æ³¨ï¼š");
 		final JTextField remark = new JTextField(item.getRemark());
 		remark.setPreferredSize(new Dimension(100, 30));
 		pane.add(remark);
 		container.add(pane);
 
 		pane = new JPanel();
-		JButton update = new JButton("±£´æ");
+		JButton update = new JButton("ä¿å­˜");
 		update.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (money.getText().trim().isEmpty()) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(EditDialog.this), "½ğ¶î²»ÄÜÎª¿Õ£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(EditDialog.this), "é‡‘é¢ä¸èƒ½ä¸ºç©ºï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				// ÑéÖ¤½ğ¶îÊÇ·ñÎªÊı×Ö£¬Ã»ÓĞÊ¹ÓÃJFormattedTextField
+				// éªŒè¯é‡‘é¢æ˜¯å¦ä¸ºæ•°å­—ï¼Œæ²¡æœ‰ä½¿ç”¨JFormattedTextField
 				Pattern pattern = Pattern.compile("^[0-9\\.]+$");
 				Matcher m = pattern.matcher(money.getText());
 				if (!m.matches()) {
 					JOptionPane.showMessageDialog(SwingUtilities
-							.getWindowAncestor(EditDialog.this), "ÇëÊäÈëÕıÈ·µÄ½ğ¶î£¡",
-							"ÊäÈë´íÎó", JOptionPane.ERROR_MESSAGE);
+							.getWindowAncestor(EditDialog.this), "è¯·è¾“å…¥æ­£ç¡®çš„é‡‘é¢ï¼",
+							"è¾“å…¥é”™è¯¯", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
-				// ±£´æ
+				// ä¿å­˜
 				float _money = Float.valueOf(money.getText());
 				Item toSaveItem = new Item();
 				toSaveItem.setId(item.getId());

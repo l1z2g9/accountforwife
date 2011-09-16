@@ -50,9 +50,9 @@ public class MoneyCellEditor extends DefaultCellEditor {
 	}
 
 	private boolean userSayRevert() {
-		Object[] msg = { "±à¼­", "È¡Ïû" };
+		Object[] msg = { "ç¼–è¾‘", "å–æ¶ˆ" };
 		int choose = JOptionPane.showOptionDialog(SwingUtilities
-				.getWindowAncestor(text), "½ğ¶î²»ÕıÈ·£¡\nÊÇ·ñ¼ÌĞø±à¼­½ğ¶î£¿", "´íÎó",
+				.getWindowAncestor(text), "é‡‘é¢ä¸æ­£ç¡®ï¼\næ˜¯å¦ç»§ç»­ç¼–è¾‘é‡‘é¢ï¼Ÿ", "é”™è¯¯",
 				JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null,
 				msg, msg[1]);
 		if (choose == 1) {

@@ -115,12 +115,12 @@ public class QueryPane extends JPanel {
 		if (typeCombox.getSelectedIndex() > 0) {
 			String cateName = categoryCombox.getSelectedItem().toString();
 
-			if (!cateName.equals("È«²¿")) {
+			if (!cateName.equals("å…¨éƒ¨")) {
 				parentCategoryID = categories.get(cateName).getId();
 			}
 
 			String subCateName = subCategoryCombox.getSelectedItem().toString();
-			if (!cateName.equals("È«²¿") && !subCateName.equals("È«²¿")) {
+			if (!cateName.equals("å…¨éƒ¨") && !subCateName.equals("å…¨éƒ¨")) {
 				categoryID = subcategories.get(subCateName).getId();
 			}
 		}
@@ -144,14 +144,14 @@ public class QueryPane extends JPanel {
 		float expenditureTotal = navigatePage.getTotalExpenditure();
 
 		if (typeCombox.getSelectedIndex() == 0) {
-			summaryMoney.setText("×ÜÊÕÈë£º" + nf.format(incomeTotal) + "   ×ÜÖ§³ö£º"
+			summaryMoney.setText("æ€»æ”¶å…¥ï¼š" + nf.format(incomeTotal) + "   æ€»æ”¯å‡ºï¼š"
 					+ nf.format(expenditureTotal));
 		} else if (typeCombox.getSelectedIndex() == 1)
-			summaryMoney.setText("×ÜÊÕÈë£º" + nf.format(incomeTotal));
+			summaryMoney.setText("æ€»æ”¶å…¥ï¼š" + nf.format(incomeTotal));
 		else if (typeCombox.getSelectedIndex() == 2)
-			summaryMoney.setText("×ÜÖ§³ö£º" + nf.format(expenditureTotal));
+			summaryMoney.setText("æ€»æ”¯å‡ºï¼š" + nf.format(expenditureTotal));
 
-		number.setText(currentPage + " / " + totalPage + " Ò³");
+		number.setText(currentPage + " / " + totalPage + " é¡µ");
 
 		if (currentPage == 1)
 			previous.setEnabled(false);
@@ -163,7 +163,7 @@ public class QueryPane extends JPanel {
 
 	private JPanel createButtons() {
 		JPanel search = new JPanel();
-		JButton find = new JButton("²éÑ¯");
+		JButton find = new JButton("æŸ¥è¯¢");
 		find.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				currentPage = 1;
@@ -172,7 +172,7 @@ public class QueryPane extends JPanel {
 		});
 		search.add(find);
 
-		JButton chartButton = new JButton("Í³¼ÆÍ¼");
+		JButton chartButton = new JButton("ç»Ÿè®¡å›¾");
 		chartButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int statCategoryColunm = 3;
@@ -194,25 +194,25 @@ public class QueryPane extends JPanel {
 					}
 				}
 
-				// Í¼±í
+				// å›¾è¡¨
 				DefaultPieDataset piedataset = new DefaultPieDataset();
 				for (String item : categoryStat.keySet()) {
 					piedataset.setValue(item, categoryStat.get(item));
 				}
 				JFreeChart jfreechart = ChartFactory.createPieChart(year
 						.getSelectedItem()
-						+ "Äê" + month.getSelectedItem() + "ÔÂÍ³¼ÆÍ¼", piedataset,
+						+ "å¹´" + month.getSelectedItem() + "æœˆç»Ÿè®¡å›¾", piedataset,
 						true, true, false);
 				TextTitle texttitle = jfreechart.getTitle();
-				Font font = UIManager.getFont("Button.font");// Ê¹ÓÃÏµÍ³Ìá¹©µÄ×ÖÌå
+				Font font = UIManager.getFont("Button.font");// ä½¿ç”¨ç³»ç»Ÿæä¾›çš„å­—ä½“
 				texttitle.setFont(font.deriveFont(Font.BOLD, 20f));
-				texttitle.setToolTipText(typeCombox.getSelectedItem() + "Í³¼Æ");
+				texttitle.setToolTipText(typeCombox.getSelectedItem() + "ç»Ÿè®¡");
 
 				jfreechart.getLegend().setItemFont(font.deriveFont(Font.BOLD));
 
 				PiePlot pieplot = (PiePlot) jfreechart.getPlot();
 				pieplot.setLabelFont(font.deriveFont(12f));
-				pieplot.setNoDataMessage("Ã»ÓĞÊı¾İ");
+				pieplot.setNoDataMessage("æ²¡æœ‰æ•°æ®");
 				pieplot.setCircular(false);
 				pieplot.setLabelGenerator(new StandardPieSectionLabelGenerator(
 						"{0}({1})", DecimalFormat.getCurrencyInstance(),
@@ -221,7 +221,7 @@ public class QueryPane extends JPanel {
 				ChartPanel pane = new ChartPanel(jfreechart, 600, 350, 600,
 						350, 600, 350, false, false, false, false, false, true);
 
-				// ÏÔÊ¾
+				// æ˜¾ç¤º
 				final JDialog dialog = new JDialog(SwingUtilities
 						.getWindowAncestor(QueryPane.this));
 				pane.getInputMap().put(
@@ -240,7 +240,7 @@ public class QueryPane extends JPanel {
 		});
 		search.add(chartButton);
 
-		JButton exportExcel = new JButton("µ¼³öµ½Excel");
+		JButton exportExcel = new JButton("å¯¼å‡ºåˆ°Excel");
 		exportExcel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				HSSFWorkbook wb = new HSSFWorkbook();
@@ -258,7 +258,7 @@ public class QueryPane extends JPanel {
 				TableColumnModel headModel = table.getTableHeader()
 						.getColumnModel();
 
-				// ±êÌâ
+				// æ ‡é¢˜
 				HSSFRow row = sheet.createRow(0);
 				for (int colnum = 1; colnum < headModel.getColumnCount() - 2; colnum++) {
 					HSSFCell header = row.createCell(colnum - 1);
@@ -268,7 +268,7 @@ public class QueryPane extends JPanel {
 					header.setCellStyle(cs);
 				}
 
-				// ÄÚÈİ
+				// å†…å®¹
 				final NavigatePage navigatePage = triggerFindData(-1);
 				Vector<Vector> data = navigatePage.getCurrentPageResult();
 
@@ -312,14 +312,14 @@ public class QueryPane extends JPanel {
 				HSSFCell cell = row2.createCell(0);
 				cell.setCellValue(summaryMoney.getText());
 
-				// µ÷ÕûÁĞ¿í
+				// è°ƒæ•´åˆ—å®½
 				sheet.setColumnWidth(1, (short) 3000);
 				sheet.setColumnWidth(3, (short) 3500);
 				sheet.setColumnWidth(4, (short) 2600);
 
 				// Save
-				String file = year.getSelectedItem() + "Äê"
-						+ month.getSelectedItem() + "ÔÂÁ÷Ë®ÕË.xls";
+				String file = year.getSelectedItem() + "å¹´"
+						+ month.getSelectedItem() + "æœˆæµæ°´è´¦.xls";
 				try {
 					FileOutputStream out = new FileOutputStream(file);
 					wb.write(out);
@@ -347,18 +347,18 @@ public class QueryPane extends JPanel {
 		month.setSelectedItem(c.get(Calendar.MONTH) + 1);
 
 		items.add(year);
-		items.add(new JLabel("Äê"));
+		items.add(new JLabel("å¹´"));
 		items.add(month);
-		items.add(new JLabel("ÔÂ"));
+		items.add(new JLabel("æœˆ"));
 
-		items.add(new JLabel("ÀàĞÍ"));
-		typeMap.put("È«²¿", "All");
-		typeMap.put("ÊÕÈë", "Income");
-		typeMap.put("Ö§³ö", "Expenditure");
-		typeCombox = new JComboBox(new Object[] { "È«²¿", "ÊÕÈë", "Ö§³ö" });
+		items.add(new JLabel("ç±»å‹"));
+		typeMap.put("å…¨éƒ¨", "All");
+		typeMap.put("æ”¶å…¥", "Income");
+		typeMap.put("æ”¯å‡º", "Expenditure");
+		typeCombox = new JComboBox(new Object[] { "å…¨éƒ¨", "æ”¶å…¥", "æ”¯å‡º" });
 		items.add(typeCombox);
 
-		items.add(new JLabel("Àà±ğ"));
+		items.add(new JLabel("ç±»åˆ«"));
 
 		categoryCombox = new JComboBox();
 		initCategory(typeCombox, categoryCombox);
@@ -370,7 +370,7 @@ public class QueryPane extends JPanel {
 		});
 		items.add(categoryCombox);
 
-		items.add(new JLabel("Ğ¡Àà±ğ"));
+		items.add(new JLabel("å°ç±»åˆ«"));
 		subCategoryCombox = new JComboBox();
 		initSubCategory(categoryCombox, subCategoryCombox);
 		categoryCombox.addActionListener(new ActionListener() {
@@ -380,7 +380,7 @@ public class QueryPane extends JPanel {
 		});
 		items.add(subCategoryCombox);
 
-		items.add(new JLabel("ÓÃ»§"));
+		items.add(new JLabel("ç”¨æˆ·"));
 		user = new JTextField(5);
 		items.add(user);
 		return items;
@@ -393,12 +393,12 @@ public class QueryPane extends JPanel {
 		if (typeCombox.getSelectedIndex() > 0) {
 			categories = DBManager.getCategory(typeMap.get(typeCombox
 					.getSelectedItem().toString()));
-			model.addElement("È«²¿");
+			model.addElement("å…¨éƒ¨");
 			for (String name : categories.keySet()) {
 				model.addElement(name);
 			}
 		} else {
-			model.addElement("È«²¿");
+			model.addElement("å…¨éƒ¨");
 		}
 	}
 
@@ -409,12 +409,12 @@ public class QueryPane extends JPanel {
 					.getModel();
 			model.removeAllElements();
 			String cateName = categoryCombox.getSelectedItem().toString();
-			if (cateName.equals("È«²¿")) {
-				model.addElement("È«²¿");
+			if (cateName.equals("å…¨éƒ¨")) {
+				model.addElement("å…¨éƒ¨");
 			} else {
 				subcategories = DBManager.getSubCategory(categories.get(
 						cateName).getId());
-				model.addElement("È«²¿");
+				model.addElement("å…¨éƒ¨");
 				for (String name : subcategories.keySet()) {
 					model.addElement(name);
 				}
@@ -423,7 +423,7 @@ public class QueryPane extends JPanel {
 	}
 
 	/**
-	 * ¸ùBalancePaneµÄtableµÄ½á¹¹Ò»Ñù¡£
+	 * æ ¹BalancePaneçš„tableçš„ç»“æ„ä¸€æ ·ã€‚
 	 */
 	private JPanel createDataTable() {
 		JPanel pane = new JPanel();
@@ -508,19 +508,19 @@ public class QueryPane extends JPanel {
 	}
 
 	private void arrangeColumn() {
-		// Òş²ØIDÁĞ
+		// éšè—IDåˆ—
 		TableColumn idCol = table.getColumnModel().getColumn(0);
 		idCol.setMaxWidth(0);
 		idCol.setMinWidth(0);
 		idCol.setPreferredWidth(0);
 
-		// Òş²ØÀà±ğÁĞ
+		// éšè—ç±»åˆ«åˆ—
 		TableColumn typeCol = table.getColumnModel().getColumn(9);
 		typeCol.setMaxWidth(0);
 		typeCol.setMinWidth(0);
 		typeCol.setPreferredWidth(0);
 
-		// Òş²ØÑÕÉ«ÁĞ
+		// éšè—é¢œè‰²åˆ—
 		TableColumn colorCol = table.getColumnModel().getColumn(10);
 		colorCol.setMaxWidth(0);
 		colorCol.setMinWidth(0);

@@ -54,7 +54,7 @@ public class DBManager {
 					DateFormat df = DateFormat.getInstance();
 					String time = df.format(new Date());
 
-					return time + "£º " + record.getMessage() + "\r\n";
+					return time + "ï¼š " + record.getMessage() + "\r\n";
 				}
 			});
 		} catch (Exception e) {
@@ -148,7 +148,7 @@ public class DBManager {
 		monthFirstDay.set(Calendar.MINUTE, 0);
 		monthFirstDay.set(Calendar.SECOND, 0);
 
-		// ¼ÆËã×ÜÒ³ÊıºÍoffset
+		// è®¡ç®—æ€»é¡µæ•°å’Œoffset
 		String totalSql = buildCondition(
 				"SELECT count(i.id) FROM Item i, Category c, Category cp "
 						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
@@ -187,7 +187,7 @@ public class DBManager {
 		Map<Integer, Float> sumMap = new HashMap<Integer, Float>();
 		Map<Integer, Float> budgetMap = new HashMap<Integer, Float>();
 		if (!"Income".equalsIgnoreCase(type)) {
-			// »ñÈ¡ÔÂ³õµ½¿ªÊ¼Ê±¼äÖ®Ç°µÄ¿ªÏú
+			// è·å–æœˆåˆåˆ°å¼€å§‹æ—¶é—´ä¹‹å‰çš„å¼€é”€
 			try {
 				String sumSql = "SELECT cp.id, sum(money) FROM Item i, Category c, Category cp "
 						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and "
@@ -209,7 +209,7 @@ public class DBManager {
 				exitProgram(e);
 			}
 
-			// »ñÈ¡µ±ÔÂÔ¤Ëã
+			// è·å–å½“æœˆé¢„ç®—
 			String sql = "select c.id, money from Category c, Budget b where c.id = b.categoryID and parentID is null and "
 					+ "type = 'Expenditure' and year = ? and month = ? order by displayOrder desc";
 			try {
@@ -227,14 +227,14 @@ public class DBManager {
 			}
 		}
 
-		// ·â×°½á¹û
+		// å°è£…ç»“æœ
 		Vector<Vector> result = new Vector<Vector>();
 		try {
 			String sql = buildCondition(
 					"SELECT i.id, time, cp.name, c.name, money, user, address, remark, cp.id, c.type FROM Item i, Category c, Category cp "
 							+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
 					type, parentID, subCategoryID, user, currentPage);
-			if (currentPage != -1) // == -1Ê±ºò´¦Àí·ÖÒ³ÄÚÈİ
+			if (currentPage != -1) // == -1æ—¶å€™å¤„ç†åˆ†é¡µå†…å®¹
 				sql += String.format(
 						" order by time asc, i.id asc limit %s offset %s ",
 						limit, offset);
@@ -297,7 +297,7 @@ public class DBManager {
 
 		navigatePage.setCurrentPageResult(result);
 
-		// ×ÜÊäÈëÖ§³öÍ³¼Æ
+		// æ€»è¾“å…¥æ”¯å‡ºç»Ÿè®¡
 		String sql = buildCondition(
 				"SELECT c.type, sum(money) FROM Item i, Category c, Category cp "
 						+ "WHERE i.categoryID = c.id and c.parentID = cp.id and time between ? and ?",
@@ -328,7 +328,7 @@ public class DBManager {
 	}
 
 	public static int saveItem(Item item) {
-		log.info("ĞÂÔöÏîÄ¿, time=" + sf.format(item.getTime()) + " , money="
+		log.info("æ–°å¢é¡¹ç›®, time=" + sf.format(item.getTime()) + " , money="
 				+ item.getMoney() + "categoryID=" + item.getCategoryID());
 		int rowID = 0;
 		try {
@@ -395,7 +395,7 @@ public class DBManager {
 
 	// --------- end items ---------
 
-	// ---------- start Àà±ğ ------------
+	// ---------- start ç±»åˆ« ------------
 	public static Map<String, Category> getCategory(String type) {
 		String sql = "SELECT name, id, displayOrder FROM Category WHERE Type = ? and ParentID is null order by displayOrder desc";
 
@@ -498,8 +498,8 @@ public class DBManager {
 		String sql = "insert into Category(id, parentId, type, name, displayOrder) values(?, ?, ?, ?, ?)";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			log.info("±£´æ×ÓÀà±ğ£ºid: " + lastID);
-			log.info("¸¸Àà±ğ£ºparentID: " + parentID);
+			log.info("ä¿å­˜å­ç±»åˆ«ï¼šid: " + lastID);
+			log.info("çˆ¶ç±»åˆ«ï¼šparentID: " + parentID);
 			ps.setInt(1, lastID);
 			ps.setInt(2, parentID);
 			ps.setString(3, type);
@@ -557,8 +557,8 @@ public class DBManager {
 		return true;
 	}
 
-	// ---------- end Àà±ğ ------------
-	// ---------- start Ô¤Ëã ------------
+	// ---------- end ç±»åˆ« ------------
+	// ---------- start é¢„ç®— ------------
 	public static Vector<Vector> getBudgetItems(int year, int month) {
 		Vector<Vector> result = new Vector<Vector>();
 		Map budget = new HashMap();
@@ -651,7 +651,7 @@ public class DBManager {
 		}
 	}
 
-	// ---------- end Ô¤Ëã ------------
+	// ---------- end é¢„ç®— ------------
 	public static NavigatePage query(int year, int month, String type,
 			int parentCategoryID, int categoryID, String user, int currentPage) {
 
@@ -677,14 +677,14 @@ public class DBManager {
 
 	public static void releaseConnection() {
 		try {
-			log.info("ÊÍ·ÅÊı¾İ¿âÁ¬½Ó");
+			log.info("é‡Šæ”¾æ•°æ®åº“è¿æ¥");
 			conn.close();
 		} catch (SQLException e) {
 			exitProgram(e);
 		}
 	}
 
-	// --------- start Ô¤Ö§¸¶
+	// --------- start é¢„æ”¯ä»˜
 	public static NavigatePage getOverDrawItems(int year, int month,
 			int currentPage) {
 		NavigatePage navigatePage = new NavigatePage();
@@ -704,7 +704,7 @@ public class DBManager {
 		endtTime.set(Calendar.HOUR_OF_DAY, 23);
 		endtTime.set(Calendar.MINUTE, 59);
 		endtTime.set(Calendar.SECOND, 59);
-		// ×ÜÊı
+		// æ€»æ•°
 		String sql = "SELECT COUNT(id) FROM Overdraw WHERE time between ? and ?";
 		int total = 0;
 		try {
@@ -734,7 +734,7 @@ public class DBManager {
 			offset = 0;
 		navigatePage.setTotalPage(total_pages);
 
-		// ½á¹û¼¯
+		// ç»“æœé›†
 		sql = String
 				.format(
 						"SELECT id, time, money, address, remark, returnTime, returnMoney, returnRemark, (returnMoney - money), completed FROM Overdraw "
@@ -766,7 +766,7 @@ public class DBManager {
 					v.addElement(rs.getString(8));
 				}
 				v.addElement(rs.getInt(10) == 1 ? rs.getFloat(9):"");
-				v.addElement(rs.getInt(10) == 1 ? "ÊÇ" : "·ñ");
+				v.addElement(rs.getInt(10) == 1 ? "æ˜¯" : "å¦");
 				currentPageResult.add(v);
 			}
 			rs.close();
@@ -776,7 +776,7 @@ public class DBManager {
 		}
 		navigatePage.setCurrentPageResult(currentPageResult);
 
-		// Ö§³öÊÕÈë
+		// æ”¯å‡ºæ”¶å…¥
 		sql = "SELECT SUM(money), SUM(returnMoney) FROM Overdraw WHERE time between ? and ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -799,7 +799,7 @@ public class DBManager {
 	}
 
 	public static void saveOverDrawItems(Overdraw overdraw) {
-		log.info("ĞÂÔöÔ¤Ö§¸¶Ïî" + sf.format(overdraw.getTime()) + " , Í¸Ö§: "
+		log.info("æ–°å¢é¢„æ”¯ä»˜é¡¹" + sf.format(overdraw.getTime()) + " , é€æ”¯: "
 				+ overdraw.getMoney());
 		String sql = "insert into Overdraw(time, money, remark, address, returnTime, returnMoney, returnRemark) values(?,?,?,?,?,?,?)";
 		try {
@@ -840,7 +840,7 @@ public class DBManager {
 
 	public static void deleteOverDrawItems(int id) {
 		String sql = "delete from Overdraw where id = ?";
-		log.info("É¾³ıÔ¤Ö§¸¶Ïî£¬id = " + id);
+		log.info("åˆ é™¤é¢„æ”¯ä»˜é¡¹ï¼Œid = " + id);
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
@@ -879,14 +879,14 @@ public class DBManager {
 		return overdraw;
 	}
 
-	// --------- end Ô¤Ö§¸¶
+	// --------- end é¢„æ”¯ä»˜
 	private static void exitProgram(Exception e) {
 		log.severe(e.toString());
 		StackTraceElement[] trace = e.getStackTrace();
 		for (int i = 0; i < trace.length; i++)
 			log.severe("\tat " + trace[i]);
 		releaseConnection();
-		JOptionPane.showMessageDialog(null, "³ÌĞò³öÏÖÒâÏë²»µ½µÄ´íÎó£¬ÇëÓëĞ¡Ç¿ÁªÏµ£¡", "³ÌĞò³ö´í",
+		JOptionPane.showMessageDialog(null, "ç¨‹åºå‡ºç°æ„æƒ³ä¸åˆ°çš„é”™è¯¯ï¼Œè¯·ä¸å°å¼ºè”ç³»ï¼", "ç¨‹åºå‡ºé”™",
 				JOptionPane.ERROR_MESSAGE);
 		System.exit(1);
 	}
