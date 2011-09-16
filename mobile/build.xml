@@ -1,34 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="accountforwife" default="allInOne" basedir=".">
+<project name="accountforwife" default="runInmicroEmn" basedir=".">
 	<path id="lib">
-		<fileset dir="C:\Program Files\NetBeans 7.0.1\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar"/>
-		<path location="dependencies\antenna-bin-1.2.1-beta.jar"/>
-		<path location="dependencies\LWUIT_MIDP.jar"/>
+		<fileset dir="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar" />
+		<fileset dir="dependencies\microemu" includes="*.jar" />
+		<path location="dependencies\antenna-bin-1.2.1-beta.jar" />
+		<path location="dependencies\LWUIT_MIDP.jar" />
+		<path location="dependencies\MIDP_IO.jar" />
 	</path>
-	<taskdef resource="antenna.properties" classpathref="lib"/>
-	<property name="wtk.home" value="C:\Program Files\NetBeans 7.0.1\mobility\Java_ME_platform_SDK_3.0"/>
+	<path id="lwuit-lib">
+		<path location="dependencies\LWUIT_MIDP.jar" />
+		<path location="dependencies\MIDP_IO.jar" />
+	</path>
+	<taskdef resource="antenna.properties" classpathref="lib" />
+	<property name="wtk.home" value="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0" />
 	<property name="wtk.cldc.version" value="1.1" />
-    <property name="wtk.midp.version" value="2.0" />
-    <property name="wtk.j2mews.enabled" value="true" />
+	<property name="wtk.midp.version" value="2.0" />
+	<property name="wtk.j2mews.enabled" value="true" />
 	<property name="jad.midlet-class" value="Midlet" />
-	<target name="allInOne">
-		<wtkbuild srcDir="src" destDir="bin" debug="false" classpathref="lib"/>
+	<target name="jar">
+		<wtkbuild srcDir="src" destDir="bin" debug="false" classpathref="lib">
+			<exclude name="**/DesktopRun*" />
+		</wtkbuild>
 		<wtkjad jadfile="accountforwife.jad" jarfile="accountforwife.jar" name="accountforwife" vendor="forest" version="1.0" encoding="utf-8">
-			<midlet name="accountforwife" class="cat.AccountPanel" />
-			<attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.PushRegistry"/>  
-			<attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
-			<attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
+			<midlet name="accountforwife" class="cat.AccountPanelMIDlet" />
+			<attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.PushRegistry" />
+			<attribute name="MicroEdition-Configuration" value="CLDC-1.1" />
+			<attribute name="MicroEdition-Profile" value="MIDP-2.0" />
 		</wtkjad>
-		<copy todir="bin" file="src/TipsterTheme.res"/>
-		<wtkpackage jarfile="accountforwife.jar" jadfile="accountforwife.jad" preverify="false" libclasspath="dependencies\LWUIT_MIDP.jar">
-			<fileset dir="bin"/>
+		<copy todir="bin" file="src/TipsterTheme.res" />
+		<wtkpackage jarfile="accountforwife.jar" jadfile="accountforwife.jad" preverify="false" libclasspathref="lwuit-lib">
+			<fileset dir="bin" />
 		</wtkpackage>
-		<wtksign keystore="accountforwife.ks" storepass="accountforwife" certalias="accountforwife" certpass="accountforwife" jarfile="accountforwife.jar" jadfile="accountforwife.jad" />
-		<wtkrun jadfile="accountforwife.jad" device="ClamshellCldcPhone1"/>
 	</target>
 
-	 <target name="genkey">
-		 <delete file="accountforwife.ks"/>
-		 <genkey alias="accountforwife" keystore="accountforwife.ks" storepass="accountforwife" keyalg="RSA" dname="CN=trusted by Forest"/>
-	 </target>
+	<target name="runInJavame" depends="jar">
+		<!-- wtksign keystore="accountforwife.ks" storepass="accountforwife" certalias="accountforwife" certpass="accountforwife" jarfile="accountforwife.jar" jadfile="accountforwife.jad" / -->
+		<wtkrun jadfile="accountforwife.jad" device="ClamshellCldcPhone1" />
+	</target>
+
+	<target name="genkey">
+		<delete file="accountforwife.ks" />
+		<genkey alias="accountforwife" keystore="accountforwife.ks" storepass="accountforwife" keyalg="RSA" dname="CN=trusted by Forest" />
+	</target>
+
+	<target name="runInmicroEmn" depends="jar">
+		<!-- java jar="dependencies\microemu\microemulator.jar" fork="yes">
+			<classpath>
+				<fileset dir="dependencies\microemu" includes="*.jar">
+				</fileset>
+				<fileset dir="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar" />
+			</classpath>
+			<arg value="accountforwife.jad" />
+		</java -->
+
+		<java classname="org.microemu.app.Main" fork="yes">
+			<classpath>
+				<fileset dir="dependencies\microemu" includes="*.jar">
+				</fileset>
+
+				<path location="accountforwife.jar">
+				</path>
+			</classpath>
+			<arg value="cat.AccountPanelMIDlet" />
+		</java>
+	</target>
 </project>
