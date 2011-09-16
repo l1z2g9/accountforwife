@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="accountforwife" default="runInmicroEmn" basedir=".">
+<project name="accountforwife" default="runInJavame" basedir=".">
 	<path id="lib">
 		<fileset dir="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar" />
 		<fileset dir="dependencies\microemu" includes="*.jar" />
