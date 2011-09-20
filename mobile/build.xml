@@ -18,7 +18,7 @@
 	<property name="wtk.j2mews.enabled" value="true" />
 	<property name="jad.midlet-class" value="Midlet" />
 	<target name="jar">
-		<wtkbuild srcDir="src" destDir="bin" debug="false" classpathref="lib">
+		<wtkbuild srcDir="src" destDir="bin" debug="false" classpathref="lib" encoding="UTF-8">
 			<exclude name="**/DesktopRun*" />
 		</wtkbuild>
 		<wtkjad jadfile="accountforwife.jad" jarfile="accountforwife.jar" name="accountforwife" vendor="forest" version="1.0" encoding="utf-8">
@@ -27,7 +27,7 @@
 			<attribute name="MicroEdition-Configuration" value="CLDC-1.1" />
 			<attribute name="MicroEdition-Profile" value="MIDP-2.0" />
 		</wtkjad>
-		<copy todir="bin" file="src/TipsterTheme.res" />
+		<copy todir="bin" file="src/theme.res" />
 		<wtkpackage jarfile="accountforwife.jar" jadfile="accountforwife.jad" preverify="false" libclasspathref="lwuit-lib">
 			<fileset dir="bin" />
 		</wtkpackage>
