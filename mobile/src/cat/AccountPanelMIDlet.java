@@ -12,14 +12,18 @@ public class AccountPanelMIDlet extends MIDlet {
 
 	public AccountPanelMIDlet() {
 		bundle.put("mainTitle", "小艺有数");
-		bundle.put("loginName", "用户名");
+		bundle.put("loginName", "用户");
 		bundle.put("password", "密码");
 		bundle.put("login", "登录");
 		bundle.put("exit", "退出");
+		bundle.put("back", "后退");
 		bundle.put("expenditure", "支出");
 		bundle.put("income", "收入");
 		bundle.put("query", "查询");
 		bundle.put("overdraw", "预支付");
+		bundle.put("year", "年");
+		bundle.put("month", "月");
+		bundle.put("day", "日");
 	}
 
 	public void startApp() {
