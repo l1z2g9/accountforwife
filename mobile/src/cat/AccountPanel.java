@@ -5,23 +5,23 @@ import java.io.InputStream;
 import java.util.Hashtable;
 
 import com.sun.lwuit.Button;
+import com.sun.lwuit.ComboBox;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
-import com.sun.lwuit.TextArea;
-import com.sun.lwuit.TextField;
-import com.sun.lwuit.animations.CommonTransitions;
+import com.sun.lwuit.List;
 import com.sun.lwuit.animations.Transition;
+import com.sun.lwuit.animations.Transition3D;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.io.ConnectionRequest;
 import com.sun.lwuit.io.NetworkManager;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.sun.lwuit.layouts.GridLayout;
+import com.sun.lwuit.list.ListCellRenderer;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
 
@@ -29,11 +29,17 @@ public class AccountPanel implements ActionListener {
 	private boolean started;
 	private static final int EXIT_COMMAND = 1;
 	private static final int BACK_COMMAND = 3;
-	private static final Command exitCommand = new Command("Exit", EXIT_COMMAND);
-	private static final Command backCommand = new Command("Back", BACK_COMMAND);
+
+	private static final int EXPENDITURE_COMMAND = 5;
+	private static final int INCOME_COMMAND = 6;
+	private static final int QUERY_COMMAND = 7;
+	private static final int OVERDRAW_COMMAND = 8;
+
+	public static final Command exitCommand = new Command("exit", EXIT_COMMAND);
+	public static final Command backCommand = new Command("back", BACK_COMMAND);
+	Resources imagesRes;
 
 	public AccountPanel() {
-
 	}
 
 	protected void destroyApp(boolean arg0) {
@@ -48,13 +54,15 @@ public class AccountPanel implements ActionListener {
 	protected void startApp(Hashtable bundle) {
 		if (!started) {
 			started = true;
-			String name = "theme";
+			String name = "theme.res";
+			UIManager.getInstance().setResourceBundle(bundle);
 
 			try {
-				Resources r = Resources.open("/" + name + ".res");
+				Resources r = Resources.open("/" + name);
 				UIManager.getInstance().setThemeProps(
 						r.getTheme(r.getThemeResourceNames()[0]));
-				UIManager.getInstance().setResourceBundle(bundle);
+
+				imagesRes = Resources.open("/images.res");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -68,16 +76,30 @@ public class AccountPanel implements ActionListener {
 
 	protected void showLoginForm() {
 		Form loginForm = new Form();
-
+		loginForm.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 		loginForm.setTitle("mainTitle");
-		loginForm.addComponent(new Label("loginName"));
-		final TextField searchFor = new TextField("cat", 50);
-		loginForm.addComponent(searchFor);
 
-		loginForm.addComponent(new Label("password"));
-		final TextField password = new TextField("741258", 50);
-		password.setConstraint(TextArea.PASSWORD);
-		loginForm.addComponent(password);
+		Container userPanel = new Container();
+		userPanel.addComponent(new Label("loginName"));
+
+		final ComboBox user = new ComboBox(new String[] { "cat", "forest" });
+		userPanel.addComponent(user);
+
+		user.setRenderer(new ListCellRenderer() {
+			public Component getListCellRendererComponent(List list,
+					Object value, int index, boolean isSelected) {
+				Label label = new Label();
+				label.setIcon(imagesRes.getImage(value + ".jpg"));
+				return label;
+			}
+
+			public Component getListFocusComponent(List list) {
+				list.setSmoothScrolling(true);
+				Label label = new Label();
+				return label;
+			}
+		});
+		loginForm.addComponent(userPanel);
 
 		Command login = new Command("login") {
 			public void actionPerformed(ActionEvent ae) {
@@ -86,50 +108,46 @@ public class AccountPanel implements ActionListener {
 		};
 		Button searchButton = new Button(login);
 		Container searchContainer = new Container(new BorderLayout());
-		searchContainer.addComponent(BorderLayout.EAST, searchButton);
+		searchContainer.addComponent(BorderLayout.WEST, searchButton);
 		loginForm.addComponent(searchContainer);
 
 		loginForm.addCommand(exitCommand);
 		loginForm.addCommand(login);
+		loginForm.addCommandListener(this);
 		loginForm.show();
 	}
 
+	Form mainForm;
+
 	private void showMainForm() {
-		Form mainForm = new Form();
+		mainForm = new Form();
 		mainForm.setTitle("mainTitle");
 
 		Transition in, out;
-		out = CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL,
-				false, 500);
-		in = CommonTransitions.createSlide(CommonTransitions.SLIDE_HORIZONTAL,
-				true, 500);
+		out = Transition3D.createFlyIn(500);
+		in = Transition3D.createCube(500, true);
 		mainForm.setTransitionInAnimator(in);
 		mainForm.setTransitionOutAnimator(out);
 
 		mainForm.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
-		Button expenditure = createButton("expenditure");
-		expenditure.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				final BalancePane expenditure = new BalancePane("Expenditure");
-			}
-		});
-
-		mainForm.addComponent(expenditure);
-		mainForm.addComponent(createButton("income"));
-		mainForm.addComponent(createButton("query"));
-		mainForm.addComponent(createButton("overdraw"));
+		mainForm.addComponent(createButton("expenditure", EXPENDITURE_COMMAND));
+		mainForm.addComponent(createButton("income", INCOME_COMMAND));
+		mainForm.addComponent(createButton("query", QUERY_COMMAND));
+		mainForm.addComponent(createButton("overdraw", OVERDRAW_COMMAND));
 
 		mainForm.addCommand(exitCommand);
-
+		mainForm.addCommandListener(this);
 		mainForm.show();
 	}
 
-	private Button createButton(String string) {
+	private Button createButton(String string, int id) {
 		Button button = new Button(string);
 		button.getUnselectedStyle().setAlignment(Label.CENTER);
 		button.getSelectedStyle().setAlignment(Label.CENTER);
 		button.getPressedStyle().setAlignment(Label.CENTER);
+		button.setCommand(new Command(string, id));
+		button.addActionListener(this);
 		return button;
 	}
 
@@ -140,8 +158,6 @@ public class AccountPanel implements ActionListener {
 				byte[] buffer = new byte[10000];
 				int length = input.read(buffer);
 				while (length != -1) {
-					System.out.println("------ "
-							+ new String(buffer, 0, length));
 					label.setText(new String(buffer, 0, length));
 					length = input.read(buffer);
 				}
@@ -153,13 +169,21 @@ public class AccountPanel implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent evt) {
-		Command cmd = evt.getCommand();
+		final Command cmd = evt.getCommand();
+
 		switch (cmd.getId()) {
 		case EXIT_COMMAND:
 			Display.getInstance().exitApplication();
 			break;
 		case BACK_COMMAND:
-//			mainMenu.showBack();
+			mainForm.showBack();
+			break;
+
+		case EXPENDITURE_COMMAND:
+			new BalancePane("expenditure", this).show();
+			break;
+		case INCOME_COMMAND:
+			new BalancePane("income", this).show();
 			break;
 		}
 	}

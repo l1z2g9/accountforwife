@@ -2,7 +2,6 @@
 <project name="accountforwife" default="runInJavame" basedir=".">
 	<path id="lib">
 		<fileset dir="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar" />
-		<fileset dir="dependencies\microemu" includes="*.jar" />
 		<path location="dependencies\antenna-bin-1.2.1-beta.jar" />
 		<path location="dependencies\LWUIT_MIDP.jar" />
 		<path location="dependencies\MIDP_IO.jar" />
@@ -18,6 +17,7 @@
 	<property name="wtk.j2mews.enabled" value="true" />
 	<property name="jad.midlet-class" value="Midlet" />
 	<target name="jar">
+
 		<wtkbuild srcDir="src" destDir="bin" debug="false" classpathref="lib" encoding="UTF-8">
 			<exclude name="**/DesktopRun*" />
 		</wtkbuild>
@@ -27,7 +27,6 @@
 			<attribute name="MicroEdition-Configuration" value="CLDC-1.1" />
 			<attribute name="MicroEdition-Profile" value="MIDP-2.0" />
 		</wtkjad>
-		<copy todir="bin" file="src/theme.res" />
 		<wtkpackage jarfile="accountforwife.jar" jadfile="accountforwife.jad" preverify="false" libclasspathref="lwuit-lib">
 			<fileset dir="bin" />
 		</wtkpackage>
@@ -43,25 +42,11 @@
 		<genkey alias="accountforwife" keystore="accountforwife.ks" storepass="accountforwife" keyalg="RSA" dname="CN=trusted by Forest" />
 	</target>
 
-	<target name="runInmicroEmn" depends="jar">
-		<!-- java jar="dependencies\microemu\microemulator.jar" fork="yes">
-			<classpath>
-				<fileset dir="dependencies\microemu" includes="*.jar">
-				</fileset>
-				<fileset dir="C:\NetBeans\mobility\Java_ME_platform_SDK_3.0\lib" includes="*.jar" />
-			</classpath>
-			<arg value="accountforwife.jad" />
-		</java -->
-
-		<java classname="org.microemu.app.Main" fork="yes">
-			<classpath>
-				<fileset dir="dependencies\microemu" includes="*.jar">
-				</fileset>
-
-				<path location="accountforwife.jar">
-				</path>
-			</classpath>
-			<arg value="cat.AccountPanelMIDlet" />
-		</java>
+	<target name="buildRes">
+		<taskdef classpath="C:\TDDownload\LWUIT_1_5\apps\LWUITDemo\editor.jar" classname="com.sun.lwuit.tools.resourcebuilder.LWUITTask" name="build" />
+		<build dest="bin/images.res">
+			<image file="src/images/forest.jpg" />
+			<image file="src/images/cat.jpg" />
+		</build>
 	</target>
 </project>
