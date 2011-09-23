@@ -4,25 +4,60 @@ import java.util.Calendar;
 import java.util.Vector;
 
 import com.sun.lwuit.ComboBox;
-import com.sun.lwuit.Font;
+import com.sun.lwuit.Component;
+import com.sun.lwuit.Container;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
-
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.io.util.Log;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.list.DefaultListModel;
 
 public class BalancePane extends Form {
 	public BalancePane(String type, ActionListener listener) {
 		this.setTitle(type);
 
-		// year
+		this.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+		this.addComponent(createDateTime());
+		this.addComponent(createCategory());
+		this.addComponent(createRow());
+
+		this.addCommand(AccountPanel.exitCommand);
+		this.addCommand(AccountPanel.backCommand);
+		this.addCommandListener(listener);
+		this.setBackCommand(AccountPanel.backCommand);
+	}
+
+	private Component createRow() {
+		Container pane = new Container();
+		pane.addComponent(ComponentFactory.getLabel("money"));
+		pane.addComponent(ComponentFactory.getTextField(4, TextArea.DECIMAL));
+
+		return pane;
+	}
+
+	private Component createCategory() {
+		Container pane = new Container();
+		pane.addComponent(ComponentFactory.getLabel("category"));
+		ComboBox category = ComponentFactory.getCombox(new String[] { "xx",
+				"yy" });
+		pane.addComponent(category);
+
+		pane.addComponent(ComponentFactory.getLabel("subCategory"));
+		ComboBox subCategory = ComponentFactory.getCombox(new String[] { "xx",
+				"yy" });
+		pane.addComponent(subCategory);
+		return pane;
+	}
+
+	private Container createDateTime() {
+		Container pane = new Container();
+		//year
 		Calendar now = Calendar.getInstance();
 		int currYear = now.get(Calendar.YEAR);
-		this.addComponent(new Label(String.valueOf(currYear)));
-		Label label = new Label("year");
-		this.addComponent(label);
-		label.setPreferredW(100);
+
+		pane.addComponent(ComponentFactory.getLabel(String.valueOf(currYear)));
+		pane.addComponent(ComponentFactory.getLabel("year"));
 
 		// month
 		int currMonth = now.get(Calendar.MONTH);
@@ -30,11 +65,11 @@ public class BalancePane extends Form {
 		for (int i = 1; i < 13; i++) {
 			months[i - 1] = String.valueOf(i);
 		}
-		ComboBox month = new ComboBox(months);
-		alignComboBox(month, 50, 20);
+		ComboBox month = ComponentFactory.getCombox(months);
+
 		month.setSelectedIndex(currMonth);
-		this.addComponent(month);
-		this.addComponent(new Label("month"));
+		pane.addComponent(month);
+		pane.addComponent(ComponentFactory.getLabel("month"));
 
 		// day
 		final short[] month31 = new short[] { 1, 3, 5, 7, 8, 10, 12 };
@@ -56,22 +91,13 @@ public class BalancePane extends Form {
 				v.addElement(String.valueOf(i));
 			}
 		}
-		ComboBox day = new ComboBox(new DefaultListModel(v));
-		alignComboBox(day, 50, 20);
+		ComboBox day = ComponentFactory.getCombox(new DefaultListModel(v));
+
 		day.setSelectedIndex(currDay - 1);
-		this.addComponent(day);
-		this.addComponent(new Label("day"));
+		pane.addComponent(day);
+		pane.addComponent(ComponentFactory.getLabel("day"));
+		;
 
-		this.addCommand(AccountPanel.exitCommand);
-		this.addCommand(AccountPanel.backCommand);
-		this.addCommandListener(listener);
-		this.setBackCommand(AccountPanel.backCommand);
-	}
-
-	private void alignComboBox(ComboBox box, int w, int h) {
-		box.setPreferredW(w);
-		box.setWidth(w);
-		box.setPreferredH(h);
-		box.setHeight(h);
+		return pane;
 	}
 }
