@@ -15,11 +15,11 @@ public class DesktopRun {
 	private static Hashtable bundle = new Hashtable();
 	static {
 		bundle.put("mainTitle", "AccountForWife");
-		/*bundle.put("loginName", "LoginName");
+		bundle.put("loginName", "LoginName");
 		bundle.put("password", "Password");
 		bundle.put("login", "Login");
 		bundle.put("exit", "Exit");
-		bundle.put("expenditure", "Expenditure");*/
+		bundle.put("expenditure", "Expenditure");
 
 	}
 
