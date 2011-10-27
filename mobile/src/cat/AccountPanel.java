@@ -35,8 +35,8 @@ public class AccountPanel implements ActionListener {
 	private static final int QUERY_COMMAND = 7;
 	private static final int OVERDRAW_COMMAND = 8;
 
-	public static final Command exitCommand = new Command("exit", EXIT_COMMAND);
-	public static final Command backCommand = new Command("back", BACK_COMMAND);
+	public static final Command exitCommand = new Command("退出", EXIT_COMMAND);
+	public static final Command backCommand = new Command("返回", BACK_COMMAND);
 	Resources imagesRes;
 
 	public AccountPanel() {
@@ -51,11 +51,10 @@ public class AccountPanel implements ActionListener {
 		// TODO Auto-generated method stub
 	}
 
-	protected void startApp(Hashtable bundle) {
+	protected void startApp() {
 		if (!started) {
 			started = true;
 			String name = "theme.res";
-			UIManager.getInstance().setResourceBundle(bundle);
 
 			try {
 				Resources r = Resources.open("/" + name);
@@ -63,8 +62,6 @@ public class AccountPanel implements ActionListener {
 						r.getTheme(r.getThemeResourceNames()[0]));
 
 				imagesRes = Resources.open("/images.res");
-				//				fonts = Resources.open("/fonts.res");
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -79,10 +76,10 @@ public class AccountPanel implements ActionListener {
 	protected void showLoginForm() {
 		Form loginForm = new Form();
 		loginForm.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-		loginForm.setTitle("mainTitle");
+		loginForm.setTitle("小艺有数");
 
 		Container userPanel = new Container();
-		userPanel.addComponent(new Label("loginName"));
+		userPanel.addComponent(new Label("用户"));
 
 		final ComboBox user = new ComboBox(new String[] { "cat", "forest" });
 		userPanel.addComponent(user);
@@ -103,7 +100,7 @@ public class AccountPanel implements ActionListener {
 		});
 		loginForm.addComponent(userPanel);
 
-		Command login = new Command("login") {
+		Command login = new Command("登录") {
 			public void actionPerformed(ActionEvent ae) {
 				showMainForm();
 			}
@@ -123,7 +120,7 @@ public class AccountPanel implements ActionListener {
 
 	private void showMainForm() {
 		mainForm = new Form();
-		mainForm.setTitle("mainTitle");
+		mainForm.setTitle("小艺有数");
 
 		Transition in, out;
 		out = Transition3D.createFlyIn(500);
@@ -133,10 +130,10 @@ public class AccountPanel implements ActionListener {
 
 		mainForm.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
-		mainForm.addComponent(createButton("expenditure", EXPENDITURE_COMMAND));
-		mainForm.addComponent(createButton("income", INCOME_COMMAND));
-		mainForm.addComponent(createButton("query", QUERY_COMMAND));
-		mainForm.addComponent(createButton("overdraw", OVERDRAW_COMMAND));
+		mainForm.addComponent(createButton("支出", EXPENDITURE_COMMAND));
+		mainForm.addComponent(createButton("收入", INCOME_COMMAND));
+		mainForm.addComponent(createButton("查询", QUERY_COMMAND));
+		mainForm.addComponent(createButton("预支付", OVERDRAW_COMMAND));
 
 		mainForm.addCommand(exitCommand);
 		mainForm.addCommandListener(this);
@@ -149,34 +146,7 @@ public class AccountPanel implements ActionListener {
 		button.getSelectedStyle().setAlignment(Label.CENTER);
 		button.getPressedStyle().setAlignment(Label.CENTER);
 		button.setCommand(new Command(string, id));
-		button.addActionListener(this);
 		return button;
-	}
-
-	private static void testConnectHttp() {
-
-		//ConnectionRequest con = new ConnectionRequest();
-		ConnectionRequest con = new ConnectionRequest() {
-			protected void readResponse(InputStream input) throws IOException {
-				byte[] buffer = new byte[10000];
-				int length = input.read(buffer);
-
-				System.out.println(new String(buffer, 0, length));
-			}
-		};
-
-		con.setUrl("http://www.baidu.com/");
-		con.setPost(false);
-		con.addResponseListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("<<<");
-
-			}
-
-		});
-		NetworkManager.getInstance().start();
-		NetworkManager.getInstance().addToQueue(con);
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -191,10 +161,10 @@ public class AccountPanel implements ActionListener {
 			break;
 
 		case EXPENDITURE_COMMAND:
-			new BalancePane("expenditure", this).show();
+			new BalancePane("支出", this, BalancePane.expenditureCategory).show();
 			break;
 		case INCOME_COMMAND:
-			new BalancePane("income", this).show();
+			new BalancePane("收入", this, BalancePane.incomeCategory).show();
 			break;
 		}
 	}

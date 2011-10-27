@@ -18,12 +18,12 @@ public class ComponentFactory {
 	public static TextField getTextField(int columns, int constraint) {
 		TextField field = new TextField(columns);
 		field.setConstraint(constraint);
-		field.getStyle().setMargin(0, 0, 2, 0);
+		/*field.getStyle().setMargin(0, 0, 2, 0);
 		field.getStyle().setPadding(0, 0, 0, 0);
 		field.setPreferredW(40);
 		field.setWidth(40);
 		field.setPreferredH(20);
-		field.setHeight(20);
+		field.setHeight(20);*/
 
 		return field;
 	}
