@@ -48,5 +48,8 @@
 			<image file="src/images/forest.jpg" />
 			<image file="src/images/cat.jpg" />
 		</build>
+		<build dest="bin/fonts.res">
+			<font logicalname="Arial Unicode US" createbitmap="true" antialiasing="Simple" charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789小艺有数用户密码登录后退出支收入查询预付年月日" />
+		</build>
 	</target>
 </project>
