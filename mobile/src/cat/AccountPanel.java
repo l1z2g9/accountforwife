@@ -63,6 +63,8 @@ public class AccountPanel implements ActionListener {
 						r.getTheme(r.getThemeResourceNames()[0]));
 
 				imagesRes = Resources.open("/images.res");
+				//				fonts = Resources.open("/fonts.res");
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -151,20 +153,29 @@ public class AccountPanel implements ActionListener {
 		return button;
 	}
 
-	private void testConnectHttp(final Label label) {
-		NetworkManager.getInstance().start();
+	private static void testConnectHttp() {
+
+		//ConnectionRequest con = new ConnectionRequest();
 		ConnectionRequest con = new ConnectionRequest() {
 			protected void readResponse(InputStream input) throws IOException {
 				byte[] buffer = new byte[10000];
 				int length = input.read(buffer);
-				while (length != -1) {
-					label.setText(new String(buffer, 0, length));
-					length = input.read(buffer);
-				}
+
+				System.out.println(new String(buffer, 0, length));
 			}
 		};
-		con.setUrl("http://accountforwife.sinaapp.com/");
+
+		con.setUrl("http://www.baidu.com/");
 		con.setPost(false);
+		con.addResponseListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("<<<");
+
+			}
+
+		});
+		NetworkManager.getInstance().start();
 		NetworkManager.getInstance().addToQueue(con);
 	}
 
@@ -187,4 +198,5 @@ public class AccountPanel implements ActionListener {
 			break;
 		}
 	}
+
 }

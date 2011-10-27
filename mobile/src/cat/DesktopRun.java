@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.sun.lwuit.Display;
-import com.sun.lwuit.awtport.AwtImpl;
 
 public class DesktopRun {
 	private static Hashtable bundle = new Hashtable();
@@ -32,7 +31,7 @@ public class DesktopRun {
 		});
 		f.setLayout(new java.awt.BorderLayout());
 		f.setSize(320, 480);
-		AwtImpl.setUseNativeInput(false);
+		//		AwtImpl.setUseNativeInput(false);
 		Display.init(f);
 		f.validate();
 		f.setLocationByPlatform(true);

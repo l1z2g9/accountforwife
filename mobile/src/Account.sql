@@ -10,7 +10,7 @@ remark TEXT NULL,
 user VARCHAR(20) NULL,
 address VARCHAR(200) NULL,
 sourceFrom CHAR(1) NOT NULL DEFAULT 'D',
-exchangeTime TIMESTAMP NULL
+createdTime TIMESTAMP(14) NULL
 );
 
 DROP TABLE IF EXISTS Category;
@@ -41,8 +41,19 @@ address VARCHAR(200) NULL,
 returnTime TIMESTAMP NULL,
 returnMoney FLOAT NULL,
 returnRemark TEXT NULL,
-completed INTEGER NOT NULL DEFAULT 0
+completed INTEGER NOT NULL DEFAULT 0,
+sourceFrom CHAR(1) NOT NULL DEFAULT 'D',
+createdTime TIMESTAMP(14) NULL
 );
+
+DROP TABLE IF EXISTS ChangeList;
+CREATE TABLE ChangeList(
+id INTEGER PRIMARY KEY AUTO_INCREMENT,
+tableName VARCHAR(50) NOT NULL,
+pk INTEGER NOT NULL,
+action VARCHAR(20) NOT NULL DEFAULT 'Add',
+exchangeTime TIMESTAMP(14) NULL
+)
 
 CREATE INDEX Item_idx ON Item (time);
 
