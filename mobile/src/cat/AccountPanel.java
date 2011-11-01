@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
+import cat.pane.BalancePane;
+import cat.pane.QueryPane;
+
 import com.sun.lwuit.Button;
 import com.sun.lwuit.ComboBox;
 import com.sun.lwuit.Command;
@@ -161,11 +164,15 @@ public class AccountPanel implements ActionListener {
 			break;
 
 		case EXPENDITURE_COMMAND:
-			new BalancePane("支出", this, BalancePane.expenditureCategory).show();
+			new BalancePane("支出", this, Util.expenditureCategory).show();
 			break;
 		case INCOME_COMMAND:
-			new BalancePane("收入", this, BalancePane.incomeCategory).show();
+			new BalancePane("收入", this, Util.incomeCategory).show();
 			break;
+		case QUERY_COMMAND:
+			new QueryPane(this).show();
+			break;
+
 		}
 	}
 
