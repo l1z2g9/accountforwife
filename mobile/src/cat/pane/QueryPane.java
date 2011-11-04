@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import com.sun.lwuit.table.DefaultTableModel;
-import com.sun.lwuit.table.Table;
-import com.sun.lwuit.table.TableModel;
 
 import cat.AccountPanel;
 import cat.ComponentFactory;
@@ -28,11 +26,16 @@ import com.sun.lwuit.TextArea;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.io.ConnectionRequest;
 import com.sun.lwuit.io.NetworkManager;
 import com.sun.lwuit.io.util.JSONParser;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.list.DefaultListModel;
+import com.sun.lwuit.plaf.Border;
+import com.sun.lwuit.table.DefaultTableModel;
+import com.sun.lwuit.table.Table;
+import com.sun.lwuit.table.TableModel;
 
 public class QueryPane extends Form {
 	private int currYear;
@@ -57,6 +60,22 @@ public class QueryPane extends Form {
 		initTable();
 		this.addCommand(AccountPanel.exitCommand);
 		this.addCommand(AccountPanel.backCommand);
+		this.addCommand(new Command("编辑") {
+			public void actionPerformed(ActionEvent ev) {
+				Util.log("<< " + table.getSelectedRow());
+			}
+		});
+		table.addFocusListener(new FocusListener() {
+
+			public void focusGained(Component cmp) {
+				Util.log("<< " + cmp);
+			}
+
+			public void focusLost(Component cmp) {
+				// TODO Auto-generated method stub
+			}
+
+		});
 	}
 
 	private void initTable() {
@@ -65,7 +84,24 @@ public class QueryPane extends Form {
 				return false;
 			}
 		};
-		table = new Table(model);
+		table = new Table(model, true) {
+			protected Component createCell(Object value, final int row,
+					final int column, boolean editable) {
+
+				final Component c = super.createCell(value, row, column,
+						editable);
+				c.getStyle().setBorder(Border.createLineBorder(12, 0xffff33));
+
+				c.getSelectedStyle().setBorder(
+						Border.createLineBorder(12, 0xffff33));
+
+				c.setFocusable(true);
+				return c;
+			}
+		};
+		//table.setScrollable(true);
+		//table.setIncludeHeader(true);
+
 		this.addComponent(table);
 	}
 
@@ -94,26 +130,45 @@ public class QueryPane extends Form {
 						final Enumeration keys = data.keys();
 
 						int row = 0;
-						Object[][] value = new Object[data.size()][3];
+						final Object[][] value = new Object[data.size()][colunNames.length];
 
 						while (keys.hasMoreElements()) {
-							Object cat = keys.nextElement();
+							final Object id = keys.nextElement();
+							final Hashtable items = (Hashtable) data.get(id);
+							value[row][0] = String.valueOf(row + 1);
 
-							table.getModel().setValueAt(row, 1,
-									String.valueOf(row));
+							// setTimeInMillis not exist 
+							final Date x = new Date();
+							final String time = (String) items.get("time");
+							x.setTime(Long.parseLong(time));
+
+							final Calendar date = Calendar.getInstance();
+							date.setTime(x);
+
+							value[row][1] = String.valueOf(date
+									.get(Calendar.MONDAY) + 1)
+									+ "-"
+									+ String.valueOf(date
+											.get(Calendar.DAY_OF_MONTH));
+
+							value[row][2] = items.get("categoryName");
+							value[row][3] = items.get("money");
 							row++;
 						}
 
-						DefaultTableModel newModel = new DefaultTableModel(
+						final DefaultTableModel newModel = new DefaultTableModel(
 								colunNames, value);
-
-						table.refreshTheme();
+						table.setModel(newModel);
 					}
 				};
 				con.setPost(false);
 				con.setUrl(Util.searchUrl);
-				con.addArgument("month", String.valueOf(currYear) + "-"
-						+ String.valueOf(month));
+				String x = String.valueOf(currYear) + "-"
+						+ String.valueOf(month);
+
+				x = "2011-11";
+				Util.log("x " + x);
+				con.addArgument("month", x);
 
 				con.addArgument("categoryID", categoryData.get(categoryName)
 						.toString());

@@ -5,6 +5,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.SwingUtilities;
 
@@ -63,8 +65,17 @@ public class DesktopRun {
 		}
 	}
 
+	static void test2() throws Exception {
+		String time = "1320076800000";
+		Date date = new Date();
+		date.setTime(Long.parseLong(time));
+		SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+		Util.log("<< " + sf.format(date) + " , " + (date.getYear() + 1900));
+	}
+
 	public static void main(String[] args) throws Exception {
 		run();
 		//		test();
+		//		test2();
 	}
 }

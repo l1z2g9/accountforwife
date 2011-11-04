@@ -144,7 +144,7 @@ public class AccountPanel implements ActionListener {
 	}
 
 	private Button createButton(String string, int id) {
-		Button button = new Button(string);
+		final Button button = new Button(string);
 		button.getUnselectedStyle().setAlignment(Label.CENTER);
 		button.getSelectedStyle().setAlignment(Label.CENTER);
 		button.getPressedStyle().setAlignment(Label.CENTER);
