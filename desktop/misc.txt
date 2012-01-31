@@ -1,0 +1,2 @@
+to query time in sqlite:
+SELECT datetime(1325692800000/1000, 'unixepoch', 'localtime');

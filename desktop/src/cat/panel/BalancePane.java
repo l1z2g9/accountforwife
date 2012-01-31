@@ -335,10 +335,11 @@ public class BalancePane extends JPanel {
 											"你确定要删除选择的内容？", "删除内容",
 											JOptionPane.YES_NO_OPTION,
 											JOptionPane.INFORMATION_MESSAGE);
-							if (result == 0)
+							if (result == 0) {
 								DBManager.deleteItem((Integer) tableModel
 										.getValueAt(selectedRow, 0));
-							tableModel.removeRow(selectedRow);
+								tableModel.removeRow(selectedRow);
+							}
 						}
 					});
 					popup.add(menuItem);
