@@ -41,7 +41,7 @@ public class AccountPanel extends JPanel {
 		tab.setMnemonicAt(2, KeyEvent.VK_3);
 
 		final QueryPane queryPane = new QueryPane();
-		tab.addTab("查询", queryPane);
+		 tab.addTab("查询", queryPane);
 		tab.setMnemonicAt(3, KeyEvent.VK_4);
 
 		final OverdrawPane overdrawPane = new OverdrawPane();
