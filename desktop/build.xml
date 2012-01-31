@@ -1,0 +1,5 @@
+<project default="package">
+	<target name="package">
+		<jar destfile="dist/core.jar" manifest="wrap/MANIFEST.MF" basedir="C:\Users\User1\workspace\accountforwife\bin"/>
+	</target>
+</project>
