@@ -1,2 +1,53 @@
 to query time in sqlite:
 SELECT datetime(1325692800000/1000, 'unixepoch', 'localtime');
+
+Archlinux安装时候选择
+base-devel
+kernel header
+
+mount -t vboxsf sharepoint /mnt/share
+
+download jre1.7u2
+download tomcat
+export JRE_HOME=
+
+网络设置
+1. VirtualBox设置为Bridge模式
+
+2. 查看IP
+ip addr
+ls /sys/class/net/
+
+3. 设置IP和DNS
+rc.conf
+resolv.conf
+
+4.设置host主机的浏览器访问192.168.56.*的IP不经过proxy
+
+5. 设置ssh, https://wiki.archlinux.org/index.php/Secure_Shell_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E5.AE.88.E6.8A.A4.E8.BF.9B.E7.A8.8B
+设置root的密码：passwd root
+
+6.建立pacman的本地仓库
+https://wiki.archlinux.org/index.php/Pacman_Tips#Installing_packages_from_a_CD.2FDVD.2FISO
+由于暂时不能上网，所以在pacman.conf文件里注释掉extra和community部分
+简单的测试：
+pacman -Syu
+pacman -U sqlite3-3.7.7.1-1-i686.pkg.tar.xz
+
+7. 使用netty的example下的HexDumpProxy作为代理服务器，
+java -cp netty.jar HexDumpProxy 1099 myproxy 8080
+设置环境变量 export http_proxy=http://192.168.56.15:1099
+
+8. 使用lynx测试, lynx http://www.google.com
+
+9. 取消pacman.conf的extra和community的注释（因为之前不能上网），在pacman.d/mirrorlist打开任意一个Server
+pacman -Syu
+
+10. 下载nginx, pacman -S nginx
+查看pacman -Qil nginx
+
+11. 运行nginx出现找不到libpcre.so.1的error
+处理
+a. export LD_LIBRARY_PATH=/usr/lib
+b. ldconfig
+c. ln -s /usr/lib/libpcre.so /usr/lib/libpcre.so.1
